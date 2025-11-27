@@ -14,7 +14,7 @@ export type EventSessionResults =
   | EventPracticeResultsFragment['driver_sessions'][number];
 
 // *** Helper
-interface XY {
+interface Point {
   X: number;
   Y: number;
 }
@@ -22,8 +22,9 @@ interface XY {
 // *** Globally accessible, no need to import
 declare global {
   export interface CircuitDetails {
-    xy_values: XY[];
+    xy_values: Point[];
     rotation: number;
+    corners: Point[];
   }
 
   type ViewType = 'drivers' | 'constructors';

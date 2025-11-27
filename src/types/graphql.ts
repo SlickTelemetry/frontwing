@@ -12926,6 +12926,22 @@ export type GetSeasonPageQuery = {
   >;
 };
 
+export type GetAllCircuitsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetAllCircuitsQuery = {
+  __typename?: 'query_root';
+  circuits: Array<
+    {
+      __typename?: 'circuits';
+      year?: number | null;
+      location?: string | null;
+      country?: string | null;
+    } & {
+      ' $fragmentRefs'?: { CircuitDetailsFragment: CircuitDetailsFragment };
+    }
+  >;
+};
+
 export type CircuitDetailsFragment = {
   __typename?: 'circuits';
   circuit_details?: unknown | null;
@@ -16667,6 +16683,72 @@ export const GetSeasonPageDocument = {
     },
   ],
 } as unknown as DocumentNode<GetSeasonPageQuery, GetSeasonPageQueryVariables>;
+export const GetAllCircuitsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetAllCircuits' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'circuits' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'year' },
+                      value: { kind: 'EnumValue', value: 'desc' },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'location' },
+                      value: { kind: 'EnumValue', value: 'asc' },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'location' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'country' } },
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'CircuitDetails' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'CircuitDetails' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'circuits' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'circuit_details' } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetAllCircuitsQuery, GetAllCircuitsQueryVariables>;
 export const GetSeasonEventNamesDocument = {
   kind: 'Document',
   definitions: [
