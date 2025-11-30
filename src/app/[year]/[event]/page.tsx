@@ -49,11 +49,7 @@ const EventPage = ({
   params: Promise<{ year: string; event: string }>;
 }) => {
   const { year, event: eventLoc } = use(params);
-  const {
-    loading,
-    data: dataSrc,
-    error,
-  } = useQuery(GET_EVENT_DETAILS, {
+  const { loading, data, error } = useQuery(GET_EVENT_DETAILS, {
     variables: {
       year: parseInt(year),
       event: eventLocationDecode(eventLoc),
@@ -62,9 +58,8 @@ const EventPage = ({
 
   useEffect(() => {
     adjustRightColumnHeight();
-  }, [dataSrc]);
+  }, [data]);
 
-  const data = dataSrc;
   const eventName = data?.schedule[0]?.event_name;
 
   if (error) return <ServerPageError msg='Failed to load event details.' />;
@@ -124,7 +119,7 @@ const EventPage = ({
         </div>
         <EventResultsContainer
           loading={loading}
-          sessions={dataSrc?.events ?? []}
+          sessions={data?.events ?? []}
         />
       </div>
       <div
