@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
-import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
+import {
+  eventLocationDecode,
+  eventLocationEncode,
+  sessionDecode,
+} from '@/lib/utils';
 
 import { SprintBadge } from '@/components/badges/sprint-badge';
 import { Separator } from '@/components/ui/separator';
@@ -24,46 +28,43 @@ const ScheduleEventDetailFragment = graphql(`
 
 type EventDetailsProps = {
   evt?: FragmentType<typeof ScheduleEventDetailFragment>;
+  session?: string;
   maxRounds?: number;
 };
-export function EventDetails({ maxRounds, ...props }: EventDetailsProps) {
+export function EventDetails({
+  maxRounds,
+  session,
+  ...props
+}: EventDetailsProps) {
   const evt = useFragment(ScheduleEventDetailFragment, props?.evt);
-  const { year } = useParams();
-  if (!evt)
-    return (
-      <div className='grid gap-1'>
-        <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-4xl font-semibold tracking-tight text-balance'>
-          No Event Found
-        </h1>
-        <p>
-          Return to{' '}
-          <Link
-            className='decoration-1 hover:underline'
-            href={`/${year || '2025'}`}
-          >
-            {year || '2025'} Season
-          </Link>
-        </p>
-        <PossibleEvents />
-      </div>
-    );
+  if (!evt) return null;
   return (
     <>
       {/* Event Title */}
-      <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-5xl font-semibold tracking-tight text-balance'>
-        <Link
-          className='hover:underline focus:underline'
-          href={`/${evt.year}/${eventLocationEncode(evt.event_name)}`}
-        >
-          {evt.event_name}
-        </Link>
+      <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-5xl leading-[1.1] font-medium tracking-tight text-balance'>
+        {session ? (
+          sessionDecode(session).replace('_', ' ')
+        ) : (
+          <Link
+            className='hover:underline focus:underline'
+            href={`/${evt.year}/${eventLocationEncode(evt.event_name)}`}
+          >
+            {evt.event_name}
+          </Link>
+        )}
       </h1>
+
+      {session && (
+        <h2 className='pointer-cursor line-clamp-1 scroll-m-20 text-4xl tracking-tight text-balance'>
+          {evt.event_name}
+        </h2>
+      )}
 
       {/* Attributes */}
       <p className='text-lg'>
         {evt.location}, {evt.country}
       </p>
-      <div className='flex items-center text-xs md:text-sm'>
+      <div className='flex items-center text-sm md:text-base'>
         <p>
           {new Date((evt.event_date as string).slice(0, -6)).toLocaleDateString(
             undefined,
