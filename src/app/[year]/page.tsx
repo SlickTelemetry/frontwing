@@ -6,14 +6,9 @@ import { use } from 'react';
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 import { isAllEmptyArrays } from '@/lib/utils';
 
+import Breadcrumbs from '@/components/navigation/breadcrumbs';
 import NextEvent from '@/components/next-event';
 import { ServerPageError } from '@/components/ServerError';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from '@/components/ui/breadcrumb';
 
 import {
   SeasonQuickLinks,
@@ -70,13 +65,7 @@ export default function SeasonPage({
     <div className='p-4 lg:p-6'>
       <div className='grid gap-4 md:grid-cols-3 2xl:grid-cols-4'>
         <div className='col-span-full'>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbPage>{year}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          <Breadcrumbs />
         </div>
         <div className='flex flex-col gap-4 md:col-span-2'>
           <div className='flex h-full min-h-48 justify-center overflow-hidden rounded border'>

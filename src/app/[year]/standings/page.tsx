@@ -7,14 +7,7 @@ import { useState } from 'react';
 import { GET_STANDINGS } from '@/lib/queries';
 import { isAllEmptyArrays } from '@/lib/utils';
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import Breadcrumbs from '@/components/navigation/breadcrumbs';
 import { Button } from '@/components/ui/button';
 
 import { StandingsChart } from '@/app/[year]/standings/_components/chart';
@@ -172,19 +165,7 @@ const StandingsContent = () => {
   return (
     <div className='grid gap-4 p-4 lg:px-6 2xl:grid-cols-5'>
       <div className='col-span-full'>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/${season}`}>{season}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Standings</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <Breadcrumbs />
       </div>
       <div className='h-fit 2xl:order-2 2xl:col-span-3'>
         <div className='rounded border'>
