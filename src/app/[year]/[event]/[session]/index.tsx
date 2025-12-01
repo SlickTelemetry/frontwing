@@ -7,6 +7,7 @@ import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 
 import { Loader } from '@/components/Loader';
 import { ServerPageError } from '@/components/ServerError';
+import { Button } from '@/components/ui/button';
 
 import { DriverGrid } from '@/app/[year]/[event]/[session]/DriverGrid';
 
@@ -74,29 +75,35 @@ export const SessionHeader = () => {
 
 const ChartConfigs: Record<
   string,
-  { title: string; component?: React.ReactNode }
+  { title: string; description: string; component?: React.ReactNode }
 > = {
   grid: {
-    title: 'Driver Grid',
+    title: 'Results',
+    description: 'Table of drivers',
     component: <DriverGrid />,
   },
   laps: {
-    title: 'Laps Chart',
+    title: 'Lap Times',
+    description: 'Compare driver laps',
     component: <LapTimeContainer />,
   },
-  sectors: {
-    title: 'Sector Times',
-    component: <SectorTimes />,
-  },
   stints: {
-    title: 'Stints',
+    title: 'Strategy',
+    description: 'Tyres & Pit Stops',
     component: <Stints />,
   },
-  'gap to fastest': {
-    title: 'Gap to Fastest',
+  sectors: {
+    title: 'Fastest Laps',
+    description: 'Best laps & sectors',
+    component: <SectorTimes />,
   },
   'top speeds': {
     title: 'Top Speeds',
+    description: 'Coming soon...',
+  },
+  postions: {
+    title: 'Positions',
+    description: 'Coming soon...',
   },
 };
 type ChartKey = keyof typeof ChartConfigs;
@@ -112,35 +119,24 @@ export const ChartViewController = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const tabClass = (tab: string) =>
-    `flex h-8 w-full items-center justify-center rounded border transition-colors
-    ${
-      // Active tab styles
-      tab === chart
-        ? 'bg-white text-black font-semibold'
-        : 'border outline-none hover:bg-muted cursor-pointer'
-    }
-    ${
-      // Disabled styles for specific tabs
-      ['gap to fastest', 'top speeds'].includes(tab)
-        ? 'opacity-50 cursor-not-allowed'
-        : ''
-    }
-    `;
-
   return (
     <>
-      <div className='grid grid-cols-5 gap-4 py-4'>
+      <div className='grid grid-cols-3 gap-4 py-4 md:grid-cols-6'>
         {Object.keys(ChartConfigs).map((tab) => (
-          <div
+          <Button
             key={tab}
             onClick={() =>
               chargeChart(tab as 'grid' | 'sectors' | 'laps' | 'stints')
             }
-            className={tabClass(tab)}
+            className='inline h-full cursor-pointer text-left'
+            variant={tab === chart ? 'default' : 'outline'}
+            disabled={!ChartConfigs[tab].component}
           >
-            {ChartConfigs[tab].title}
-          </div>
+            <p className='font-semibold'>{ChartConfigs[tab].title}</p>
+            <p className='font-light text-wrap'>
+              {ChartConfigs[tab].description}
+            </p>
+          </Button>
         ))}
       </div>
       {ChartConfigs[chart] && ChartConfigs[chart].component}
