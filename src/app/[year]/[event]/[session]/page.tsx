@@ -17,7 +17,7 @@ export default function SessionPage({
 }) {
   const { year, event: eventLoc, session } = use(params);
 
-  const { data } = useQuery(GET_EVENT_DETAILS, {
+  const { loading, data } = useQuery(GET_EVENT_DETAILS, {
     variables: {
       year: parseInt(year),
       event: eventLocationDecode(eventLoc),
@@ -27,7 +27,7 @@ export default function SessionPage({
     <div className='p-4 lg:p-6'>
       <Breadcrumbs />
       <EventDetails evt={data?.schedule[0]} session={session} />
-      <ChartViewController />
+      <ChartViewController loading={loading} data={data} />
     </div>
   );
 }
