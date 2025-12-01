@@ -1,21 +1,22 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { JSX } from 'react';
 
 import { GET_SESSION } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 
 import { Loader } from '@/components/Loader';
+import EventResultsContainer from '@/components/results/event-results-container';
 import { ServerPageError } from '@/components/ServerError';
 import { Button } from '@/components/ui/button';
-
-import { DriverGrid } from '@/app/[year]/[event]/[session]/DriverGrid';
 
 import LapTimeContainer from './lapTimes';
 import SectorTimes from './sectorTimes';
 import Stints from './stints';
 
 import {
+  GetEventDetailsQuery,
   Session_Name_Choices_Enum,
   SessionQuery,
   SessionQueryVariables,
@@ -75,12 +76,16 @@ export const SessionHeader = () => {
 
 const ChartConfigs: Record<
   string,
-  { title: string; description: string; component?: React.ReactNode }
+  {
+    title: string;
+    description: string;
+    component?: React.ReactNode | ((data: GetEventDetailsQuery) => JSX.Element);
+  }
 > = {
   grid: {
     title: 'Results',
     description: 'Table of drivers',
-    component: <DriverGrid />,
+    component: <>Placeholder</>,
   },
   laps: {
     title: 'Lap Times',
@@ -108,7 +113,13 @@ const ChartConfigs: Record<
 };
 type ChartKey = keyof typeof ChartConfigs;
 
-export const ChartViewController = () => {
+export const ChartViewController = ({
+  loading,
+  data,
+}: {
+  data?: GetEventDetailsQuery;
+  loading: boolean;
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const chart = (searchParams.get('chart') || 'grid') as ChartKey;
@@ -139,7 +150,16 @@ export const ChartViewController = () => {
           </Button>
         ))}
       </div>
-      {ChartConfigs[chart] && ChartConfigs[chart].component}
+
+      {/* TODO: Refactor for multiple charts that will have to use partial fragment data */}
+      {ChartConfigs[chart] && chart === 'grid' ? (
+        <EventResultsContainer
+          loading={loading}
+          sessions={data?.events ?? []}
+        />
+      ) : (
+        ChartConfigs[chart].component
+      )}
     </>
   );
 };

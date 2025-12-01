@@ -15,12 +15,12 @@ import { CircuitMap } from '@/components/circuit-map';
 import { EventDetails } from '@/components/event-details';
 import Breadcrumbs from '@/components/navigation/breadcrumbs';
 import { GET_NAV_EVENTS } from '@/components/navigation/event-selector';
+import EventResultsContainer from '@/components/results/event-results-container';
 import { ServerPageError } from '@/components/ServerError';
 import { ToggleLocalStorage } from '@/components/toggle';
 import { Button } from '@/components/ui/button';
 
 import {
-  EventResultsContainer,
   EventWinners,
   FIADocs,
   SessionCards,
