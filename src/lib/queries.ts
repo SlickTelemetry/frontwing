@@ -159,8 +159,8 @@ export const GET_STANDINGS = graphql(`
   }
 `);
 
-export const GET_SESSION = gql`
-  query Session(
+export const GET_SESSION_DETAILS = graphql(`
+  query GetSessionDetails(
     $year: Int!
     $event: String!
     $session: session_name_choices_enum!
@@ -172,15 +172,22 @@ export const GET_SESSION = gql`
         name: { _eq: $session }
       }
     ) {
-      name
-      total_laps
-      scheduled_start_time_utc
-      event {
-        name
-      }
+      ...SessionDetails
+    }
+
+    schedule(
+      where: { _and: { event_name: { _eq: $event }, year: { _eq: $year } } }
+      order_by: { round_number: asc }
+      limit: 1
+    ) {
+      ...ScheduleEventDetails
+    }
+
+    events(where: { name: { _eq: $event }, year: { _eq: $year } }, limit: 1) {
+      ...EventSessionResults
     }
   }
-`;
+`);
 
 export const GET_SESSION_RESULTS = gql`
   query SessionResults(

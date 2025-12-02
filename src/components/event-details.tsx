@@ -3,11 +3,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
-import {
-  eventLocationDecode,
-  eventLocationEncode,
-  sessionDecode,
-} from '@/lib/utils';
+import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
 
 import { SprintBadge } from '@/components/badges/sprint-badge';
 import { Separator } from '@/components/ui/separator';
@@ -28,36 +24,36 @@ const ScheduleEventDetailFragment = graphql(`
 
 type EventDetailsProps = {
   evt?: FragmentType<typeof ScheduleEventDetailFragment>;
-  session?: string;
+  session?: boolean;
   maxRounds?: number;
+  loading?: boolean;
 };
 export function EventDetails({
   maxRounds,
-  session,
+  session = false,
+  loading = false,
   ...props
 }: EventDetailsProps) {
   const evt = useFragment(ScheduleEventDetailFragment, props?.evt);
+  if (loading) return <EventDetailsSkeleton />;
   if (!evt) return null;
   return (
     <>
       {/* Event Title */}
-      <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-5xl leading-[1.1] font-medium tracking-tight text-balance'>
-        {session ? (
-          sessionDecode(session).replace('_', ' ')
-        ) : (
+
+      {session ? (
+        <h2 className='line-clamp-1 scroll-m-20 text-5xl leading-[1.1] font-medium tracking-tight text-balance'>
+          {evt.event_name}
+        </h2>
+      ) : (
+        <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-5xl leading-[1.1] font-medium tracking-tight text-balance'>
           <Link
             className='hover:underline focus:underline'
             href={`/${evt.year}/${eventLocationEncode(evt.event_name)}`}
           >
             {evt.event_name}
           </Link>
-        )}
-      </h1>
-
-      {session && (
-        <h2 className='pointer-cursor line-clamp-1 scroll-m-20 text-4xl tracking-tight text-balance'>
-          {evt.event_name}
-        </h2>
+        </h1>
       )}
 
       {/* Attributes */}
@@ -93,6 +89,16 @@ export function EventDetails({
         <SprintBadge format={evt.event_format} />
       </div>
     </>
+  );
+}
+
+function EventDetailsSkeleton() {
+  return (
+    <div className='grid animate-pulse gap-1 py-2'>
+      <div className='bg-accent/50 h-9 w-72 rounded'></div>
+      <div className='bg-accent/50 h-7 w-36 rounded'></div>
+      <div className='bg-accent/50 h-7 w-96 rounded'></div>
+    </div>
   );
 }
 

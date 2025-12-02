@@ -1,10 +1,8 @@
 'use client';
-import { useQuery } from '@apollo/client/react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { JSX } from 'react';
 
-import { GET_SESSION } from '@/lib/queries';
-import { eventLocationDecode, sessionDecode } from '@/lib/utils';
+import { COMPETITION_SESSIONS } from '@/lib/constants';
 
 import { Loader } from '@/components/Loader';
 import EventResultsContainer from '@/components/results/event-results-container';
@@ -15,61 +13,60 @@ import LapTimeContainer from './lapTimes';
 import SectorTimes from './sectorTimes';
 import Stints from './stints';
 
+import { FragmentType, graphql, useFragment } from '@/types';
 import {
   GetEventDetailsQuery,
+  GetSessionDetailsQuery,
   Session_Name_Choices_Enum,
-  SessionQuery,
-  SessionQueryVariables,
 } from '@/types/graphql';
 
-export const SessionHeader = () => {
-  const { year, event: eventParams, session: sessionParam } = useParams();
+const SessionDetails = graphql(`
+  fragment SessionDetails on sessions {
+    name
+    total_laps
+    scheduled_start_time_utc
+  }
+`);
 
-  const { data, loading, error } = useQuery<
-    SessionQuery,
-    SessionQueryVariables
-  >(GET_SESSION, {
-    variables: {
-      year: parseInt(year as string),
-      event: eventLocationDecode(eventParams as string),
-      session: sessionDecode(
-        sessionParam as string,
-      ) as Session_Name_Choices_Enum,
-    },
-  });
+export const SessionHeader = ({
+  loading,
+  sessions,
+}: {
+  loading: boolean;
+  sessions?: FragmentType<typeof SessionDetails>[];
+}) => {
+  const { session: sessionParam } = useParams<{ session?: string }>();
+  const [session] = useFragment(SessionDetails, sessions ?? []);
+  const name = session?.name ?? (sessionParam as Session_Name_Choices_Enum);
 
   if (loading) {
     return <Loader />;
   }
-  if (error || !data?.sessions.length) return <ServerPageError />;
-
-  const { event, name, total_laps, scheduled_start_time_utc } =
-    data.sessions[0];
+  if (!loading && !session) return <ServerPageError />;
 
   return (
-    <div>
-      <h1 className='text-4xl'>{event?.name}</h1>
-      <h2 className='text-2xl'>{name?.replace(/_/g, ' ')}</h2>
-      <span className='italic'>
-        {(name === Session_Name_Choices_Enum.Race ||
-          name === Session_Name_Choices_Enum.Sprint) && (
-          <>
-            {total_laps} Laps
-            <br />
-          </>
+    <div className='-col-end-1 w-full rounded border xl:-col-end-3'>
+      <h1 className='scroll-m-20 px-4 py-2 text-center text-4xl font-extrabold tracking-tight text-balance'>
+        {name?.replace(/_/g, ' ')}
+      </h1>
+      <div className='bg-secondary text-secondary-foreground flex flex-wrap justify-center gap-x-8 px-4 py-2'>
+        <p>
+          {new Date(session?.scheduled_start_time_utc ?? '').toLocaleDateString(
+            undefined,
+            {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true,
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            },
+          )}
+        </p>
+        {name && COMPETITION_SESSIONS.includes(name) && (
+          <p className='font-semibold'>Laps: {session?.total_laps}</p>
         )}
-        {new Date(scheduled_start_time_utc as string).toLocaleString(
-          undefined,
-          {
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true,
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          },
-        )}
-      </span>
+      </div>
     </div>
   );
 };
@@ -102,14 +99,14 @@ const ChartConfigs: Record<
     description: 'Best laps & sectors',
     component: <SectorTimes />,
   },
-  'top speeds': {
-    title: 'Top Speeds',
-    description: 'Coming soon...',
-  },
-  postions: {
-    title: 'Positions',
-    description: 'Coming soon...',
-  },
+  // 'top speeds': {
+  //   title: 'Top Speeds',
+  //   description: 'Coming soon...',
+  // },
+  // postions: {
+  //   title: 'Positions',
+  //   description: 'Coming soon...',
+  // },
 };
 type ChartKey = keyof typeof ChartConfigs;
 
@@ -117,7 +114,7 @@ export const ChartViewController = ({
   loading,
   data,
 }: {
-  data?: GetEventDetailsQuery;
+  data?: GetSessionDetailsQuery;
   loading: boolean;
 }) => {
   const router = useRouter();
@@ -132,7 +129,7 @@ export const ChartViewController = ({
 
   return (
     <>
-      <div className='grid grid-cols-3 gap-4 py-4 md:grid-cols-6'>
+      <div className='grid grid-cols-2 gap-4 py-4 md:grid-cols-4'>
         {Object.keys(ChartConfigs).map((tab) => (
           <Button
             key={tab}
