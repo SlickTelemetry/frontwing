@@ -68,15 +68,7 @@ const EventPage = ({
       </div>
       <div id='event-col-left' className='col-span-2 grid h-fit gap-8'>
         <div className='grid gap-1'>
-          {loading ? (
-            <>
-              <div className='bg-accent/50 h-9 w-72 animate-pulse rounded'></div>
-              <div className='bg-accent/50 h-7 w-36 animate-pulse rounded'></div>
-              <div className='bg-accent/50 h-7 w-56 animate-pulse rounded'></div>
-            </>
-          ) : (
-            <EventDetails evt={data?.schedule[0]} />
-          )}
+          <EventDetails loading={loading} evt={data?.schedule[0]} />
         </div>
         <div className='grid gap-2'>
           <div className='grid-cols-full'>
