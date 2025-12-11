@@ -131,10 +131,11 @@ export function Table({
             <PositionsBadge positionCounts={item.positionCounts} />
             {/* Driver badges for constructor view - hide first when space is limited */}
             {driversByConstructor && driversByConstructor.has(item.name) && (
-              <div className='hidden shrink-0 overflow-visible @[600px]:flex'>
+              <div className='hidden shrink-0 gap-x-2 overflow-visible @[600px]:flex'>
                 <DriverBadges
-                  drivers={driversByConstructor.get(item.name) || []}
+                  drivers={driversByConstructor.get(item.name) ?? []}
                   color={item.color}
+                  className='min-w-12'
                 />
               </div>
             )}
