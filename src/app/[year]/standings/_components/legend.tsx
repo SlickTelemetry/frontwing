@@ -79,25 +79,32 @@ export const Legend = ({
           <div
             className={clsx(
               'flex items-center gap-1',
-              hiddenItems[team] ? 'opacity-50' : 'opacity-100',
+              hiddenItems[team] && 'opacity-50',
             )}
           >
             <Circle fill={color} stroke='none' className='size-3' />
             <p className='truncate'>{team}</p>
           </div>
 
-          {showDrivers && (
+          <div className='flex w-full gap-x-2'>
             <DriverBadges
               drivers={drivers}
-              color={color}
-              onDriverClick={(driver, e) => {
-                e.stopPropagation();
-                toggleVisibility('drivers', [driver]);
-              }}
               hiddenItems={hiddenItems}
-              fullWidth
+              color={color}
+              className={clsx(
+                'flex-1 cursor-pointer select-none',
+                !showDrivers && 'opacity-50',
+              )}
+              onClick={(e) => {
+                if (!showDrivers) return;
+                // Prevent Constructor from being clicked
+                e.stopPropagation();
+                toggleVisibility('drivers', [
+                  (e.target as HTMLSpanElement).innerHTML,
+                ]);
+              }}
             />
-          )}
+          </div>
         </div>
       ))}
     </div>
