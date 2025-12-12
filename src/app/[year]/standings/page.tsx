@@ -24,7 +24,7 @@ import {
   countDriverPositions,
 } from '@/app/[year]/standings/_components/countback';
 import { Legend } from '@/app/[year]/standings/_components/legend';
-import { Table } from '@/app/[year]/standings/_components/table';
+import { StandingsTable } from '@/app/[year]/standings/_components/table';
 
 import type { GetStandingsQuery } from '@/types/graphql';
 
@@ -222,7 +222,7 @@ const StandingsContent = () => {
           ))}
         </div>
         <div className='@container min-w-0 overflow-hidden'>
-          <Table
+          <StandingsTable
             items={
               chartType === 'drivers' ? simpleDriverData : simpleConstructorData
             }

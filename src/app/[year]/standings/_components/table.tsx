@@ -4,7 +4,15 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ConstructorBadge } from '@/components/badges/constructor-badge';
 import { DriverBadges } from '@/components/badges/driver-badge';
-import { PositionsBadge } from '@/components/badges/positions-badge';
+import { PositionBadge } from '@/components/badges/positions-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 // TODO duplicate from legend
 type Driver = {
@@ -24,7 +32,7 @@ const calculateGap = (currentPoints: number, previousPoints: number | null) => {
   return diff === 0 ? '0' : `-${diff}`;
 };
 
-export function Table({
+export function StandingsTable({
   items,
   toggleItem,
   hiddenItems,
@@ -38,6 +46,7 @@ export function Table({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartIndex, setDragStartIndex] = useState<number | null>(null);
   const [dragEndIndex, setDragEndIndex] = useState<number | null>(null);
+  const isConstructorView = !!driversByConstructor;
 
   const handleMouseDown = (index: number) => {
     setIsDragging(true);
@@ -91,69 +100,112 @@ export function Table({
     }
   }, [isDragging, handleMouseUp]);
 
-  return items.map((item, idx, allItems) => {
-    const currentPoints = item.totalPoints;
-    const previousPoints = allItems[idx - 1]?.totalPoints;
-    const gap = calculateGap(currentPoints, previousPoints);
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Pos</TableHead>
+          <TableHead>{isConstructorView ? 'Constructor' : 'Driver'}</TableHead>
+          <TableHead>{isConstructorView ? 'Drivers' : 'Constructor'}</TableHead>
+          <TableHead className='w-24 text-center'>Podiums</TableHead>
+          <TableHead className='text-center'>Points</TableHead>
+          <TableHead className='text-center'>Gap</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {items.map((item, idx, allItems) => {
+          const currentPoints = item.totalPoints;
+          const previousPoints = allItems[idx - 1]?.totalPoints;
+          const gap = calculateGap(currentPoints, previousPoints);
 
-    // Check if this item is in the drag selection range
-    const isInDragRange =
-      isDragging &&
-      dragStartIndex !== null &&
-      dragEndIndex !== null &&
-      idx >= Math.min(dragStartIndex, dragEndIndex) &&
-      idx <= Math.max(dragStartIndex, dragEndIndex);
+          // Check if this item is in the drag selection range
+          const isInDragRange =
+            isDragging &&
+            dragStartIndex !== null &&
+            dragEndIndex !== null &&
+            idx >= Math.min(dragStartIndex, dragEndIndex) &&
+            idx <= Math.max(dragStartIndex, dragEndIndex);
 
-    const isConstructorView = !!driversByConstructor;
+          return (
+            <TableRow
+              key={item.name}
+              onMouseDown={() => handleMouseDown(idx)}
+              onMouseEnter={() => handleMouseEnter(idx)}
+              onMouseUp={handleMouseUp}
+              className={clsx(
+                'bg-background min-w-0 cursor-pointer select-none',
+                {
+                  'opacity-50': hiddenItems[item.abbr],
+                  'dark:bg-accent/50 bg-blue-200': isInDragRange,
+                },
+              )}
+              aria-label={`Toggle ${item.name} from chart`}
+              // style={{ borderColor: item.color }}
+            >
+              <TableCell className='w-8 shrink-0 text-center'>
+                {idx + 1}
+              </TableCell>
+              <TableCell>
+                <div className='flex gap-2'>
+                  <Circle
+                    fill={item.color}
+                    stroke='none'
+                    className='size-4 shrink-0'
+                  />
+                  <p className='min-w-[120px] flex-1 truncate'>{item.name}</p>
+                </div>
+              </TableCell>
 
-    return (
-      <div
-        key={item.name}
-        onMouseDown={() => handleMouseDown(idx)}
-        onMouseEnter={() => handleMouseEnter(idx)}
-        onMouseUp={handleMouseUp}
-        className={clsx(
-          'bg-background flex min-w-0 cursor-pointer flex-nowrap items-center divide-x rounded border py-1 select-none',
-          {
-            'opacity-50': hiddenItems[item.abbr],
-            'dark:bg-accent/50 bg-blue-100': isInDragRange,
-          },
-        )}
-        aria-label={`Toggle ${item.name} from chart`}
-        // style={{ borderColor: item.color }}
-      >
-        <p className='w-8 shrink-0 text-center'>{idx + 1}</p>
-        <div className='flex min-w-0 flex-1 items-center gap-2 px-2'>
-          <Circle fill={item.color} stroke='none' className='size-4 shrink-0' />
-          <div className='flex min-w-0 flex-1 items-center gap-2 overflow-hidden'>
-            <p className='min-w-[120px] flex-1 truncate'>{item.name}</p>
-            {/* Position icons and counts - hide after badges are hidden */}
-            <PositionsBadge positionCounts={item.positionCounts} />
-            {/* Driver badges for constructor view - hide first when space is limited */}
-            {driversByConstructor && driversByConstructor.has(item.name) && (
-              <div className='hidden shrink-0 gap-x-2 overflow-visible @[600px]:flex'>
-                <DriverBadges
-                  drivers={driversByConstructor.get(item.name) ?? []}
-                  color={item.color}
-                  className='min-w-12'
-                />
-              </div>
-            )}
-            {/* Constructor badge for driver view - hide first when space is limited */}
-            {item.team && !isConstructorView && (
-              <div className='hidden min-w-[120px] shrink-0 @[600px]:flex'>
-                <ConstructorBadge
-                  className='2xl:text-sm'
-                  color={item.color.slice(1)} //remove #
-                  name={item.team}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-        <p className='min-w-14 shrink-0 text-center'>{item.totalPoints}</p>
-        <p className='min-w-14 shrink-0 text-center'>{gap ?? 'Gap'}</p>
-      </div>
-    );
-  });
+              <TableCell>
+                {/* Driver badges for constructor view - hide first when space is limited */}
+                {driversByConstructor &&
+                  driversByConstructor.has(item.name) && (
+                    <div className='hidden shrink-0 gap-2 overflow-visible @[600px]:flex'>
+                      <DriverBadges
+                        drivers={driversByConstructor.get(item.name) || []}
+                        color={item.color}
+                        className='min-w-12'
+                      />
+                    </div>
+                  )}
+                {/* Constructor badge for driver view - hide first when space is limited */}
+                {item.team && !isConstructorView && (
+                  <div className='hidden min-w-[120px] shrink-0 @[600px]:flex'>
+                    <ConstructorBadge
+                      className='2xl:text-sm'
+                      color={item.color.slice(1)} //remove #
+                      name={item.team}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell>
+                <div className='flex gap-2'>
+                  {/* Position icons and counts - hide after badges are hidden */}
+                  <PositionBadge
+                    type='win'
+                    count={item.positionCounts?.[0] ?? 0}
+                  />
+                  <PositionBadge
+                    type='p2'
+                    count={item.positionCounts?.[1] ?? 0}
+                  />
+                  <PositionBadge
+                    type='p3'
+                    count={item.positionCounts?.[2] ?? 0}
+                  />
+                </div>
+              </TableCell>
+              <TableCell className='min-w-14 shrink-0 text-center'>
+                {item.totalPoints}
+              </TableCell>
+              <TableCell className='min-w-14 shrink-0 text-center'>
+                {gap ?? 'Gap'}
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
 }

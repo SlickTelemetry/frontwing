@@ -8,15 +8,13 @@ import {
 } from '@/components/ui/tooltip';
 
 type PositionType = 'win' | 'p2' | 'p3';
+type PositionProps = {
+  icon: LucideIcon;
+  color: string;
+  label: string;
+};
 
-const positionConfig: Record<
-  PositionType,
-  {
-    icon: LucideIcon;
-    color: string;
-    label: string;
-  }
-> = {
+const positionConfig: Record<PositionType, PositionProps> = {
   win: {
     icon: Crown,
     color: 'text-yellow-500',
@@ -34,8 +32,27 @@ const positionConfig: Record<
   },
 };
 
-function PositionBadge({ count, type }: { count: number; type: PositionType }) {
+export function PositionBadge({
+  count,
+  type,
+}: {
+  count: number;
+  type: PositionType;
+}) {
   const { icon: Icon, color, label } = positionConfig[type];
+
+  // TODO: Rework
+  // Janky way to keep spacing the same
+  if (!count)
+    return (
+      <Badge
+        variant='outline'
+        className='flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium opacity-0'
+      >
+        <Icon className={`size-3.5 ${color}`} />
+        <span>{count}</span>
+      </Badge>
+    );
 
   return (
     <Tooltip>
@@ -55,25 +72,5 @@ function PositionBadge({ count, type }: { count: number; type: PositionType }) {
         </p>
       </TooltipContent>
     </Tooltip>
-  );
-}
-
-export function PositionsBadge({
-  positionCounts,
-}: {
-  positionCounts?: number[];
-}) {
-  if (!positionCounts) return null;
-
-  const [wins = 0, p2s = 0, p3s = 0] = positionCounts;
-
-  if (wins === 0 && p2s === 0 && p3s === 0) return null;
-
-  return (
-    <div className='hidden shrink-0 items-center gap-1 @[500px]:flex'>
-      {wins > 0 && <PositionBadge count={wins} type='win' />}
-      {p2s > 0 && <PositionBadge count={p2s} type='p2' />}
-      {p3s > 0 && <PositionBadge count={p3s} type='p3' />}
-    </div>
   );
 }
