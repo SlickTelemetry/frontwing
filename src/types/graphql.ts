@@ -12973,13 +12973,12 @@ export type GetNavSessionsQueryVariables = Exact<{
 
 export type GetNavSessionsQuery = {
   __typename?: 'query_root';
-  schedule: Array<{
-    __typename?: 'schedule';
-    session1?: Session_Name_Choices_Enum | null;
-    session2?: Session_Name_Choices_Enum | null;
-    session3?: Session_Name_Choices_Enum | null;
-    session4?: Session_Name_Choices_Enum | null;
-    session5?: Session_Name_Choices_Enum | null;
+  events: Array<{
+    __typename?: 'events';
+    sessions: Array<{
+      __typename?: 'sessions';
+      name?: Session_Name_Choices_Enum | null;
+    }>;
   }>;
 };
 
@@ -13089,7 +13088,16 @@ export type GetEventDetailsQueryVariables = Exact<{
 export type GetEventDetailsQuery = {
   __typename?: 'query_root';
   events: Array<
-    { __typename?: 'events' } & {
+    {
+      __typename?: 'events';
+      sessions_aggregate: {
+        __typename?: 'sessions_aggregate';
+        aggregate?: {
+          __typename?: 'sessions_aggregate_fields';
+          count: number;
+        } | null;
+      };
+    } & {
       ' $fragmentRefs'?: {
         EventSessionResultsFragment: EventSessionResultsFragment;
       };
@@ -16944,12 +16952,12 @@ export const GetNavSessionsDocument = {
         selections: [
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'schedule' },
+            name: { kind: 'Name', value: 'events' },
             arguments: [
               {
                 kind: 'Argument',
                 name: { kind: 'Name', value: 'distinct_on' },
-                value: { kind: 'EnumValue', value: 'event_name' },
+                value: { kind: 'EnumValue', value: 'name' },
               },
               {
                 kind: 'Argument',
@@ -16976,7 +16984,7 @@ export const GetNavSessionsDocument = {
                     },
                     {
                       kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'event_name' },
+                      name: { kind: 'Name', value: 'name' },
                       value: {
                         kind: 'ObjectValue',
                         fields: [
@@ -17003,11 +17011,16 @@ export const GetNavSessionsDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'session1' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'session2' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'session3' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'session4' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'session5' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'sessions' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -17628,6 +17641,28 @@ export const GetEventDetailsDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'sessions_aggregate' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'aggregate' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'count' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
                 {
                   kind: 'FragmentSpread',
                   name: { kind: 'Name', value: 'EventSessionResults' },

@@ -12,6 +12,7 @@ export default function useUrlUpdater() {
     if (segments[index]) segments[index] = value;
     else segments.push(value);
 
+    // TODO: Issue with sprint and convential events
     const newPath = segments.join('/');
     const newUrl = `${newPath}?${searchParams.toString()}`;
     router.push(newUrl);

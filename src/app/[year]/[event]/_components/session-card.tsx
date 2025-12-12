@@ -1,5 +1,6 @@
+import clsx from 'clsx';
 import { ArrowUpRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { SESSION_KEYS } from '@/lib/constants';
 import { eventLocationEncode } from '@/lib/utils';
@@ -25,27 +26,37 @@ const EventSessionCards = graphql(`
 `);
 
 export function SessionCards({
-  eventLoc,
+  availableSessionCount,
   ...props
 }: {
+  availableSessionCount: number;
   schedule?: FragmentType<typeof EventSessionCards>;
-  eventLoc: string;
 }) {
+  const { event } = useParams<{ event: string }>();
   const schedule = useFragment(EventSessionCards, props?.schedule);
   const trackTime = useReadLocalStorage('track-time');
 
   const router = useRouter();
-  return SESSION_KEYS.map((sessId) => {
+  return SESSION_KEYS.map((sessId, idx) => {
     const name = schedule?.[sessId];
     const date = schedule?.[`${sessId}_date`] ?? '';
+
+    // Resolve if button should be clickable or not
+    const ingested = idx + 1 <= availableSessionCount;
+
     return (
       <Button
         variant='outline'
         size='lg'
         key={sessId}
         id={`${name}-session`}
-        className='flex h-fit w-full cursor-pointer items-start justify-between gap-1 rounded border px-4 py-2 transition-shadow hover:shadow'
-        onClick={() => router.push(`${eventLoc}/${eventLocationEncode(name)}`)}
+        className={clsx(
+          'flex h-fit w-full items-start justify-between gap-1 rounded border px-4 py-2 transition-shadow last:col-span-full hover:shadow',
+          ingested && 'cursor-pointer',
+        )}
+        onClick={() =>
+          ingested && router.push(`${event}/${eventLocationEncode(name)}`)
+        }
         aria-label={name?.replace('_', ' ')}
         tabIndex={0}
       >
@@ -69,7 +80,7 @@ export function SessionCards({
             {name?.replace('_', ' ')}
           </h3>
         </div>
-        <ArrowUpRight className='size-6' />
+        {ingested && <ArrowUpRight className='size-6' />}
       </Button>
     );
   });
@@ -77,10 +88,12 @@ export function SessionCards({
 
 export function SessionCardSkeletons() {
   return Array.from({ length: 5 }).map((_, i) => (
-    <div key={i} className='bg-muted animate-pulse rounded border px-4 py-2'>
+    <div
+      key={i}
+      className='bg-muted animate-pulse rounded border px-4 py-2 last:col-span-full'
+    >
       <div className='mb-2 flex justify-between'>
         <div className='bg-accent/50 h-4 w-24 rounded' />
-        <ArrowUpRight className='size-6' />
       </div>
       <div className='bg-accent/50 h-7 w-32 rounded' />
     </div>

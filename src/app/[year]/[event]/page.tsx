@@ -109,11 +109,18 @@ const EventPage = ({
               Track Time
             </ToggleLocalStorage>
           </div>
-          {loading ? (
-            <SessionCardSkeletons />
-          ) : (
-            <SessionCards schedule={data?.schedule[0]} eventLoc={eventLoc} />
-          )}
+          <div className='grid grid-cols-2 gap-2'>
+            {loading ? (
+              <SessionCardSkeletons />
+            ) : (
+              <SessionCards
+                schedule={data?.schedule[0]}
+                availableSessionCount={
+                  dataSrc?.events[0]?.sessions_aggregate.aggregate?.count ?? 0
+                }
+              />
+            )}
+          </div>
         </div>
         <EventResultsContainer
           loading={loading}

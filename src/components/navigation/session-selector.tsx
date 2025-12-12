@@ -16,22 +16,24 @@ import { graphql } from '@/types';
 
 export const GET_NAV_SESSIONS = graphql(`
   query GetNavSessions($year: Int!, $event: String!) @cached {
-    schedule(
-      distinct_on: event_name
-      where: { year: { _eq: $year }, event_name: { _eq: $event } }
+    events(
+      distinct_on: name
+      where: { year: { _eq: $year }, name: { _eq: $event } }
       limit: 1
     ) {
-      session1
-      session2
-      session3
-      session4
-      session5
+      sessions {
+        name
+      }
     }
   }
 `);
 
 export function SessionSelector() {
-  const { year, event, session } = useParams<{
+  const {
+    year,
+    event: eventLoc,
+    session,
+  } = useParams<{
     year: string;
     event?: string;
     session?: string;
@@ -41,28 +43,23 @@ export function SessionSelector() {
   const { data, loading, error } = useQuery(GET_NAV_SESSIONS, {
     variables: {
       year: parseInt(year),
-      event: eventLocationDecode(event)!,
+      event: eventLocationDecode(eventLoc)!,
     },
-    skip: !year || !event,
+    skip: !year || !eventLoc,
   });
 
   if (loading) return <SelectorSkeleton width='w-32' />;
-  if (error || !data?.schedule?.[0])
+  if (error || !data?.events?.[0])
     return <SelectorDisabled placeholder='Session' width='w-32' />;
 
-  const eventDetails = data.schedule[0];
-  const sessions = [
-    eventDetails.session1,
-    eventDetails.session2,
-    eventDetails.session3,
-    eventDetails.session4,
-    eventDetails.session5,
-  ].filter(Boolean) as string[];
+  const event = data.events[0];
 
-  const items = sessions.map((s) => ({
-    value: eventLocationEncode(s) as string,
-    label: s.replace('_', ' '),
-  }));
+  const items = event.sessions
+    ?.filter((s) => !!s.name)
+    .map(({ name }) => ({
+      value: eventLocationEncode(name) as string,
+      label: (name ?? '').replace('_', ' '),
+    }));
 
   return (
     <BaseSelector
