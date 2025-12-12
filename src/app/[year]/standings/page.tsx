@@ -170,7 +170,7 @@ const StandingsContent = () => {
   };
 
   return (
-    <div className='grid gap-4 p-4 lg:px-6 2xl:grid-cols-2'>
+    <div className='grid gap-4 p-4 lg:px-6 2xl:grid-cols-5'>
       <div className='col-span-full'>
         <Breadcrumb>
           <BreadcrumbList>
@@ -186,7 +186,7 @@ const StandingsContent = () => {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className='h-fit 2xl:order-2'>
+      <div className='h-fit 2xl:order-2 2xl:col-span-3'>
         <div className='rounded border'>
           <div className='bg-secondary/25 rounded border-b'>
             <StandingsChart
@@ -203,7 +203,7 @@ const StandingsContent = () => {
           />
         </div>
       </div>
-      <div className='w-full min-w-0 2xl:order-1'>
+      <div className='w-full min-w-0 2xl:order-1 2xl:col-span-2'>
         <div className='bg-muted/50 mb-2 grid grid-cols-2 gap-2 rounded p-2'>
           {['drivers', 'constructors'].map((v) => (
             <Button
