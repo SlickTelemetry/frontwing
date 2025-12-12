@@ -75,24 +75,24 @@ const EventPage = ({
 
   return (
     <div className='flex grid-cols-3 flex-col gap-x-8 gap-y-4 p-4 lg:grid lg:px-6'>
-      <div className='col-span-full grid items-center justify-between gap-4 md:flex'>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/${year}`}>{year}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{eventName}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <PrevNextEventButtons eventName={eventName} />
-      </div>
       <div id='event-col-left' className='col-span-2 grid h-fit gap-8'>
         <div className='grid gap-1'>
+          <div className='col-span-full grid items-center gap-x-8 md:flex'>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href={`/${year}`}>{year}</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{eventName}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <PrevNextEventButtons eventName={eventName} />
+          </div>
           {loading ? (
             <>
               <div className='bg-accent/50 h-9 w-72 animate-pulse rounded'></div>
@@ -135,7 +135,10 @@ const EventPage = ({
           {loading && (
             <div className='bg-muted/50 h-[175px] w-full animate-pulse rounded'></div>
           )}
-          <CircuitMap circuitData={data?.circuits[0]} className='w-full py-0' />
+          <CircuitMap
+            circuitData={data?.circuits[0]}
+            className='aspect-auto max-h-[400px] w-full rounded border p-4'
+          />
 
           <EventWinners
             drivers={data?.drivers}
