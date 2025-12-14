@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 import { isSprintFormat } from '@/lib/utils';
 
 import { Badge } from '@/components/ui/badge';
@@ -20,27 +22,16 @@ export const SprintBadge = ({
   format?: Event_Format_Choices_Enum | null;
   style?: 'short' | 'long';
 }) => {
+  const short = style === 'short';
+
   if (!isSprintFormat(format)) return null;
-
-  if (style === 'short') {
-    return (
-      <Badge
-        data-cy='sprint-badge-short'
-        variant='outline'
-        className='h-4 w-4 border-yellow-400 p-0 text-[0.65rem]'
-      >
-        S
-      </Badge>
-    );
-  }
-
   return (
     <Badge
-      data-cy='sprint-badge-long'
-      className='z-10 w-fit rounded-full border-yellow-400'
+      data-cy={`sprint-badge-${style}`}
       variant='outline'
+      className={clsx('border-yellow-400', short && 'px-1 leading-none')}
     >
-      Sprint
+      {short ? 'S' : 'Sprint'}
     </Badge>
   );
 };
