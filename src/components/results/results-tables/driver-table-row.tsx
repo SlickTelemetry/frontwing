@@ -46,8 +46,8 @@ export function FastestLapCell({
   fastest_lap,
 }: {
   fastest_lap?:
-    | EventCompetitionResultsFragment['driver_sessions'][number]['fastest_lap']
-    | EventPracticeResultsFragment['driver_sessions'][number]['fastest_lap'];
+    | EventCompetitionResultsFragment['competition_sessions'][number]['fastest_lap']
+    | EventPracticeResultsFragment['practice_sessions'][number]['fastest_lap'];
 }) {
   return (
     <TableCell>

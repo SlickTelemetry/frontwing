@@ -5,9 +5,14 @@ import { JSX } from 'react';
 import { COMPETITION_SESSIONS } from '@/lib/constants';
 
 import { Loader } from '@/components/Loader';
-import EventResultsContainer from '@/components/results/event-results-container';
+import {
+  CompetitionResults,
+  PracticeResults,
+  QualifyingResults,
+} from '@/components/results/results-tables';
 import { ServerPageError } from '@/components/ServerError';
 import { Button } from '@/components/ui/button';
+import { Table } from '@/components/ui/table';
 
 import LapTimeContainer from './lapTimes';
 import SectorTimes from './sectorTimes';
@@ -45,8 +50,8 @@ export const SessionHeader = ({
   if (!loading && !session) return <ServerPageError />;
 
   return (
-    <div className='-col-end-1 w-full rounded border xl:-col-end-3'>
-      <h1 className='scroll-m-20 px-4 py-2 text-center text-4xl font-extrabold tracking-tight text-balance'>
+    <div className='-col-end-1 w-full rounded border xl:col-span-2'>
+      <h1 className='scroll-m-20 px-4 py-3 text-center text-4xl font-extrabold tracking-tight text-balance'>
         {name?.replace(/_/g, ' ')}
       </h1>
       <div className='bg-secondary text-secondary-foreground flex flex-wrap justify-center gap-x-8 px-4 py-2'>
@@ -82,7 +87,8 @@ const ChartConfigs: Record<
   grid: {
     title: 'Results',
     description: 'Table of drivers',
-    component: <>Placeholder</>,
+    // TODO: Loader goes here
+    component: <></>,
   },
   laps: {
     title: 'Lap Times',
@@ -111,16 +117,19 @@ const ChartConfigs: Record<
 type ChartKey = keyof typeof ChartConfigs;
 
 export const ChartViewController = ({
-  loading,
   data,
+  sessionType,
 }: {
   data?: GetSessionDetailsQuery;
-  loading: boolean;
+  sessionType: {
+    isCompetition: boolean;
+    isQualifying: boolean;
+    isPractice: boolean;
+  };
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const chart = (searchParams.get('chart') || 'grid') as ChartKey;
-
   const chargeChart = (tab: 'grid' | 'sectors' | 'laps' | 'stints') => {
     const params = new URLSearchParams(searchParams);
     params.set('chart', tab);
@@ -149,11 +158,18 @@ export const ChartViewController = ({
       </div>
 
       {/* TODO: Refactor for multiple charts that will have to use partial fragment data */}
-      {ChartConfigs[chart] && chart === 'grid' ? (
-        <EventResultsContainer
-          loading={loading}
-          sessions={data?.events ?? []}
-        />
+      {data && ChartConfigs[chart] && chart === 'grid' ? (
+        <Table>
+          {sessionType.isCompetition && (
+            <CompetitionResults session={data.sessions} />
+          )}
+          {sessionType.isQualifying && (
+            <QualifyingResults session={data.sessions} />
+          )}
+          {sessionType.isPractice && (
+            <PracticeResults session={data.sessions} />
+          )}
+        </Table>
       ) : (
         ChartConfigs[chart].component
       )}
