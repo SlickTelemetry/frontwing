@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import * as React from 'react';
 
+import { HoverSidebar } from '@/components/hover-sidebar';
 import {
-  Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarHeader,
@@ -79,10 +79,15 @@ const formatLink = (url: string, params: DashParams): string | undefined => {
     .replace('$session', params?.session || 'Race');
 };
 
-export function AppSidebar() {
+export function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof HoverSidebar>) {
   const params = useParams<DashParams>();
   return (
-    <Sidebar>
+    <HoverSidebar
+      className='top-(--header-height) h-[calc(100svh-var(--header-height))]!'
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -117,7 +122,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>
+    </HoverSidebar>
   );
 }
 

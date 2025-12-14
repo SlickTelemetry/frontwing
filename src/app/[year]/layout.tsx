@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 import { Footer } from '@/components/Footer';
+import { SidebarHoverProvider } from '@/components/hover-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 import { Nav } from '@/app/[year]/_components/nav';
@@ -30,6 +31,7 @@ export default async function Layout({
   return (
     <>
       <SidebarProvider
+        className='flex flex-col'
         defaultOpen={defaultOpen}
         style={
           {
@@ -38,12 +40,16 @@ export default async function Layout({
           } as React.CSSProperties
         }
       >
-        <AppSidebar />
-        <SidebarInset className='@container/sidebar'>
+        <SidebarHoverProvider>
           <Nav />
-          {children}
-          <Footer />
-        </SidebarInset>
+          <div className='flex flex-1'>
+            <AppSidebar />
+            <SidebarInset className='@container/sidebar'>
+              {children}
+              <Footer />
+            </SidebarInset>
+          </div>
+        </SidebarHoverProvider>
       </SidebarProvider>
     </>
   );

@@ -3,6 +3,8 @@ import {
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
 
+export const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
+
 export const SUPPORTED_SEASONS = [
   2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
 ];

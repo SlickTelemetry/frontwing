@@ -1,18 +1,21 @@
-import * as React from 'react';
+import { House } from 'lucide-react';
+import Link from 'next/link';
 
+import { SidebarHoverTrigger } from '@/components/hover-sidebar';
 import {
   EventSelector,
   SeasonSelector,
   ServerStatus,
   SessionSelector,
 } from '@/components/navigation';
+import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function Nav() {
   return (
@@ -20,7 +23,25 @@ export function Nav() {
       <NavigationMenu viewport={false}>
         <NavigationMenuList className='flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6'>
           <NavigationMenuItem>
-            <SidebarTrigger />
+            <SidebarHoverTrigger />
+          </NavigationMenuItem>
+          <Separator
+            orientation='vertical'
+            className='mx-2 data-[orientation=vertical]:h-4'
+          />
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+              <Link href='/'>
+                <Button
+                  data-slot='navigation-home-button'
+                  variant='ghost'
+                  className='size-7'
+                >
+                  <House className='stroke-foreground' />
+                  <span className='sr-only'>Return home</span>
+                </Button>
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
           <Separator
             orientation='vertical'
