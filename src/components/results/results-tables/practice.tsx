@@ -6,7 +6,9 @@ import { FragmentType, graphql, useFragment } from '@/types';
 
 const EventPracticeResults = graphql(`
   fragment EventPracticeResults on sessions {
-    driver_sessions(order_by: { laps_aggregate: { min: { lap_time: asc } } }) {
+    practice_sessions: driver_sessions(
+      order_by: { laps_aggregate: { min: { lap_time: asc } } }
+    ) {
       driver {
         abbreviation
         full_name
@@ -41,7 +43,7 @@ export function PracticeResults(props: {
         <TableHead className='w-12 text-center'>Laps</TableHead>
       </HeaderRow>
       <TableBody>
-        {session.driver_sessions.map((s, idx) => {
+        {session.practice_sessions.map((s, idx) => {
           return (
             <DriverRow key={s.driver?.full_name} s={s} idx={idx}>
               <FastestLapCell fastest_lap={s.fastest_lap} />

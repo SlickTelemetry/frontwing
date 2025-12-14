@@ -8,7 +8,7 @@ import { FragmentType, graphql, useFragment } from '@/types';
 
 const EventQualifyingResults = graphql(`
   fragment EventQualifyingResults on sessions {
-    driver_sessions(
+    qualifying_session: driver_sessions(
       order_by: { results_aggregate: { min: { finishing_position: asc } } }
     ) {
       driver {
@@ -43,7 +43,7 @@ export function QualifyingResults(props: {
         <TableHead>Q3</TableHead>
       </HeaderRow>
       <TableBody>
-        {session.driver_sessions.map((s, idx) => {
+        {session.qualifying_session.map((s, idx) => {
           return (
             <DriverRow key={s.driver?.full_name} s={s} idx={idx}>
               <TableCell>

@@ -2,6 +2,11 @@
 import { useQuery } from '@apollo/client/react';
 import { use } from 'react';
 
+import {
+  COMPETITION_SESSIONS,
+  PRACTICE_SESSIONS,
+  QUALIFYING_SESSIONS,
+} from '@/lib/constants';
 import { GET_SESSION_DETAILS } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 
@@ -21,25 +26,36 @@ export default function SessionPage({
   params: Promise<{ year: string; event: string; session: string }>;
 }) {
   const { year, event: eventLoc, session } = use(params);
+  const sessionName = sessionDecode(session) as Session_Name_Choices_Enum;
+
+  const isCompetition = COMPETITION_SESSIONS.includes(sessionName);
+  const isQualifying = QUALIFYING_SESSIONS.includes(sessionName);
+  const isPractice = PRACTICE_SESSIONS.includes(sessionName);
 
   const { loading, data } = useQuery(GET_SESSION_DETAILS, {
     variables: {
       year: parseInt(year),
       event: eventLocationDecode(eventLoc),
-      session: sessionDecode(session) as Session_Name_Choices_Enum,
+      session: sessionName,
+      isCompetition,
+      isQualifying,
+      isPractice,
     },
   });
 
   return (
     <div className='p-4 lg:p-6'>
       <Breadcrumbs />
-      <div className='grid items-center gap-x-4 gap-y-4 md:grid-cols-2 xl:grid-cols-4'>
-        <div>
+      <div className='grid items-center gap-x-4 gap-y-4 lg:grid-cols-2 xl:grid-cols-4'>
+        <div className='xl:col-span-2'>
           <EventDetails session loading={loading} evt={data?.schedule[0]} />
         </div>
         <SessionHeader loading={loading} sessions={data?.sessions} />
       </div>
-      <ChartViewController loading={loading} data={data} />
+      <ChartViewController
+        data={data}
+        sessionType={{ isCompetition, isQualifying, isPractice }}
+      />
     </div>
   );
 }

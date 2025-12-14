@@ -12959,7 +12959,7 @@ export type EventSessionResultsFragment = {
 
 export type EventCompetitionResultsFragment = {
   __typename?: 'sessions';
-  driver_sessions: Array<{
+  competition_sessions: Array<{
     __typename?: 'driver_sessions';
     driver?: {
       __typename?: 'drivers';
@@ -12992,7 +12992,7 @@ export type EventCompetitionResultsFragment = {
 
 export type EventPracticeResultsFragment = {
   __typename?: 'sessions';
-  driver_sessions: Array<{
+  practice_sessions: Array<{
     __typename?: 'driver_sessions';
     driver?: {
       __typename?: 'drivers';
@@ -13023,7 +13023,7 @@ export type EventPracticeResultsFragment = {
 
 export type EventQualifyingResultsFragment = {
   __typename?: 'sessions';
-  driver_sessions: Array<{
+  qualifying_session: Array<{
     __typename?: 'driver_sessions';
     driver?: {
       __typename?: 'drivers';
@@ -13209,26 +13209,27 @@ export type GetSessionDetailsQueryVariables = Exact<{
   year: Scalars['Int']['input'];
   event: Scalars['String']['input'];
   session: Session_Name_Choices_Enum;
+  isCompetition?: Scalars['Boolean']['input'];
+  isQualifying?: Scalars['Boolean']['input'];
+  isPractice?: Scalars['Boolean']['input'];
 }>;
 
 export type GetSessionDetailsQuery = {
   __typename?: 'query_root';
   sessions: Array<
-    { __typename?: 'sessions' } & {
-      ' $fragmentRefs'?: { SessionDetailsFragment: SessionDetailsFragment };
+    { __typename?: 'sessions'; name?: Session_Name_Choices_Enum | null } & {
+      ' $fragmentRefs'?: {
+        SessionDetailsFragment: SessionDetailsFragment;
+        EventCompetitionResultsFragment: EventCompetitionResultsFragment;
+        EventQualifyingResultsFragment: EventQualifyingResultsFragment;
+        EventPracticeResultsFragment: EventPracticeResultsFragment;
+      };
     }
   >;
   schedule: Array<
     { __typename?: 'schedule' } & {
       ' $fragmentRefs'?: {
         ScheduleEventDetailsFragment: ScheduleEventDetailsFragment;
-      };
-    }
-  >;
-  events: Array<
-    { __typename?: 'events' } & {
-      ' $fragmentRefs'?: {
-        EventSessionResultsFragment: EventSessionResultsFragment;
       };
     }
   >;
@@ -14438,6 +14439,7 @@ export const EventCompetitionResultsFragmentDoc = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'competition_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -14607,6 +14609,7 @@ export const EventQualifyingResultsFragmentDoc = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'qualifying_session' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -14732,6 +14735,7 @@ export const EventPracticeResultsFragmentDoc = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'practice_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -15115,6 +15119,7 @@ export const EventSessionResultsFragmentDoc = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'competition_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -15279,6 +15284,7 @@ export const EventSessionResultsFragmentDoc = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'qualifying_session' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -15399,6 +15405,7 @@ export const EventSessionResultsFragmentDoc = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'practice_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -18134,6 +18141,7 @@ export const GetEventDetailsDocument = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'competition_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -18298,6 +18306,7 @@ export const GetEventDetailsDocument = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'qualifying_session' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -18418,6 +18427,7 @@ export const GetEventDetailsDocument = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'practice_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -19652,6 +19662,51 @@ export const GetSessionDetailsDocument = {
             },
           },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'isCompetition' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'Boolean' },
+            },
+          },
+          defaultValue: { kind: 'BooleanValue', value: false },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'isQualifying' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'Boolean' },
+            },
+          },
+          defaultValue: { kind: 'BooleanValue', value: false },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'isPractice' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'Boolean' },
+            },
+          },
+          defaultValue: { kind: 'BooleanValue', value: false },
+        },
       ],
       directives: [
         { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
@@ -19741,9 +19796,70 @@ export const GetSessionDetailsDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                 {
                   kind: 'FragmentSpread',
                   name: { kind: 'Name', value: 'SessionDetails' },
+                },
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'EventCompetitionResults' },
+                  directives: [
+                    {
+                      kind: 'Directive',
+                      name: { kind: 'Name', value: 'include' },
+                      arguments: [
+                        {
+                          kind: 'Argument',
+                          name: { kind: 'Name', value: 'if' },
+                          value: {
+                            kind: 'Variable',
+                            name: { kind: 'Name', value: 'isCompetition' },
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'EventQualifyingResults' },
+                  directives: [
+                    {
+                      kind: 'Directive',
+                      name: { kind: 'Name', value: 'include' },
+                      arguments: [
+                        {
+                          kind: 'Argument',
+                          name: { kind: 'Name', value: 'if' },
+                          value: {
+                            kind: 'Variable',
+                            name: { kind: 'Name', value: 'isQualifying' },
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'EventPracticeResults' },
+                  directives: [
+                    {
+                      kind: 'Directive',
+                      name: { kind: 'Name', value: 'include' },
+                      arguments: [
+                        {
+                          kind: 'Argument',
+                          name: { kind: 'Name', value: 'if' },
+                          value: {
+                            kind: 'Variable',
+                            name: { kind: 'Name', value: 'isPractice' },
+                          },
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
@@ -19834,68 +19950,24 @@ export const GetSessionDetailsDocument = {
               ],
             },
           },
+        ],
+      },
+    },
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'SessionDetails' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'sessions' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+          { kind: 'Field', name: { kind: 'Name', value: 'total_laps' } },
           {
             kind: 'Field',
-            name: { kind: 'Name', value: 'events' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'where' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'name' },
-                      value: {
-                        kind: 'ObjectValue',
-                        fields: [
-                          {
-                            kind: 'ObjectField',
-                            name: { kind: 'Name', value: '_eq' },
-                            value: {
-                              kind: 'Variable',
-                              name: { kind: 'Name', value: 'event' },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'year' },
-                      value: {
-                        kind: 'ObjectValue',
-                        fields: [
-                          {
-                            kind: 'ObjectField',
-                            name: { kind: 'Name', value: '_eq' },
-                            value: {
-                              kind: 'Variable',
-                              name: { kind: 'Name', value: 'year' },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'limit' },
-                value: { kind: 'IntValue', value: '1' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'EventSessionResults' },
-                },
-              ],
-            },
+            name: { kind: 'Name', value: 'scheduled_start_time_utc' },
           },
         ],
       },
@@ -19912,6 +19984,7 @@ export const GetSessionDetailsDocument = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'competition_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -20076,6 +20149,7 @@ export const GetSessionDetailsDocument = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'qualifying_session' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -20196,6 +20270,7 @@ export const GetSessionDetailsDocument = {
         selections: [
           {
             kind: 'Field',
+            alias: { kind: 'Name', value: 'practice_sessions' },
             name: { kind: 'Name', value: 'driver_sessions' },
             arguments: [
               {
@@ -20339,25 +20414,6 @@ export const GetSessionDetailsDocument = {
     },
     {
       kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'SessionDetails' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'sessions' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'total_laps' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-          },
-        ],
-      },
-    },
-    {
-      kind: 'FragmentDefinition',
       name: { kind: 'Name', value: 'ScheduleEventDetails' },
       typeCondition: {
         kind: 'NamedType',
@@ -20373,231 +20429,6 @@ export const GetSessionDetailsDocument = {
           { kind: 'Field', name: { kind: 'Name', value: 'location' } },
           { kind: 'Field', name: { kind: 'Name', value: 'country' } },
           { kind: 'Field', name: { kind: 'Name', value: 'event_format' } },
-        ],
-      },
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'EventSessionResults' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'events' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            alias: { kind: 'Name', value: 'competition' },
-            name: { kind: 'Name', value: 'sessions' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'order_by' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-                      value: { kind: 'EnumValue', value: 'asc' },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'where' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'name' },
-                      value: {
-                        kind: 'ObjectValue',
-                        fields: [
-                          {
-                            kind: 'ObjectField',
-                            name: { kind: 'Name', value: '_in' },
-                            value: {
-                              kind: 'ListValue',
-                              values: [
-                                { kind: 'EnumValue', value: 'Sprint' },
-                                { kind: 'EnumValue', value: 'Race' },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'limit' },
-                value: { kind: 'IntValue', value: '2' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'EventCompetitionResults' },
-                },
-              ],
-            },
-          },
-          {
-            kind: 'Field',
-            alias: { kind: 'Name', value: 'qualifying' },
-            name: { kind: 'Name', value: 'sessions' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'order_by' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-                      value: { kind: 'EnumValue', value: 'asc' },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'where' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'name' },
-                      value: {
-                        kind: 'ObjectValue',
-                        fields: [
-                          {
-                            kind: 'ObjectField',
-                            name: { kind: 'Name', value: '_in' },
-                            value: {
-                              kind: 'ListValue',
-                              values: [
-                                { kind: 'EnumValue', value: 'Sprint_Shootout' },
-                                {
-                                  kind: 'EnumValue',
-                                  value: 'Sprint_Qualifying',
-                                },
-                                { kind: 'EnumValue', value: 'Qualifying' },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'limit' },
-                value: { kind: 'IntValue', value: '2' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'EventQualifyingResults' },
-                },
-              ],
-            },
-          },
-          {
-            kind: 'Field',
-            alias: { kind: 'Name', value: 'practice' },
-            name: { kind: 'Name', value: 'sessions' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'order_by' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-                      value: { kind: 'EnumValue', value: 'asc' },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'where' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'name' },
-                      value: {
-                        kind: 'ObjectValue',
-                        fields: [
-                          {
-                            kind: 'ObjectField',
-                            name: { kind: 'Name', value: '_in' },
-                            value: {
-                              kind: 'ListValue',
-                              values: [
-                                { kind: 'EnumValue', value: 'Practice_1' },
-                                { kind: 'EnumValue', value: 'Practice_2' },
-                                { kind: 'EnumValue', value: 'Practice_3' },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'limit' },
-                value: { kind: 'IntValue', value: '3' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'scheduled_start_time_utc' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'EventPracticeResults' },
-                },
-              ],
-            },
-          },
         ],
       },
     },

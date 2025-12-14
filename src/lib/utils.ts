@@ -193,8 +193,8 @@ export const formatLapTime = (time?: string | number | bigint | null) => {
 
 export const sortFastestLaps = (
   sessions:
-    | EventCompetitionResultsFragment['driver_sessions']
-    | EventPracticeResultsFragment['driver_sessions'],
+    | EventCompetitionResultsFragment['competition_sessions']
+    | EventPracticeResultsFragment['practice_sessions'],
 ) => {
   return sessions
     ?.filter((driver) => {
@@ -211,7 +211,7 @@ export const sortFastestLaps = (
 };
 
 export const sortQuali = (
-  sessions: EventQualifyingResultsFragment['driver_sessions'],
+  sessions: EventQualifyingResultsFragment['qualifying_session'],
 ) => {
   return sessions
     .filter((driver) => !!driver.results[0]?.finishing_position)

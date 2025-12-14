@@ -164,6 +164,9 @@ export const GET_SESSION_DETAILS = graphql(`
     $year: Int!
     $event: String!
     $session: session_name_choices_enum!
+    $isCompetition: Boolean! = false
+    $isQualifying: Boolean! = false
+    $isPractice: Boolean! = false
   ) @cached {
     sessions(
       limit: 1
@@ -172,7 +175,11 @@ export const GET_SESSION_DETAILS = graphql(`
         name: { _eq: $session }
       }
     ) {
+      name
       ...SessionDetails
+      ...EventCompetitionResults @include(if: $isCompetition)
+      ...EventQualifyingResults @include(if: $isQualifying)
+      ...EventPracticeResults @include(if: $isPractice)
     }
 
     schedule(
@@ -181,10 +188,6 @@ export const GET_SESSION_DETAILS = graphql(`
       limit: 1
     ) {
       ...ScheduleEventDetails
-    }
-
-    events(where: { name: { _eq: $event }, year: { _eq: $year } }, limit: 1) {
-      ...EventSessionResults
     }
   }
 `);
