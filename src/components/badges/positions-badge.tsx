@@ -10,24 +10,24 @@ import {
 type PositionType = 'win' | 'p2' | 'p3';
 type PositionProps = {
   icon: LucideIcon;
-  color: string;
+  className: string;
   label: string;
 };
 
 const positionConfig: Record<PositionType, PositionProps> = {
   win: {
     icon: Crown,
-    color: 'text-yellow-500',
+    className: 'text-yellow-500',
     label: 'Win',
   },
   p2: {
     icon: Tally2,
-    color: 'text-gray-400',
+    className: 'text-gray-400',
     label: 'P2',
   },
   p3: {
     icon: Tally3,
-    color: 'text-amber-600',
+    className: 'text-amber-600',
     label: 'P3',
   },
 };
@@ -39,37 +39,21 @@ export function PositionBadge({
   count: number;
   type: PositionType;
 }) {
-  const { icon: Icon, color, label } = positionConfig[type];
+  if (!type || count === 0) return <div className='w-11'></div>;
 
-  // TODO: Rework
-  // Janky way to keep spacing the same
-  if (!count)
-    return (
-      <Badge
-        variant='outline'
-        className='flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium opacity-0'
-      >
-        <Icon className={`size-3.5 ${color}`} />
-        <span>{count}</span>
-      </Badge>
-    );
+  const { icon: Icon, className, label } = positionConfig[type];
+  const tooltipText = `${count} ${label}${count !== 1 ? 's' : ''}`;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge
-          variant='outline'
-          className='flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium'
-        >
-          <Icon className={`size-3.5 ${color}`} />
+        <Badge variant='outline' className='w-11 gap-0.5'>
+          <Icon className={className} />
           <span>{count}</span>
         </Badge>
       </TooltipTrigger>
       <TooltipContent>
-        <p>
-          {count} {label}
-          {count > 1 ? 's' : ''}
-        </p>
+        <p>{tooltipText}</p>
       </TooltipContent>
     </Tooltip>
   );
