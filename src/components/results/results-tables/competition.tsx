@@ -7,7 +7,7 @@ import { DriverRow, FastestLapCell, HeaderRow } from './driver-table-row';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 
-const EventCompetitionResultsFragment = graphql(`
+export const EventCompetitionResultsFragment = graphql(`
   fragment EventCompetitionResults on sessions {
     competition_sessions: driver_sessions(
       order_by: { results_aggregate: { min: { finishing_position: asc } } }

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 import { Badge } from '@/components/ui/badge';
 
@@ -19,17 +19,20 @@ export function DriverBadges({
   onDriverClick,
   hiddenItems,
   fullWidth,
-}: {
+  ...props
+}: React.ComponentProps<'span'> & {
   drivers: string[];
   color: string;
   onDriverClick?: (driver: string, e: React.MouseEvent) => void;
-  hiddenItems?: Record<string, boolean>;
+  hiddenItems?: string[];
   fullWidth?: boolean;
 }) {
   if (!drivers || drivers.length === 0) return null;
 
   return (
-    <div className={cn('flex gap-x-2', fullWidth && 'w-full')}>
+    <div
+      className={clsx(props.className, 'flex gap-x-2', fullWidth && 'w-full')}
+    >
       {drivers.map((driver, idx) => (
         <Badge
           key={driver}
@@ -39,7 +42,7 @@ export function DriverBadges({
             getBorderStyle(idx),
             fullWidth ? 'flex-1' : 'min-w-12',
             onDriverClick && 'cursor-pointer select-none',
-            hiddenItems?.[driver] ? 'opacity-50' : 'opacity-100',
+            hiddenItems?.includes(driver) ? 'opacity-50' : 'opacity-100',
           ]
             .filter(Boolean)
             .join(' ')}

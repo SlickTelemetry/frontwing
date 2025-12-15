@@ -6,14 +6,53 @@ import { ConstructorBadge } from '@/components/badges/constructor-badge';
 import { DriverBadges } from '@/components/badges/driver-badge';
 import { PositionsBadge } from '@/components/badges/positions-badge';
 
-// TODO duplicate from legend
-type Driver = {
-  name: string;
-  abbr: string;
-  team?: string;
-  color: string;
-  totalPoints: number;
-  positionCounts?: number[];
+import {
+  countConstructorPositions,
+  countDriverPositions,
+} from '@/app/[year]/standings/_components/countback';
+import { useHiddenItems } from '@/app/[year]/standings/_components/legend/context';
+
+import { GetStandingsQuery } from '@/types/graphql';
+
+const getConstructorData = (
+  constructor: GetStandingsQuery['constructors'][number] & {
+    isHidden: boolean;
+  },
+  events: GetStandingsQuery['events'],
+) => {
+  const positionCounts = countConstructorPositions(
+    constructor.name ?? '',
+    events,
+  );
+  return {
+    name: constructor?.name ?? 'Unknown',
+    team: constructor?.name ?? 'Unknown',
+    abbr: constructor?.name ?? 'Unknown',
+    color: constructor?.color ? `#${constructor.color}` : 'var(--foreground)',
+    totalPoints: constructor?.lastRoundPoints?.[0]?.points ?? 0,
+    positionCounts,
+    isHidden: constructor.isHidden,
+  };
+};
+
+const getDriverData = (
+  driver: GetStandingsQuery['drivers'][number] & { isHidden: boolean },
+  events: GetStandingsQuery['events'],
+) => {
+  const constructor = driver.latest_constructor?.[0]?.constructor;
+  const positionCounts = countDriverPositions(
+    driver.abbreviation ?? '',
+    events,
+  );
+  return {
+    abbr: driver.abbreviation ?? '',
+    name: driver.full_name ?? '',
+    totalPoints: driver.driver_standings?.at(-1)?.points ?? 0,
+    team: constructor?.name ?? 'Unknown',
+    color: constructor?.color ? `#${constructor.color}` : 'var(--foreground)',
+    positionCounts,
+    isHidden: driver.isHidden,
+  };
 };
 
 const calculateGap = (currentPoints: number, previousPoints: number | null) => {
@@ -25,19 +64,21 @@ const calculateGap = (currentPoints: number, previousPoints: number | null) => {
 };
 
 export function Table({
-  items,
-  toggleItem,
-  hiddenItems,
-  driversByConstructor,
+  events,
+  chartType,
 }: {
-  items: Driver[];
-  toggleItem: (items: string[]) => void;
-  hiddenItems: Record<string, boolean>;
-  driversByConstructor?: Map<string, string[]>;
+  events: GetStandingsQuery['events'];
+  chartType: 'drivers' | 'constructors';
 }) {
+  const { constructorDriversMap, toggleVisibility, data } = useHiddenItems();
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartIndex, setDragStartIndex] = useState<number | null>(null);
   const [dragEndIndex, setDragEndIndex] = useState<number | null>(null);
+
+  const isConstructorView = chartType === 'constructors';
+  const tableItems = isConstructorView
+    ? data.constructors.map((c) => getConstructorData(c, events))
+    : data.drivers.map((d) => getDriverData(d, events));
 
   const handleMouseDown = (index: number) => {
     setIsDragging(true);
@@ -56,26 +97,33 @@ export function Table({
       // Check if it's a single item click (start and end are the same)
       if (dragStartIndex === dragEndIndex) {
         // Single item click - just toggle that item
-        const item = items[dragStartIndex];
+        const item = tableItems[dragStartIndex];
         if (item) {
-          toggleItem([item.abbr]);
+          toggleVisibility(chartType, [item.abbr]);
         }
       } else {
         // Multi-item drag selection
         const startIndex = Math.min(dragStartIndex, dragEndIndex);
         const endIndex = Math.max(dragStartIndex, dragEndIndex);
-        const itemsToToggle = items
+        const itemsToToggle = tableItems
           .slice(startIndex, endIndex + 1)
           .map((item) => item.abbr);
 
-        toggleItem(itemsToToggle);
+        toggleVisibility(chartType, itemsToToggle);
       }
 
       setIsDragging(false);
       setDragStartIndex(null);
       setDragEndIndex(null);
     }
-  }, [isDragging, dragStartIndex, dragEndIndex, items, toggleItem]);
+  }, [
+    isDragging,
+    dragStartIndex,
+    dragEndIndex,
+    tableItems,
+    toggleVisibility,
+    chartType,
+  ]);
 
   // Handle mouse up events outside the component
   useEffect(() => {
@@ -91,7 +139,7 @@ export function Table({
     }
   }, [isDragging, handleMouseUp]);
 
-  return items.map((item, idx, allItems) => {
+  return tableItems.map((item, idx, allItems) => {
     const currentPoints = item.totalPoints;
     const previousPoints = allItems[idx - 1]?.totalPoints;
     const gap = calculateGap(currentPoints, previousPoints);
@@ -104,8 +152,6 @@ export function Table({
       idx >= Math.min(dragStartIndex, dragEndIndex) &&
       idx <= Math.max(dragStartIndex, dragEndIndex);
 
-    const isConstructorView = !!driversByConstructor;
-
     return (
       <div
         key={item.name}
@@ -115,7 +161,7 @@ export function Table({
         className={clsx(
           'bg-background flex min-w-0 cursor-pointer flex-nowrap items-center divide-x rounded border py-1 select-none',
           {
-            'opacity-50': hiddenItems[item.abbr],
+            'opacity-50': item.isHidden,
             'dark:bg-accent/50 bg-blue-100': isInDragRange,
           },
         )}
@@ -127,19 +173,18 @@ export function Table({
           <Circle fill={item.color} stroke='none' className='size-4 shrink-0' />
           <div className='flex min-w-0 flex-1 items-center gap-2 overflow-hidden'>
             <p className='min-w-[120px] flex-1 truncate'>{item.name}</p>
-            {/* Position icons and counts - hide after badges are hidden */}
             <PositionsBadge positionCounts={item.positionCounts} />
             {/* Driver badges for constructor view - hide first when space is limited */}
-            {driversByConstructor && driversByConstructor.has(item.name) && (
+            {constructorDriversMap.has(item.name) && (
               <div className='hidden shrink-0 overflow-visible @[600px]:flex'>
                 <DriverBadges
-                  drivers={driversByConstructor.get(item.name) || []}
+                  drivers={constructorDriversMap.get(item.name) || []}
                   color={item.color}
                 />
               </div>
             )}
             {/* Constructor badge for driver view - hide first when space is limited */}
-            {item.team && !isConstructorView && (
+            {!isConstructorView && (
               <div className='hidden min-w-[120px] shrink-0 @[600px]:flex'>
                 <ConstructorBadge
                   className='2xl:text-sm'

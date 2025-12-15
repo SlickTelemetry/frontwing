@@ -17,6 +17,7 @@ import {
   ChartViewController,
   SessionHeader,
 } from '@/app/[year]/[event]/[session]';
+import { SessionItemProvider } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 
 import { Session_Name_Choices_Enum } from '@/types/graphql';
 
@@ -44,18 +45,22 @@ export default function SessionPage({
   });
 
   return (
-    <div className='p-4 lg:p-6'>
-      <Breadcrumbs />
-      <div className='grid items-center gap-x-4 gap-y-4 lg:grid-cols-2 xl:grid-cols-4'>
-        <div className='xl:col-span-2'>
-          <EventDetails session loading={loading} evt={data?.schedule[0]} />
+    <SessionItemProvider sessions={data?.sessions[0].driver_sessions}>
+      <div className='p-4 lg:p-6'>
+        {/* Content wont change after data loads */}
+        <Breadcrumbs />
+        <div className='grid items-center gap-x-4 gap-y-4 lg:grid-cols-2 xl:grid-cols-4'>
+          <div className='xl:col-span-2'>
+            <EventDetails session loading={loading} evt={data?.schedule[0]} />
+          </div>
+          <SessionHeader loading={loading} sessions={data?.sessions} />
         </div>
-        <SessionHeader loading={loading} sessions={data?.sessions} />
+
+        <ChartViewController
+          data={data}
+          sessionType={{ isCompetition, isQualifying, isPractice }}
+        />
       </div>
-      <ChartViewController
-        data={data}
-        sessionType={{ isCompetition, isQualifying, isPractice }}
-      />
-    </div>
+    </SessionItemProvider>
   );
 }

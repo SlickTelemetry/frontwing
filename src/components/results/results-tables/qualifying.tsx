@@ -6,7 +6,7 @@ import { DriverRow, HeaderRow } from './driver-table-row';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 
-const EventQualifyingResults = graphql(`
+export const EventQualifyingResults = graphql(`
   fragment EventQualifyingResults on sessions {
     qualifying_session: driver_sessions(
       order_by: { results_aggregate: { min: { finishing_position: asc } } }
