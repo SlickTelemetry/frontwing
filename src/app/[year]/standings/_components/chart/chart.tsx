@@ -19,6 +19,8 @@ import {
   baseOptions,
   ChartControls,
   generatePerRoundAvailablePoints,
+  makeLineSeries,
+  preparePoints,
   useStandingsSeries,
   useTooltipFormatter,
 } from '@/app/[year]/standings/_components/chart';
@@ -26,6 +28,7 @@ import {
   buildConstructorPositionCountsTimeline,
   buildDriverPositionCountsTimeline,
 } from '@/app/[year]/standings/_components/countback';
+import { useHiddenItems } from '@/app/[year]/standings/_components/legend/context';
 
 import {
   Event_Format_Choices_Enum,
@@ -44,18 +47,12 @@ echarts.use([
 ]);
 
 interface Props {
-  data: GetStandingsQuery;
+  events: GetStandingsQuery['events'];
   type: ViewType;
-  hiddenItems: Record<string, boolean>;
-  toggleVisibility: (string: 'all' | 'none') => void;
 }
 
-export function StandingsChart({
-  data,
-  type,
-  hiddenItems,
-  toggleVisibility,
-}: Props) {
+export function StandingsChart({ events, type }: Props) {
+  const { data, toggleVisibility } = useHiddenItems();
   const { year } = useParams<{ year: string }>();
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(chartRef);
@@ -65,15 +62,12 @@ export function StandingsChart({
   const [showPointsPerRound, setShowRoundPoints] = useState(false);
   const [showAvailablePoints, setShowAvailablePoints] = useState(false);
 
-  const driverWithMostRounds = Math.max(
-    ...data.drivers.map((d) => d.driver_standings.length),
+  const allRoundFormats = events.map(
+    (e) => e.format ?? Event_Format_Choices_Enum.Conventional,
   );
   const allRounds = Array.from(
-    { length: driverWithMostRounds },
+    { length: allRoundFormats.length },
     (_, i) => i + 1,
-  );
-  const allRoundFormats = data.events.map(
-    (e) => e.format ?? Event_Format_Choices_Enum.Conventional,
   );
 
   const perRoundAvailablePoints = generatePerRoundAvailablePoints({
@@ -81,52 +75,44 @@ export function StandingsChart({
     allRoundFormats,
     type,
   });
-
-  // Precompute countback position counts for each series after every event so
-  // the tooltip can apply per-round countback identical to the standings table
-  // but scoped to the rounds completed so far.
-  const driverPositionCountsTimeline = buildDriverPositionCountsTimeline(
-    data.drivers
-      .map((driver) => driver.abbreviation ?? '')
-      .filter((abbr): abbr is string => Boolean(abbr)),
-    data.events,
+  const availablePointsSeries = makeLineSeries(
+    'Available Points',
+    preparePoints(perRoundAvailablePoints, allRounds, showPointsPerRound),
+    '#888888',
+    'dashed',
   );
 
-  const constructorPositionCountsTimeline =
-    buildConstructorPositionCountsTimeline(
-      data.constructors
-        .map((constructor) => constructor.name ?? '')
-        .filter((name): name is string => Boolean(name)),
-      data.events,
-    );
-
-  const positionCountsTimeline =
+  const activeDrivers = data.drivers.filter((d) => !d.isHidden);
+  const activeConstructors = data.constructors.filter((d) => !d.isHidden);
+  const activeItems =
     type === 'drivers'
-      ? driverPositionCountsTimeline
-      : constructorPositionCountsTimeline;
+      ? activeDrivers.map((d) => d.abbreviation ?? '')
+      : activeConstructors.map((constructor) => constructor.name ?? '');
 
   const formatTooltip = useTooltipFormatter({
-    events: data.events,
-    positionCountsTimeline,
+    events,
+    activeItems,
+    buildPosition:
+      type === 'drivers'
+        ? buildDriverPositionCountsTimeline
+        : buildConstructorPositionCountsTimeline,
   });
 
-  const { driversSeries, constructorsSeries, availablePointsSeries } =
-    useStandingsSeries({
-      data,
-      allRounds,
-      showPointsPerRound,
-      perRoundAvailablePoints,
-    });
+  const { driversSeries, constructorsSeries } = useStandingsSeries({
+    drivers: activeDrivers,
+    constructors: activeConstructors,
+    allRounds,
+    showPointsPerRound,
+  });
 
   const baseSeries = type === 'drivers' ? driversSeries : constructorsSeries;
-  const filtered = baseSeries.filter((s) => !hiddenItems[s.name]);
 
   // update chart
   useEffect(() => {
     if (!chartInstance.current) return;
     const activeSeries = [
       showAvailablePoints ? availablePointsSeries : null,
-      ...filtered,
+      ...baseSeries,
     ];
 
     chartInstance.current.setOption(
@@ -148,7 +134,7 @@ export function StandingsChart({
     formatTooltip,
     showAvailablePoints,
     availablePointsSeries,
-    filtered,
+    baseSeries,
   ]);
 
   return (

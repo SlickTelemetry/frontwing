@@ -4,7 +4,7 @@ import { DriverRow, FastestLapCell, HeaderRow } from './driver-table-row';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 
-const EventPracticeResults = graphql(`
+export const EventPracticeResults = graphql(`
   fragment EventPracticeResults on sessions {
     practice_sessions: driver_sessions(
       order_by: { laps_aggregate: { min: { lap_time: asc } } }

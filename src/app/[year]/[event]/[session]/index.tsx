@@ -14,9 +14,11 @@ import { ServerPageError } from '@/components/ServerError';
 import { Button } from '@/components/ui/button';
 import { Table } from '@/components/ui/table';
 
-import LapTimeContainer from './lapTimes';
-import SectorTimes from './sectorTimes';
-import Stints from './stints';
+import { DriverFilters } from '@/app/[year]/[event]/[session]/_components/driver-filters';
+
+import LapTimeContainer from './_components/lapTimes';
+import SectorTimes from './_components/sectorTimes';
+import Stints from './_components/stints';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 import {
@@ -136,6 +138,8 @@ export const ChartViewController = ({
     router.replace(`?${params.toString()}`);
   };
 
+  // Make some sort of component w hook for the legend
+
   return (
     <>
       <div className='grid grid-cols-2 gap-4 py-4 md:grid-cols-4'>
@@ -157,22 +161,29 @@ export const ChartViewController = ({
         ))}
       </div>
 
-      {/* TODO: Refactor for multiple charts that will have to use partial fragment data */}
-      {data && ChartConfigs[chart] && chart === 'grid' ? (
-        <Table>
-          {sessionType.isCompetition && (
-            <CompetitionResults session={data.sessions} />
+      <div className='relative flex gap-8'>
+        <div className='sticky top-20 grid h-fit w-1/4 max-w-[250px] gap-2'>
+          <DriverFilters />
+        </div>
+        <div className='flex-1'>
+          {/* TODO: Refactor for multiple charts that will have to use partial fragment data */}
+          {data && ChartConfigs[chart] && chart === 'grid' ? (
+            <Table>
+              {sessionType.isCompetition && (
+                <CompetitionResults session={data.sessions} />
+              )}
+              {sessionType.isQualifying && (
+                <QualifyingResults session={data.sessions} />
+              )}
+              {sessionType.isPractice && (
+                <PracticeResults session={data.sessions} />
+              )}
+            </Table>
+          ) : (
+            <>{ChartConfigs[chart]?.component}</>
           )}
-          {sessionType.isQualifying && (
-            <QualifyingResults session={data.sessions} />
-          )}
-          {sessionType.isPractice && (
-            <PracticeResults session={data.sessions} />
-          )}
-        </Table>
-      ) : (
-        ChartConfigs[chart].component
-      )}
+        </div>
+      </div>
     </>
   );
 };

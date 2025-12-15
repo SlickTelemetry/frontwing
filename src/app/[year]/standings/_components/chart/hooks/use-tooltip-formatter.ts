@@ -10,21 +10,24 @@ import {
 
 import { compareCountback } from '@/app/[year]/standings/_components/countback';
 
-import { Event_Format_Choices_Enum } from '@/types/graphql';
+import { GetStandingsQuery } from '@/types/graphql';
 
 interface UseTooltipFormatterProps {
-  events: {
-    round_number?: number | null;
-    name?: string | null;
-    format?: Event_Format_Choices_Enum | null;
-  }[];
-  positionCountsTimeline: Record<string, number[][]>;
+  events: GetStandingsQuery['events'];
+  activeItems: string[];
+  buildPosition: (
+    items: string[],
+    events: GetStandingsQuery['events'],
+  ) => Record<string, number[][]>;
 }
 
 export function useTooltipFormatter({
   events,
-  positionCountsTimeline,
+  activeItems,
+  buildPosition,
 }: UseTooltipFormatterProps) {
+  const positionCountsTimeline = buildPosition(activeItems, events);
+
   return useCallback(
     (params: CallbackDataParams[]) => {
       if (!params?.length) return '';

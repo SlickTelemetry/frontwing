@@ -11,6 +11,8 @@ import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 import { Loader } from '@/components/Loader';
 import { ServerPageError } from '@/components/ServerError';
 
+import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
+
 import {
   GetSessionStintsQuery,
   GetSessionStintsQueryVariables,
@@ -83,6 +85,10 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
   processedData,
   maxLaps,
 }) => {
+  const { data: sessionData } = useSessionItems();
+  const hiddenDrivers = sessionData.drivers
+    .filter((d) => d.isHidden)
+    .map((d) => d.abbreviation);
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,7 +101,9 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
         return;
       }
 
-      const drivers = processedData.map((d) => d.driver);
+      const drivers = processedData
+        .filter((d) => !hiddenDrivers.includes(d.driver))
+        .map((d) => d.driver);
 
       const series: echarts.SeriesOption[] = [];
 
@@ -281,7 +289,7 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
         myChart.dispose();
       }
     };
-  }, [processedData, maxLaps]);
+  }, [processedData, maxLaps, hiddenDrivers]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };

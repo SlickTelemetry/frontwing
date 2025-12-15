@@ -83,7 +83,7 @@ const EventPage = ({
               <SessionCards
                 schedule={data?.schedule[0]}
                 availableSessionCount={
-                  dataSrc?.events[0]?.sessions_aggregate.aggregate?.count ?? 0
+                  data?.events[0]?.sessions_aggregate.aggregate?.count ?? 0
                 }
               />
             )}

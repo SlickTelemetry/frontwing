@@ -7,24 +7,22 @@ import {
 
 import { GetStandingsQuery } from '@/types/graphql';
 
-type Standing = { round?: number | null; points?: number | bigint | null };
-
 interface UseStandingsSeriesProps {
-  data: GetStandingsQuery;
+  drivers: GetStandingsQuery['drivers'];
+  constructors: GetStandingsQuery['constructors'];
   allRounds: number[];
   showPointsPerRound: boolean;
-  perRoundAvailablePoints: Standing[];
 }
 
 export function useStandingsSeries({
-  data,
+  drivers,
+  constructors,
   allRounds,
   showPointsPerRound,
-  perRoundAvailablePoints,
 }: UseStandingsSeriesProps) {
   return useMemo(() => {
     // Compute top driver per constructor (for solid/dotted lines)
-    const topDriverPerConstructor = data.drivers.reduce((acc, driver) => {
+    const topDriverPerConstructor = drivers.reduce((acc, driver) => {
       // Find driver's constructor
       const cName = driver.latest_constructor?.[0]?.constructor?.name;
       if (!cName) return acc;
@@ -41,7 +39,7 @@ export function useStandingsSeries({
     }, new Map<string, { abbr: string; points: number }>());
 
     // Drivers series
-    const driversSeries = data.drivers.map((driver) => {
+    const driversSeries = drivers.map((driver) => {
       const points = preparePoints(
         driver.driver_standings,
         allRounds,
@@ -61,7 +59,7 @@ export function useStandingsSeries({
     });
 
     // Constructors series
-    const constructorsSeries = data.constructors.map((c) => {
+    const constructorsSeries = constructors.map((c) => {
       const points = preparePoints(
         c.constructor_standings,
         allRounds,
@@ -70,28 +68,9 @@ export function useStandingsSeries({
       return makeLineSeries(c.name || '', points, `#${c.color || 'cccccc'}`);
     });
 
-    const availablePointsData = preparePoints(
-      perRoundAvailablePoints,
-      allRounds,
-      showPointsPerRound,
-    );
-    const availablePointsSeries = makeLineSeries(
-      'Available Points',
-      availablePointsData,
-      '#888888',
-      'dashed',
-    );
-
     return {
       driversSeries,
       constructorsSeries,
-      availablePointsSeries,
     };
-  }, [
-    data.drivers,
-    data.constructors,
-    perRoundAvailablePoints,
-    allRounds,
-    showPointsPerRound,
-  ]);
+  }, [drivers, constructors, allRounds, showPointsPerRound]);
 }

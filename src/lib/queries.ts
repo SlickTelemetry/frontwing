@@ -176,6 +176,21 @@ export const GET_SESSION_DETAILS = graphql(`
       }
     ) {
       name
+      driver_sessions {
+        constructorByConstructorId {
+          name
+          color
+        }
+        driver {
+          abbreviation
+        }
+        results {
+          finishing_position
+        }
+        laps(order_by: { lap_time: asc }, limit: 1) {
+          lap_time
+        }
+      }
       ...SessionDetails
       ...EventCompetitionResults @include(if: $isCompetition)
       ...EventQualifyingResults @include(if: $isQualifying)
@@ -329,7 +344,7 @@ export const GET_SESSION_STINTS = gql`
   }
 `;
 
-export const GET_SESSION_LAP_TIMES = gql`
+export const GET_SESSION_LAP_TIMES = graphql(`
   query GetSessionLapTimes(
     $year: Int!
     $event: String!
@@ -352,7 +367,15 @@ export const GET_SESSION_LAP_TIMES = gql`
           full_name
           number
         }
+        laps_aggregate {
+          aggregate {
+            avg {
+              lap_time
+            }
+          }
+        }
         laps(order_by: { lap_number: asc }) {
+          pitin_time
           lap_number
           lap_time
           compound
@@ -361,4 +384,4 @@ export const GET_SESSION_LAP_TIMES = gql`
       }
     }
   }
-`;
+`);

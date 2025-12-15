@@ -13217,7 +13217,27 @@ export type GetSessionDetailsQueryVariables = Exact<{
 export type GetSessionDetailsQuery = {
   __typename?: 'query_root';
   sessions: Array<
-    { __typename?: 'sessions'; name?: Session_Name_Choices_Enum | null } & {
+    {
+      __typename?: 'sessions';
+      name?: Session_Name_Choices_Enum | null;
+      driver_sessions: Array<{
+        __typename?: 'driver_sessions';
+        constructorByConstructorId?: {
+          __typename?: 'constructors';
+          name?: string | null;
+          color?: string | null;
+        } | null;
+        driver?: {
+          __typename?: 'drivers';
+          abbreviation?: string | null;
+        } | null;
+        results: Array<{
+          __typename?: 'results';
+          finishing_position?: number | null;
+        }>;
+        laps: Array<{ __typename?: 'laps'; lap_time?: number | null }>;
+      }>;
+    } & {
       ' $fragmentRefs'?: {
         SessionDetailsFragment: SessionDetailsFragment;
         EventCompetitionResultsFragment: EventCompetitionResultsFragment;
@@ -13382,8 +13402,19 @@ export type GetSessionLapTimesQuery = {
         full_name?: string | null;
         number?: string | null;
       } | null;
+      laps_aggregate: {
+        __typename?: 'laps_aggregate';
+        aggregate?: {
+          __typename?: 'laps_aggregate_fields';
+          avg?: {
+            __typename?: 'laps_avg_fields';
+            lap_time?: number | null;
+          } | null;
+        } | null;
+      };
       laps: Array<{
         __typename?: 'laps';
+        pitin_time?: number | null;
         lap_number?: number | null;
         lap_time?: number | null;
         compound?: Tyre_Compounds_Enum | null;
@@ -19798,6 +19829,98 @@ export const GetSessionDetailsDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                 {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'driver_sessions' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'constructorByConstructorId',
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'color' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'driver' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'abbreviation' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'results' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'finishing_position',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'laps' },
+                        arguments: [
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'order_by' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'lap_time' },
+                                  value: { kind: 'EnumValue', value: 'asc' },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'limit' },
+                            value: { kind: 'IntValue', value: '1' },
+                          },
+                        ],
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_time' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
                   kind: 'FragmentSpread',
                   name: { kind: 'Name', value: 'SessionDetails' },
                 },
@@ -21568,6 +21691,40 @@ export const GetSessionLapTimesDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'laps_aggregate' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'aggregate' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'avg' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        {
+                                          kind: 'Field',
+                                          name: {
+                                            kind: 'Name',
+                                            value: 'lap_time',
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'laps' },
                         arguments: [
                           {
@@ -21588,6 +21745,10 @@ export const GetSessionLapTimesDocument = {
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'pitin_time' },
+                            },
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'lap_number' },

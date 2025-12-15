@@ -18,6 +18,8 @@ import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 import { Loader } from '@/components/Loader';
 import { ServerPageError } from '@/components/ServerError';
 
+import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
+
 import {
   GetSessionFastestTimesQuery,
   GetSessionFastestTimesQueryVariables,
@@ -71,6 +73,10 @@ export interface DriverTimes {
 }
 
 const SectorTimes = () => {
+  const { data: sessionData } = useSessionItems();
+  const hiddenDrivers = sessionData.drivers
+    .filter((d) => d.isHidden)
+    .map((d) => d.abbreviation);
   const { year, event, session: sessionParam } = useParams();
   const { data, loading, error } = useQuery<
     GetSessionFastestTimesQuery,
@@ -95,83 +101,85 @@ const SectorTimes = () => {
 
   const driverSessions = data?.sessions[0].driver_sessions || [];
 
-  const driverTimes: DriverTimes[] = driverSessions.map((ds) => {
-    const sector1 =
-      ds.fastest_sector1.length > 0 && ds.fastest_sector1[0].sector1 !== null
-        ? Number(ds.fastest_sector1[0].sector1) / 1000
-        : null;
-    const sector2 =
-      ds.fastest_sector2.length > 0 && ds.fastest_sector2[0].sector2 !== null
-        ? Number(ds.fastest_sector2[0].sector2) / 1000
-        : null;
-    const sector3 =
-      ds.fastest_sector3.length > 0 && ds.fastest_sector3[0].sector3 !== null
-        ? Number(ds.fastest_sector3[0].sector3) / 1000
-        : null;
+  const driverTimes: DriverTimes[] = driverSessions
+    .filter((ds) => !hiddenDrivers.includes(ds.driver?.abbreviation))
+    .map((ds) => {
+      const sector1 =
+        ds.fastest_sector1.length > 0 && ds.fastest_sector1[0].sector1 !== null
+          ? Number(ds.fastest_sector1[0].sector1) / 1000
+          : null;
+      const sector2 =
+        ds.fastest_sector2.length > 0 && ds.fastest_sector2[0].sector2 !== null
+          ? Number(ds.fastest_sector2[0].sector2) / 1000
+          : null;
+      const sector3 =
+        ds.fastest_sector3.length > 0 && ds.fastest_sector3[0].sector3 !== null
+          ? Number(ds.fastest_sector3[0].sector3) / 1000
+          : null;
 
-    return {
-      abbreviation: ds.driver?.abbreviation || 'N/A',
-      fastestLap: {
-        lap_number:
-          ds.fastest_lap.length > 0 && ds.fastest_lap[0].lap_number !== null
-            ? Number(ds.fastest_lap[0].lap_number)
-            : null,
-        lap_time:
-          ds.fastest_lap.length > 0 && ds.fastest_lap[0].lap_time !== null
-            ? Number(ds.fastest_lap[0].lap_time) / 1000
-            : null,
-        sector1: {
-          time:
-            ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector1 !== null
-              ? Number(ds.fastest_lap[0].sector1) / 1000
+      return {
+        abbreviation: ds.driver?.abbreviation || 'N/A',
+        fastestLap: {
+          lap_number:
+            ds.fastest_lap.length > 0 && ds.fastest_lap[0].lap_number !== null
+              ? Number(ds.fastest_lap[0].lap_number)
               : null,
-        },
-        sector2: {
-          time:
-            ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector2 !== null
-              ? Number(ds.fastest_lap[0].sector2) / 1000
+          lap_time:
+            ds.fastest_lap.length > 0 && ds.fastest_lap[0].lap_time !== null
+              ? Number(ds.fastest_lap[0].lap_time) / 1000
               : null,
+          sector1: {
+            time:
+              ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector1 !== null
+                ? Number(ds.fastest_lap[0].sector1) / 1000
+                : null,
+          },
+          sector2: {
+            time:
+              ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector2 !== null
+                ? Number(ds.fastest_lap[0].sector2) / 1000
+                : null,
+          },
+          sector3: {
+            time:
+              ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector3 !== null
+                ? Number(ds.fastest_lap[0].sector3) / 1000
+                : null,
+          },
+          potential_best:
+            sector1 && sector2 && sector3
+              ? (sector1 + sector2 + sector3).toFixed(3)
+              : 0,
         },
-        sector3: {
-          time:
-            ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector3 !== null
-              ? Number(ds.fastest_lap[0].sector3) / 1000
-              : null,
+        sectors: {
+          sector1: {
+            time: sector1,
+            lap:
+              ds.fastest_sector1.length > 0 &&
+              ds.fastest_sector1[0].lap_number !== null
+                ? Number(ds.fastest_sector1[0].lap_number)
+                : null,
+          },
+          sector2: {
+            time: sector2,
+            lap:
+              ds.fastest_sector2.length > 0 &&
+              ds.fastest_sector2[0].lap_number !== null
+                ? Number(ds.fastest_sector2[0].lap_number)
+                : null,
+          },
+          sector3: {
+            time: sector3,
+            lap:
+              ds.fastest_sector3.length > 0 &&
+              ds.fastest_sector3[0].lap_number !== null
+                ? Number(ds.fastest_sector3[0].lap_number)
+                : null,
+          },
         },
-        potential_best:
-          sector1 && sector2 && sector3
-            ? (sector1 + sector2 + sector3).toFixed(3)
-            : 0,
-      },
-      sectors: {
-        sector1: {
-          time: sector1,
-          lap:
-            ds.fastest_sector1.length > 0 &&
-            ds.fastest_sector1[0].lap_number !== null
-              ? Number(ds.fastest_sector1[0].lap_number)
-              : null,
-        },
-        sector2: {
-          time: sector2,
-          lap:
-            ds.fastest_sector2.length > 0 &&
-            ds.fastest_sector2[0].lap_number !== null
-              ? Number(ds.fastest_sector2[0].lap_number)
-              : null,
-        },
-        sector3: {
-          time: sector3,
-          lap:
-            ds.fastest_sector3.length > 0 &&
-            ds.fastest_sector3[0].lap_number !== null
-              ? Number(ds.fastest_sector3[0].lap_number)
-              : null,
-        },
-      },
-      color: ds.constructorByConstructorId?.color || 'cccccc',
-    };
-  });
+        color: ds.constructorByConstructorId?.color || 'cccccc',
+      };
+    });
 
   return (
     <div className='grid gap-4'>
