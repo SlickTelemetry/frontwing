@@ -1,3 +1,11 @@
+## 0.10.1 (2025-12-16)
+
+### Fix
+
+- **FRON-287**: sidebar trigger hover functionality, and home button (FRON-284)
+- **FRON-288**: standing page layout sizing
+- **FRON-295**: only after a session is ingested session cards are links and appears in session nav
+
 ## 0.10.0 (2025-12-06)
 
 ### Feat
