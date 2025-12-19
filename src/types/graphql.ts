@@ -13368,6 +13368,7 @@ export type GetSessionLapTimesQuery = {
         lap_time?: number | null;
         compound?: Tyre_Compounds_Enum | null;
         session_time?: number | null;
+        pitout_time?: number | null;
       }>;
     }>;
   }>;
@@ -20888,6 +20889,10 @@ export const GetSessionLapTimesDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'session_time' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'pitout_time' },
                             },
                           ],
                         },

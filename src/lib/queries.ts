@@ -347,6 +347,7 @@ export const GET_SESSION_LAP_TIMES = gql`
           lap_time
           compound
           session_time
+          pitout_time
         }
       }
     }

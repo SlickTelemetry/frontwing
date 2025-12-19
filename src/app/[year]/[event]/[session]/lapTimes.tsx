@@ -1,6 +1,6 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
-import { LineChart, LineSeriesOption } from 'echarts/charts';
+import { BoxplotChart, LineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -18,7 +18,13 @@ import {
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
 
-echarts.use([LineChart, TooltipComponent, GridComponent, CanvasRenderer]);
+echarts.use([
+  LineChart,
+  BoxplotChart,
+  TooltipComponent,
+  GridComponent,
+  CanvasRenderer,
+]);
 
 import type { EChartsOption } from 'echarts';
 
@@ -492,6 +498,231 @@ const LapTimesChart = ({
   );
 };
 
+// Helper function to calculate box plot statistics
+const calculateBoxplotStats = (values: number[]): number[] => {
+  if (values.length === 0) return [0, 0, 0, 0, 0];
+
+  const sorted = [...values].sort((a, b) => a - b);
+  const min = sorted[0];
+  const max = sorted[sorted.length - 1];
+
+  const getPercentile = (arr: number[], percentile: number): number => {
+    const index = (percentile / 100) * (arr.length - 1);
+    const lower = Math.floor(index);
+    const upper = Math.ceil(index);
+    const weight = index - lower;
+
+    if (lower === upper) return arr[lower];
+    return arr[lower] * (1 - weight) + arr[upper] * weight;
+  };
+
+  const q1 = getPercentile(sorted, 25);
+  const median = getPercentile(sorted, 50);
+  const q3 = getPercentile(sorted, 75);
+
+  return [min, q1, median, q3, max];
+};
+
+const LapTimesBoxPlotChart = ({
+  data,
+  loading,
+}: useQuery.Result<
+  GetSessionLapTimesQuery,
+  GetSessionLapTimesQueryVariables
+>) => {
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loading && chartRef.current) {
+      const chart = echarts.init(chartRef.current);
+
+      const driverSessions = data?.sessions?.[0]?.driver_sessions || [];
+
+      // Create a map for driver abbreviation to constructor color
+      const driverColorMap = new Map<string, string>();
+      const driverLapTimesMap = new Map<string, number[]>();
+
+      driverSessions.forEach((driver) => {
+        if (driver?.driver?.abbreviation) {
+          const abbreviation = driver.driver.abbreviation;
+          driverColorMap.set(
+            abbreviation,
+            `#${driver.constructorByConstructorId?.color || 'cccccc'}`,
+          );
+
+          // Collect all valid lap times for this driver
+          const validLapTimes = driver?.laps
+            ?.filter(
+              (lap) =>
+                lap?.lap_time !== null &&
+                lap?.lap_time !== undefined &&
+                lap?.pitout_time == null &&
+                lap?.pitout_time == undefined &&
+                lap?.lap_number !== 1,
+            )
+            .map((lap) => Number(lap?.lap_time))
+            .filter((time) => !isNaN(time) && time > 0);
+
+          if (validLapTimes && validLapTimes.length > 0) {
+            driverLapTimesMap.set(abbreviation, validLapTimes);
+          }
+        }
+      });
+
+      if (driverLapTimesMap.size === 0) {
+        chart.setOption({
+          title: {
+            text: 'No completed laps found to display box plot.',
+            left: 'center',
+            top: 'center',
+            textStyle: {
+              color: '#fff',
+            },
+          },
+        });
+        return;
+      }
+
+      // Prepare data for box plot
+      const drivers = Array.from(driverLapTimesMap.keys());
+      const boxplotData = drivers.map((driver) => {
+        const lapTimes = driverLapTimesMap.get(driver) || [];
+        return calculateBoxplotStats(lapTimes);
+      });
+
+      // Create array of colors matching driver order
+      const driverColors = drivers.map(
+        (driver) => driverColorMap.get(driver) || '#cccccc',
+      );
+
+      const option: EChartsOption = {
+        title: {
+          text: 'Lap Times Distribution (Box Plot)',
+          left: 'center',
+          top: 'top',
+          textStyle: {
+            color: '#fff',
+            fontSize: 16,
+          },
+        },
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          borderColor: '#333',
+          borderWidth: 1,
+          textStyle: {
+            color: '#fff',
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: function (params: any) {
+            const dataIndex = params.dataIndex;
+            const driver = drivers[dataIndex];
+            const stats = boxplotData[dataIndex];
+            const color = driverColorMap.get(driver) || '#FFFFFF';
+
+            const formatTime = (ms: number): string => {
+              const minutes = Math.floor(ms / 60000);
+              const seconds = Math.floor((ms % 60000) / 1000) + minutes * 60;
+              const milliseconds = ms % 1000;
+              return `${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+            };
+
+            return `
+              <div style="font-weight: bold; color: ${color}; margin-bottom: 4px;">${driver}</div>
+              <div>Fastest: ${formatTime(stats[0])}</div>
+              <div>Q1: ${formatTime(stats[1])}</div>
+              <div>Median: ${formatTime(stats[2])}</div>
+              <div>Q3: ${formatTime(stats[3])}</div>
+              <div>Slowest: ${formatTime(stats[4])}</div>
+            `;
+          },
+        },
+        grid: {
+          left: '10%',
+          right: '10%',
+          bottom: '15%',
+          containLabel: true,
+        },
+        xAxis: {
+          type: 'category',
+          data: drivers,
+          boundaryGap: true,
+          nameGap: 30,
+          axisLabel: {
+            rotate: 45,
+            color: '#fff',
+          },
+          splitArea: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Lap Time',
+          nameLocation: 'middle',
+          nameGap: 50,
+          min: 'dataMin',
+          max: 'dataMax',
+          inverse: true,
+          axisLabel: {
+            color: '#fff',
+            formatter: (value: number) => {
+              const minutes = Math.floor(value / 60000);
+              const seconds = Math.floor((value % 60000) / 1000) + minutes * 60;
+              const milliseconds = value % 1000;
+              return `${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+            },
+          },
+        },
+        // @ts-expect-error: Suppress complex type error for series for now
+        series: [
+          {
+            name: 'boxplot',
+            type: 'boxplot',
+            data: boxplotData,
+            itemStyle: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              color: (params: any) => {
+                return driverColors[params.dataIndex] || '#cccccc';
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              borderColor: (params: any) => {
+                return driverColors[params.dataIndex] || '#cccccc';
+              },
+              borderWidth: 2,
+            },
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                shadowColor: (params: any) => {
+                  const color = driverColors[params.dataIndex] || '#cccccc';
+                  return color + '80'; // Add transparency
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      chart.setOption(option);
+
+      return () => {
+        chart.dispose();
+      };
+    }
+  }, [data, loading]);
+
+  return (
+    <ChartContainer loading={loading}>
+      <div ref={chartRef} style={{ width: '100%', height: '100%' }} />
+    </ChartContainer>
+  );
+};
+
 const LapTimeContainer = () => {
   const { year, event, session } = useParams();
 
@@ -521,6 +752,7 @@ const LapTimeContainer = () => {
     <div className='grid gap-4'>
       {session && competition && <DeltaToWinnerChart {...queryState} />}
       <LapTimesChart {...queryState} />
+      <LapTimesBoxPlotChart {...queryState} />
     </div>
   );
 };
