@@ -13,7 +13,14 @@ export const DriverFilters = ({
 }: {
   showDrivers?: boolean;
 }) => {
-  const { data, toggleVisibility, constructorDriversMap } = useSessionItems();
+  const {
+    data,
+    constructorDriversMap,
+    resetHidden,
+    setAllHidden,
+    toggleConstructor,
+    toggleDrivers,
+  } = useSessionItems();
   return (
     <>
       <div className='flex w-full gap-4'>
@@ -21,7 +28,7 @@ export const DriverFilters = ({
           size='sm'
           className='flex-1'
           variant='outline'
-          onClick={() => toggleVisibility('all')}
+          onClick={() => resetHidden()}
         >
           Select All
         </Button>
@@ -29,7 +36,7 @@ export const DriverFilters = ({
           size='sm'
           className='flex-1'
           variant='outline'
-          onClick={() => toggleVisibility('none')}
+          onClick={() => setAllHidden()}
         >
           Clear All
         </Button>
@@ -49,11 +56,11 @@ export const DriverFilters = ({
               tabIndex={0}
               className='focus-visible:border-ring focus-visible:ring-ring/50 flex cursor-pointer flex-col justify-between gap-1 rounded border p-2 py-1 outline-none focus-visible:ring-[3px]'
               style={{ borderColor: color }}
-              onClick={() => toggleVisibility('constructors', [team])}
+              onClick={() => toggleConstructor(team)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  toggleVisibility('constructors', [team]);
+                  toggleConstructor(team);
                 }
               }}
               aria-label={`Toggle ${team}`}
@@ -65,7 +72,6 @@ export const DriverFilters = ({
               <div
                 className={clsx(
                   'flex items-center gap-1',
-
                   data.constructors.find((c) => c.name === team)?.isHidden
                     ? 'opacity-50'
                     : 'opacity-100',
@@ -80,7 +86,7 @@ export const DriverFilters = ({
                 color={color as string}
                 onDriverClick={(driver, e) => {
                   e.stopPropagation();
-                  toggleVisibility('drivers', [driver]);
+                  toggleDrivers([driver]);
                 }}
                 hiddenItems={data.drivers
                   .filter((d) => (showDrivers ? d.isHidden : true))

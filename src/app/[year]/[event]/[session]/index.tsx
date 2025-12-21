@@ -15,8 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Table } from '@/components/ui/table';
 
 import { DriverFilters } from '@/app/[year]/[event]/[session]/_components/driver-filters';
+import { LapTimeContainer } from '@/app/[year]/[event]/[session]/_components/lapTimes';
 
-import LapTimeContainer from './_components/lapTimes';
 import SectorTimes from './_components/sectorTimes';
 import Stints from './_components/stints';
 

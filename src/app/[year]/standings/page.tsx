@@ -52,7 +52,6 @@ const StandingsContent = () => {
                 key={v}
                 variant={chartType === v ? 'secondary' : 'outline'}
                 asChild
-      
               >
                 <Link
                   scroll={false}

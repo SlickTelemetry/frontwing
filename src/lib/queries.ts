@@ -187,7 +187,7 @@ export const GET_SESSION_DETAILS = graphql(`
         results {
           finishing_position
         }
-        laps(order_by: { lap_time: asc }, limit: 1) {
+        fastest_lap: laps(limit: 1, order_by: { lap_time: asc }) {
           lap_time
         }
       }
@@ -376,6 +376,7 @@ export const GET_SESSION_LAP_TIMES = graphql(`
         }
         laps(order_by: { lap_number: asc }) {
           pitin_time
+          pitout_time
           lap_number
           lap_time
           compound

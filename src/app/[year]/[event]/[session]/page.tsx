@@ -8,7 +8,12 @@ import {
   QUALIFYING_SESSIONS,
 } from '@/lib/constants';
 import { GET_SESSION_DETAILS } from '@/lib/queries';
-import { eventLocationDecode, sessionDecode } from '@/lib/utils';
+import {
+  eventLocationDecode,
+  sessionDecode,
+  sortFastestLaps,
+  sortQuali,
+} from '@/lib/utils';
 
 import { EventDetails } from '@/components/event-details';
 import Breadcrumbs from '@/components/navigation/breadcrumbs';
@@ -19,7 +24,10 @@ import {
 } from '@/app/[year]/[event]/[session]';
 import { SessionItemProvider } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 
-import { Session_Name_Choices_Enum } from '@/types/graphql';
+import {
+  GetSessionDetailsQuery,
+  Session_Name_Choices_Enum,
+} from '@/types/graphql';
 
 export default function SessionPage({
   params,
@@ -43,9 +51,31 @@ export default function SessionPage({
       isPractice,
     },
   });
+  const driverSessions = data?.sessions[0]?.driver_sessions || [];
+
+  // Sorting logic
+  let sortedSessions = driverSessions;
+  if (data) {
+    if (isQualifying || isCompetition) {
+      sortedSessions = sortQuali(
+        driverSessions,
+      ) as GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
+    }
+    if (isPractice) {
+      sortedSessions = sortFastestLaps(
+        driverSessions,
+      ) as GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
+    }
+  }
+  const initialHiddenDrivers = sortedSessions
+    .slice(5)
+    .map((ds) => ds.driver?.abbreviation || '');
 
   return (
-    <SessionItemProvider sessions={data?.sessions[0].driver_sessions}>
+    <SessionItemProvider
+      sessions={sortedSessions}
+      initialHiddenDrivers={initialHiddenDrivers}
+    >
       <div className='p-4 lg:p-6'>
         {/* Content wont change after data loads */}
         <Breadcrumbs />

@@ -100,7 +100,7 @@ const EventPage = ({
       >
         <div>
           {loading && (
-            <div className='bg-muted/50 h-[175px] w-full animate-pulse rounded'></div>
+            <div className='bg-muted/50 h-43.75 w-full animate-pulse rounded'></div>
           )}
           <CircuitMap circuitData={data?.circuits[0]} className='w-full py-0' />
 
