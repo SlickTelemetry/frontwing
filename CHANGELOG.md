@@ -1,3 +1,9 @@
+## 0.10.2 (2025-12-21)
+
+### Fix
+
+- home button nav link and sidebar button to mimic styles
+
 ## 0.10.1 (2025-12-16)
 
 ### Fix
