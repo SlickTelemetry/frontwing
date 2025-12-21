@@ -13235,7 +13235,7 @@ export type GetSessionDetailsQuery = {
           __typename?: 'results';
           finishing_position?: number | null;
         }>;
-        laps: Array<{ __typename?: 'laps'; lap_time?: number | null }>;
+        fastest_lap: Array<{ __typename?: 'laps'; lap_time?: number | null }>;
       }>;
     } & {
       ' $fragmentRefs'?: {
@@ -13415,6 +13415,7 @@ export type GetSessionLapTimesQuery = {
       laps: Array<{
         __typename?: 'laps';
         pitin_time?: number | null;
+        pitout_time?: number | null;
         lap_number?: number | null;
         lap_time?: number | null;
         compound?: Tyre_Compounds_Enum | null;
@@ -19885,8 +19886,14 @@ export const GetSessionDetailsDocument = {
                       },
                       {
                         kind: 'Field',
+                        alias: { kind: 'Name', value: 'fastest_lap' },
                         name: { kind: 'Name', value: 'laps' },
                         arguments: [
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'limit' },
+                            value: { kind: 'IntValue', value: '1' },
+                          },
                           {
                             kind: 'Argument',
                             name: { kind: 'Name', value: 'order_by' },
@@ -19900,11 +19907,6 @@ export const GetSessionDetailsDocument = {
                                 },
                               ],
                             },
-                          },
-                          {
-                            kind: 'Argument',
-                            name: { kind: 'Name', value: 'limit' },
-                            value: { kind: 'IntValue', value: '1' },
                           },
                         ],
                         selectionSet: {
@@ -21748,6 +21750,10 @@ export const GetSessionLapTimesDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'pitin_time' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'pitout_time' },
                             },
                             {
                               kind: 'Field',

@@ -1,28 +1,20 @@
 import { EChartsOption } from 'echarts';
 
+import { formatLapTime } from '@/lib/utils';
+
 export const baseOptions: EChartsOption = {
-  title: {
-    text: 'Lap Times',
-    left: 'center',
-    top: 'top',
-    textStyle: {
-      color: '#fff',
-    },
-  },
+  backgroundColor: 'transparent',
   tooltip: {
     trigger: 'axis',
     axisPointer: {
       type: 'cross',
       label: {
         formatter(param) {
+          const val = param.value as string;
           if (param.axisDimension === 'y') {
-            const lapTimeMs = param.value as number;
-            const minutes = Math.floor(lapTimeMs / 60000);
-            const seconds = Math.floor((lapTimeMs % 60000) / 1000);
-            const milliseconds = lapTimeMs % 1000;
-            return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().slice(0, 3)}`;
+            return formatLapTime(val) as string;
           }
-          return param.value as string;
+          return val;
         },
       },
     },
@@ -39,33 +31,32 @@ export const baseOptions: EChartsOption = {
     left: '0%',
     right: '2%',
     bottom: '0%',
-    top: '5%',
+    top: '2%',
   },
   xAxis: {
     type: 'category',
     boundaryGap: false,
-    name: 'Raw Lap Number',
+    name: 'Lap Number',
     axisTick: { show: true, alignWithLabel: true },
     axisPointer: { type: 'shadow' },
-    splitLine: { show: true, lineStyle: { opacity: 0.25 } },
     nameLocation: 'middle',
     nameGap: 35,
     nameTextStyle: {
-      color: '#fff',
+      color: 'var(--foreground)',
       fontSize: '1rem',
     },
   },
   yAxis: {
     type: 'time',
-    name: 'Times',
+    name: 'Lap Times',
     nameTextStyle: {
-      color: '#fff',
+      color: 'var(--foreground)',
       fontSize: '1rem',
     },
     axisLine: {
       show: true,
     },
-    splitLine: { show: true, lineStyle: { opacity: 0.25 } },
+    splitLine: { show: true, lineStyle: { opacity: 0.75 } },
     min: (value) => value.min - 500,
     max: (value) => value.max + 500,
     axisTick: { show: true },

@@ -1,198 +1,131 @@
 'use client';
-import { LineChart, LineSeriesOption } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import * as echarts from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import React, { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@apollo/client/react';
+import { Info } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useState } from 'react';
+
+import { GET_SESSION_LAP_TIMES } from '@/lib/queries';
+import { eventLocationDecode, sessionDecode } from '@/lib/utils';
+
+import { Loader } from '@/components/Loader';
+import { ServerPageError } from '@/components/ServerError';
+import { Toggle } from '@/components/toggle';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+
+import { LapTimesChart } from '@/app/[year]/[event]/[session]/_components/lapTimes/chart';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
+import { Session_Name_Choices_Enum } from '@/types/graphql';
 
-echarts.use([LineChart, TooltipComponent, GridComponent, CanvasRenderer]);
+export const LapTimeContainer = () => {
+  const { year, event, session } = useParams();
+  const { loading, data, error } = useQuery(GET_SESSION_LAP_TIMES, {
+    variables: {
+      year: parseInt(year as string),
+      event: eventLocationDecode(event as string),
+      session: sessionDecode(session as string) as Session_Name_Choices_Enum,
+    },
+  });
 
-import {
-  CallbackDataParams,
-  TopLevelFormatterParams,
-} from 'echarts/types/dist/shared';
+  if (error || (!data?.sessions && !loading)) return <ServerPageError />;
 
-import { useECharts } from '@/hooks/use-EChart';
+  return (
+    <div className='grid gap-4'>
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className='border-foreground flex h-125 flex-col rounded border p-4 lg:h-[75dvh]'>
+          <LapTimeChartContainer data={data} />
+        </div>
+      )}
+    </div>
+  );
+};
 
-import { Toggle } from '@/components/toggle';
-
-import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
-import { baseOptions } from '@/app/[year]/[event]/[session]/_components/lapTimes/config';
-
-export const LapTimesChart = ({ data }: { data?: GetSessionLapTimesQuery }) => {
-  const { data: sessionData } = useSessionItems();
-  const [hideOutliers, setHideOutliers] = useState(false);
-
-  // TODO: Take this logic and return directly from hook
-  const hiddenDrivers = sessionData.drivers
-    .filter((d) => d.isHidden)
-    .map((d) => d.abbreviation);
-  // TODO:
-
-  const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstance = useECharts(chartRef);
-
-  const driverSessions = React.useMemo(() => {
-    return (
-      data?.sessions?.[0]?.driver_sessions?.filter(
-        (s) => !hiddenDrivers.includes(s?.driver?.abbreviation),
-      ) || []
-    );
-  }, [data, hiddenDrivers]);
-
-  // Create a map for driver abbreviation to constructor color
-  const driverColorMap = React.useMemo(() => {
-    const map = new Map<string, string>();
-    driverSessions.forEach((driver) => {
-      if (driver?.driver?.abbreviation) {
-        map.set(
-          driver.driver.abbreviation,
-          `#${driver.constructorByConstructorId?.color || 'cccccc'}`,
-        );
-      }
-    });
-    return map;
-  }, [driverSessions]);
-
-  const allLaps = Array.from({
-    length: data?.sessions?.[0]?.driver_sessions[0].laps.length ?? 0,
-  }).map((_, idx) => idx + 1);
-
-  const baselineLap = driverSessions
-    .find((driverSession) =>
-      driverSession?.laps?.some((lap) => lap?.lap_time !== null),
-    )
-    ?.laps?.find((lap) => lap?.lap_time !== null)?.lap_time;
-
-  useEffect(() => {
-    if (chartRef.current) {
-      const chart = echarts.init(chartRef.current);
-
-      if (baselineLap === null || baselineLap === undefined) {
-        chart.setOption({
-          title: {
-            text: 'No completed laps found to display raw',
-            left: 'center',
-            top: 'center',
-          },
-        });
-        return;
-      }
-
-      chart.setOption({
-        ...baseOptions,
-        xAxis: {
-          ...baseOptions.xAxis,
-          data: allLaps,
-        },
-        tooltip: {
-          ...baseOptions.tooltip,
-          formatter: function (params: TopLevelFormatterParams) {
-            let tooltipContent = '';
-
-            const typedParams = params as CallbackDataParams[];
-            if (
-              typedParams &&
-              typedParams.length > 0 &&
-              typedParams[0]?.value
-            ) {
-              tooltipContent = `<div class='font-bold text-white'>Lap: ${typedParams[0].name}</div>`;
-
-              typedParams
-                .sort((a, b) => {
-                  return (a.value as number[])[1] - (b.value as number[])[1];
-                })
-                .forEach((item) => {
-                  const driverAbbr = item.seriesName;
-                  const driverColor =
-                    driverColorMap.get(driverAbbr ?? '') || '#FFFFFF';
-                  if (item.value) {
-                    const lapTimeMs = (item.value as number) ?? 0;
-                    const minutes = Math.floor(lapTimeMs / 60000);
-                    const seconds = Math.floor((lapTimeMs % 60000) / 1000);
-                    const milliseconds = lapTimeMs % 1000;
-                    const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-
-                    tooltipContent += `<div><span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${driverColor};"></span><span style="color:${driverColor}">${item.seriesName}</span>: ${formattedTime}</div>`;
-                  }
-                });
-            }
-            return tooltipContent;
-          },
-        },
-      });
-
-      return () => {
-        chart.dispose();
-      };
-    }
-  }, [allLaps, baselineLap, driverColorMap]);
-
-  useEffect(() => {
-    if (!chartInstance.current) return;
-
-    const chart = echarts.init(chartRef.current);
-
-    if (driverSessions.length === 0) {
-      chart.setOption({
-        title: {
-          text: 'No completed laps found to display raw',
-          left: 'center',
-          top: 'center',
-        },
-      });
-      return;
-    }
-
-    const series = driverSessions.map((driver) => {
-      //TODO:  Halfway to 107% rule, should be based on field average not driver avg
-      const avgLapTime = driver.laps_aggregate.aggregate?.avg?.lap_time;
-      const color = `#${driver?.constructorByConstructorId?.color || 'cccccc'}`;
-      const lapData = [...driver?.laps]
-        ?.filter((lap) => !!lap?.lap_number && lap.lap_time !== null)
-        //For outliers remove pitin laps and filter based on 107% rule (but right now 107% driver avg)
-        .filter((lap) => {
-          if (!hideOutliers) return true;
-          if (lap.pitin_time) return false;
-          const outlier107 = avgLapTime ? avgLapTime * 1.07 : Infinity;
-          return (lap.lap_time ?? 0) < outlier107;
-        })
-        .map((lap) => lap.lap_time ?? 0);
-
-      return {
-        name: driver?.driver?.abbreviation,
-        type: 'line',
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          color: color,
-          cap: 'round',
-          width: 2,
-        },
-        itemStyle: {
-          color: color,
-        },
-        data: lapData,
-      } as LineSeriesOption;
-    });
-
-    chart.setOption({ series });
-  }, [chartInstance, driverSessions, hideOutliers]);
+const LapTimeChartContainer = ({
+  data,
+}: {
+  data?: GetSessionLapTimesQuery;
+}) => {
+  const [showPitIn, setShowPitIn] = useState(false);
+  const [hideOutliers, setHideOutliers] = useState<number | null>(1.1);
 
   return (
     <>
-      <div className='absolute z-10 flex w-fit items-center gap-4'>
+      <div className='z-10 flex w-full flex-wrap items-center gap-4'>
+        <h2 className='mr-auto flex-1 scroll-m-20 text-2xl font-semibold tracking-tight'>
+          Raw Lap Times
+        </h2>
         <Toggle
           id='hide-outliers'
-          toggle={() => setHideOutliers((prev) => !prev)}
-          checked={hideOutliers}
+          toggle={() => setShowPitIn((prev) => !prev)}
+          checked={showPitIn}
         >
-          Hide outlier
+          Show Pit Laps
         </Toggle>
+        <Separator
+          orientation='vertical'
+          className='data-[orientation=vertical]:h-4'
+        />
+        <div className='flex items-center gap-2'>
+          <Select
+            value={hideOutliers ? (hideOutliers * 100).toFixed(0) : 'all'}
+            onValueChange={(value) =>
+              setHideOutliers(value === 'all' ? null : parseInt(value) / 100)
+            }
+          >
+            <SelectTrigger id='outlier-select-trigger' className='w-30'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value='all'>Show All</SelectItem>
+                <SelectItem value='110'>110%</SelectItem>
+                <SelectItem value='125'>125%</SelectItem>
+                <SelectItem value='150'>150%</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Label
+            htmlFor='outlier-select-trigger'
+            className='flex items-center gap-2'
+          >
+            Hide Outliers
+            <Popover>
+              <PopoverTrigger>
+                <Info className='size-4' />
+              </PopoverTrigger>
+              <PopoverContent>
+                Outliers are lap times greater than the selected percentage of
+                the session's average lap time.
+                <br />
+                <span className='font-mono text-xs'>
+                  laptime &gt; avg time * 1.10 = outlier
+                </span>
+              </PopoverContent>
+            </Popover>
+          </Label>
+        </div>
       </div>
-      <div ref={chartRef} style={{ width: '100%', height: '100%' }} />
+      <LapTimesChart
+        data={data}
+        showPitIn={showPitIn}
+        hideOutliers={hideOutliers}
+      />
     </>
   );
 };

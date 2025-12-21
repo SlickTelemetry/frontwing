@@ -2,8 +2,10 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from 'react';
 
 import { visibilityReducer } from '@/app/[year]/[event]/[session]/_components/driver-filters/reducer';
@@ -22,10 +24,13 @@ type SessionItemContextValue = {
     }[];
   };
   constructorDriversMap: Map<string, string[]>;
-  toggleVisibility: (
-    type: 'drivers' | 'constructors' | 'all' | 'none',
-    ids?: string[],
-  ) => void;
+  // New explicit APIs
+  setHidden: (ids: string[], value: boolean) => void;
+  resetHidden: () => void;
+  setAllHidden: () => void;
+  toggleConstructor: (team: string) => void;
+  toggleDrivers: (ids: string[]) => void;
+  hiddenDrivers: string[];
 };
 
 const SessionItemContext = createContext<SessionItemContextValue | null>(null);
@@ -41,10 +46,15 @@ export function useSessionItems() {
 export function SessionItemProvider({
   children,
   sessions,
+  initialHiddenDrivers,
 }: {
   children: React.ReactNode;
   sessions?: GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
+  initialHiddenDrivers?: string[];
 }) {
+  const [hiddenItems, dispatch] = useReducer(visibilityReducer, {});
+  const initAppliedRef = useRef(false);
+
   const {
     memoizedDrivers,
     memoizedConstructors,
@@ -109,33 +119,48 @@ export function SessionItemProvider({
     };
   }, [sessions]);
 
-  const [hiddenItems, dispatch] = useReducer(visibilityReducer, {});
+  // Reset the init flag whenever sessions change so a new session may be initialized
+  useEffect(() => {
+    initAppliedRef.current = false;
+  }, [sessions]);
 
-  const toggleVisibility = useCallback(
-    (type: 'drivers' | 'constructors' | 'all' | 'none', ids?: string[]) => {
-      dispatch({
-        type: 'TOGGLE_VISIBILITY',
-        payload: {
-          type,
-          ids,
-          // Pass the memoized data structures needed for calculation
-          data: {
-            memoizedDrivers,
-            memoizedConstructors,
-            driverLookupMap,
-            constructorDriversMap,
-          },
-        },
-      });
+  const setHidden = useCallback((ids: string[], value: boolean) => {
+    dispatch({ type: 'SET_HIDDEN', payload: { ids, value } });
+  }, []);
+
+  const resetHidden = useCallback(() => {
+    dispatch({ type: 'RESET' });
+  }, []);
+
+  const setAllHidden = useCallback(() => {
+    const allIds = [
+      ...Object.keys(driverLookupMap),
+      ...memoizedConstructors.map((c) => c.name ?? ''),
+    ];
+    dispatch({ type: 'SET_HIDDEN', payload: { ids: allIds, value: true } });
+  }, [driverLookupMap, memoizedConstructors]);
+
+  const toggleConstructor = useCallback(
+    (team: string) => {
+      const isHidden = !!hiddenItems[team];
+      const drivers = constructorDriversMap.get(team) ?? [];
+      setHidden([team, ...drivers], !isHidden);
     },
-    // Dependencies: dispatch is stable. The maps are stable unless `standings` changes.
-    // Including them here ensures the function passed into dispatch has the latest data references.
-    [
-      memoizedDrivers,
-      memoizedConstructors,
-      driverLookupMap,
-      constructorDriversMap,
-    ],
+    [constructorDriversMap, hiddenItems, setHidden],
+  );
+
+  const toggleDrivers = useCallback(
+    (ids: string[]) => {
+      const toHide: string[] = [];
+      const toShow: string[] = [];
+      ids.forEach((id) => {
+        if (hiddenItems[id]) toShow.push(id);
+        else toHide.push(id);
+      });
+      if (toHide.length) setHidden(toHide, true);
+      if (toShow.length) setHidden(toShow, false);
+    },
+    [hiddenItems, setHidden],
   );
 
   const data = useMemo(() => {
@@ -157,12 +182,41 @@ export function SessionItemProvider({
     };
   }, [memoizedDrivers, memoizedConstructors, hiddenItems]); // Depends on base data and visibility state
 
+  const hiddenDrivers = data.drivers
+    .filter((d) => d.isHidden)
+    .map((d) => d.abbreviation ?? '');
+
+  // Apply initial hidden drivers only once when provider initializes or
+  // when we first receive a non-empty `initialHiddenDrivers` value for this session.
+  useEffect(() => {
+    // Only apply once per session load
+    if (initAppliedRef.current) return;
+
+    // Don't apply if we don't have any drivers yet or there is nothing to apply
+    if (!initialHiddenDrivers || initialHiddenDrivers.length === 0) return;
+    if (!memoizedDrivers || memoizedDrivers.length === 0) return;
+
+    // Apply initial hidden drivers (idempotent SET_HIDDEN)
+    dispatch({
+      type: 'SET_HIDDEN',
+      payload: { ids: initialHiddenDrivers, value: true },
+    });
+    initAppliedRef.current = true;
+  }, [initialHiddenDrivers, memoizedDrivers]);
+
   return (
     <SessionItemContext.Provider
       value={{
-        toggleVisibility,
+        // Data
         constructorDriversMap,
         data,
+        hiddenDrivers,
+        // Actions
+        setHidden,
+        resetHidden,
+        setAllHidden,
+        toggleConstructor,
+        toggleDrivers,
       }}
     >
       {children}

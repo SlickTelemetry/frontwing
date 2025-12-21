@@ -85,10 +85,7 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
   processedData,
   maxLaps,
 }) => {
-  const { data: sessionData } = useSessionItems();
-  const hiddenDrivers = sessionData.drivers
-    .filter((d) => d.isHidden)
-    .map((d) => d.abbreviation);
+  const { hiddenDrivers } = useSessionItems();
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
