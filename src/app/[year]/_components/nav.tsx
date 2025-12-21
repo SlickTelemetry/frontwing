@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
@@ -30,18 +29,17 @@ export function Nav() {
             className='mx-2 data-[orientation=vertical]:h-4'
           />
           <NavigationMenuItem>
-            <NavigationMenuLink asChild>
+            <Button
+              data-slot='navigation-home-button'
+              variant='ghost'
+              className='size-7'
+              asChild
+            >
               <Link href='/'>
-                <Button
-                  data-slot='navigation-home-button'
-                  variant='ghost'
-                  className='size-7'
-                >
-                  <House className='stroke-foreground' />
-                  <span className='sr-only'>Return home</span>
-                </Button>
+                <House className='stroke-foreground' />
+                <span className='sr-only'>Return home</span>
               </Link>
-            </NavigationMenuLink>
+            </Button>
           </NavigationMenuItem>
           <Separator
             orientation='vertical'

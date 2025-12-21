@@ -152,7 +152,7 @@ export function SidebarHoverTrigger({
       data-slot='sidebar-trigger'
       variant='ghost'
       size='icon'
-      className={cn('size-7', className)}
+      className={cn('size-7 hover:cursor-pointer', className)}
       onClick={handleClick}
       onMouseEnter={(e) => {
         props.onMouseEnter?.(e);
