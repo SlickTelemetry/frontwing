@@ -50,6 +50,7 @@ export default function SessionPage({
       isQualifying,
       isPractice,
     },
+    notifyOnNetworkStatusChange: false,
   });
   const driverSessions = data?.sessions[0]?.driver_sessions || [];
 
