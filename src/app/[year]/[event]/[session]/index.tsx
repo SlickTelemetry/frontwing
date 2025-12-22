@@ -177,7 +177,7 @@ export const ChartViewController = ({
       </div>
 
       <div className='relative flex gap-8'>
-        <div className='sticky top-20 grid h-fit w-1/4 max-w-[250px] gap-2'>
+        <div className='sticky top-20 grid h-fit w-1/4 max-w-62.5 gap-2'>
           <DriverFilters />
         </div>
         <div className='flex-1'>

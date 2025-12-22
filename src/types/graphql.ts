@@ -13371,6 +13371,7 @@ export type GetSessionStintsQuery = {
       } | null;
       laps: Array<{
         __typename?: 'laps';
+        lap_number?: number | null;
         stint?: number | null;
         tyre_life?: number | null;
         fresh_tyre?: boolean | null;
@@ -21478,6 +21479,10 @@ export const GetSessionStintsDocument = {
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_number' },
+                            },
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'stint' },
