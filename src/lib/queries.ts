@@ -332,6 +332,7 @@ export const GET_SESSION_STINTS = gql`
           full_name
         }
         laps {
+          lap_number
           stint
           tyre_compound {
             value

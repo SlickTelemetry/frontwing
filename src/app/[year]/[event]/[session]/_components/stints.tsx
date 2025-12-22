@@ -1,12 +1,15 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
 import * as echarts from 'echarts';
+import { EChartsOption } from 'echarts';
+import { CallbackDataParams } from 'echarts/types/dist/shared';
 import { useParams } from 'next/navigation';
 import { useMemo } from 'react';
 import React, { useEffect, useRef } from 'react';
 
 import { GET_SESSION_STINTS } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
+import { useECharts } from '@/hooks/use-EChart';
 
 import { Loader } from '@/components/Loader';
 import { ServerPageError } from '@/components/ServerError';
@@ -37,24 +40,24 @@ type ProcessedDriverStints = {
 };
 
 interface StintsEchartsChartProps {
+  driverSessions: GetSessionStintsQuery['sessions'][0]['driver_sessions'];
   processedData: ProcessedDriverStints[] | undefined;
   maxLaps: number;
 }
 
 // Define a type for the custom data you want to attach to each bar
 interface CustomBarDataItem {
-  value: number | null;
+  value: [number | null, string];
   originalStartLap: number;
   originalEndLap: number;
   tyreCompound: string;
   freshTyre: boolean;
-  driver: string;
   itemStyle?: {
     decal?: {
       symbol: string;
       symbolSize: number;
       rotation: number;
-      symbolKeepAspect: boolean;
+      symbolKeepAspect?: boolean;
       color: string;
       dashArrayX: number[];
       dashArrayY: number[];
@@ -82,32 +85,31 @@ const tyreCompoundColors: Record<string, string> = {
 };
 
 const StintsChart: React.FC<StintsEchartsChartProps> = ({
+  driverSessions,
   processedData,
   maxLaps,
 }) => {
   const { hiddenDrivers } = useSessionItems();
   const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useECharts(chartRef);
 
   useEffect(() => {
-    let myChart: echarts.ECharts | undefined;
-    if (chartRef.current) {
-      myChart = echarts.init(chartRef.current);
-
+    if (chartInstance.current) {
       if (!processedData || processedData.length === 0) {
-        myChart.setOption({});
+        chartInstance.current.setOption({});
         return;
       }
+
+      // Determine the maximum stint number across all drivers
+      const maxStintNumber = processedData.reduce((max, driverData) => {
+        return Math.max(max, ...driverData.stints.map((s) => s.stint));
+      }, 0);
 
       const drivers = processedData
         .filter((d) => !hiddenDrivers.includes(d.driver))
         .map((d) => d.driver);
 
       const series: echarts.SeriesOption[] = [];
-
-      // Determine the maximum stint number across all drivers
-      const maxStintNumber = processedData.reduce((max, driverData) => {
-        return Math.max(max, ...driverData.stints.map((s) => s.stint));
-      }, 0);
 
       for (let i = 1; i <= maxStintNumber; i++) {
         const stintNumber = i;
@@ -116,16 +118,14 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
         drivers.forEach((driverName) => {
           const driverData = processedData.find((d) => d.driver === driverName);
           const stint = driverData?.stints.find((s) => s.stint === stintNumber);
-
           if (stint) {
             const duration = stint.endLap - stint.startLap + 1;
             stintDataForSeries.push({
-              value: duration,
-              originalStartLap: stint.startLap,
-              originalEndLap: stint.endLap,
+              value: [duration, driverName],
               tyreCompound: stint.tyreCompound,
               freshTyre: stint.freshTyre,
-              driver: driverName,
+              originalStartLap: stint.startLap,
+              originalEndLap: stint.endLap,
               itemStyle: {
                 decal: stint.freshTyre
                   ? undefined
@@ -138,27 +138,7 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
                       rotation: -Math.PI / 4,
                     },
               },
-            } as CustomBarDataItem);
-          } else {
-            // Push a placeholder for drivers without this specific stint
-            stintDataForSeries.push({
-              value: null,
-              originalStartLap: 0,
-              originalEndLap: 0,
-              tyreCompound: 'UNKNOWN',
-              freshTyre: false,
-              driver: driverName,
-              itemStyle: {
-                decal: {
-                  symbol: 'rect',
-                  symbolSize: 1,
-                  color: 'rgba(0,0,0,0.2)',
-                  dashArrayX: [1, 0],
-                  dashArrayY: [2, 5],
-                  rotation: -Math.PI / 4,
-                },
-              },
-            } as CustomBarDataItem);
+            });
           }
         });
 
@@ -166,15 +146,18 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
           name: `stint ${stintNumber}`,
           type: 'bar',
           stack: 'total', // Stack all stints for a driver together
+          emphasis: {
+            disabled: true,
+          },
           label: {
             show: true,
-            formatter: '{c}', // Display the value (lap count)
+            formatter: ({ value }) =>
+              value ? (value as [number, string])[0].toString() : '', // Display the value (lap count),
             position: 'inside', // Position label inside the bar
             color: '#000', // Set label color for visibility
           },
           itemStyle: {
-            // eslint-disable-next-line
-            color: function (params: any) {
+            color: (params) => {
               const data = params.data as CustomBarDataItem;
               const compoundKey = `${data.tyreCompound.toUpperCase()}_${
                 data.freshTyre ? 'NEW' : 'OLD'
@@ -186,19 +169,17 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
             },
           },
           data: stintDataForSeries,
-          yAxisIndex: 0,
-          xAxisIndex: 0,
+          // yAxisIndex: 0,
+          // xAxisIndex: 0,
         });
       }
 
-      const option: echarts.EChartsOption = {
+      const option: EChartsOption = {
+        backgroundColor: 'transparent',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         tooltip: {
           trigger: 'axis', // Change trigger to axis for stacked bars
-          axisPointer: {
-            type: 'shadow',
-          },
           backgroundColor: 'rgba(0, 0, 0, 1)', // Dark background
           borderColor: '#60A5FA', // Light blue border
           borderWidth: 1,
@@ -206,8 +187,19 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
           textStyle: {
             color: '#E2E8F0', // Light grey text
           },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          formatter: function (params: any[]) {
+          axisPointer: {
+            type: 'cross',
+            label: {
+              formatter(param) {
+                const val = param.value as number;
+                if (param.axisDimension === 'x') {
+                  return Math.floor(val);
+                }
+                return val;
+              },
+            },
+          },
+          formatter: function (params: CallbackDataParams[]) {
             let tooltipContent = '';
             // Sort params to ensure "stint 1", "stint 2", etc.
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -218,8 +210,8 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
             });
 
             if (params.length > 0) {
-              const driverName = (params[0].data as CustomBarDataItem).driver;
-              tooltipContent += `<b>Driver: ${driverName}</b><br/><br/>`;
+              const driverName = (params[0].data as CustomBarDataItem).value[1];
+              tooltipContent += `<p style="font-weight: bold;">Driver: ${driverName}</p>`;
             }
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,7 +221,7 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
                 param.seriesName.replace('stint ', ''),
               );
               // Only show tooltip if there is actual data for the stint
-              if (data.value === 0 || data.value === null) return;
+              if (data.value[0] === 0 || data.value === null) return;
 
               const tyreColor =
                 tyreCompoundColors[
@@ -239,8 +231,8 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
                 ] || tyreCompoundColors.UNKNOWN_NEW;
 
               tooltipContent += `
-                <div style="margin-bottom: 10px;">
-                  <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${tyreColor}; margin-right: 8px;"></span>
+                <div>
+                  <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${tyreColor};"></span>
                   Stint ${stintNumber}: Laps ${data.originalStartLap} - ${data.originalEndLap}<br/>
                   Tyre: ${data.tyreCompound} ${data.freshTyre ? '(Fresh)' : '(Used)'}
                 </div>
@@ -250,27 +242,21 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
           },
         },
         grid: {
-          left: '3%',
-          right: '1%',
-          bottom: '8%',
-          top: '5%',
-          containLabel: true,
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
         },
         xAxis: {
           type: 'value',
+          // data: Array.from({ length: maxLaps }, (_, i) => i + 1),
           name: 'Lap Number',
-          max: maxLaps,
           nameLocation: 'middle',
           nameGap: 25,
         },
         yAxis: {
           type: 'category',
           data: drivers,
-          axisLabel: {
-            interval: 0,
-            rotate: 0,
-            margin: 8,
-          },
           name: 'Driver',
           nameLocation: 'middle',
           nameGap: 40,
@@ -278,15 +264,9 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
         series: series,
       };
 
-      myChart.setOption(option);
+      chartInstance.current.setOption(option);
     }
-
-    return () => {
-      if (myChart) {
-        myChart.dispose();
-      }
-    };
-  }, [processedData, maxLaps, hiddenDrivers]);
+  }, [processedData, maxLaps, hiddenDrivers, chartInstance, driverSessions]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };
@@ -356,9 +336,13 @@ const Stints = () => {
 
   return (
     <>
-      <div className='h-[600px] rounded border p-2'>
+      <div className='h-150 rounded border p-2'>
         <h3 className='text-center text-lg font-semibold'>Tyre Analysis</h3>
-        <StintsChart processedData={processedData} maxLaps={maxLaps} />
+        <StintsChart
+          driverSessions={sessionData?.sessions[0]?.driver_sessions || []}
+          processedData={processedData}
+          maxLaps={maxLaps}
+        />
       </div>
     </>
   );
