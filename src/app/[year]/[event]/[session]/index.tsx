@@ -31,6 +31,7 @@ const SessionDetails = graphql(`
   fragment SessionDetails on sessions {
     name
     total_laps
+    scheduled_start_time
     scheduled_start_time_utc
   }
 `);
@@ -56,8 +57,25 @@ export const SessionHeader = ({
       <h1 className='scroll-m-20 px-4 py-3 text-center text-4xl font-extrabold tracking-tight text-balance'>
         {name?.replace(/_/g, ' ')}
       </h1>
-      <div className='bg-secondary text-secondary-foreground flex flex-wrap justify-center gap-x-8 px-4 py-2'>
+      <div className='bg-secondary text-secondary-foreground flex flex-col gap-1 px-4 py-2'>
+        {/* <p>
+          Track Time:{' '}
+          {new Date(
+            session?.scheduled_start_time?.slice(0, -6) ?? '',
+          ).toLocaleDateString(undefined, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </p> */}
+        {name && COMPETITION_SESSIONS.includes(name) && (
+          <p>Laps: {session?.total_laps}</p>
+        )}
         <p>
+          Local:{' '}
           {new Date(session?.scheduled_start_time_utc ?? '').toLocaleDateString(
             undefined,
             {
@@ -70,9 +88,6 @@ export const SessionHeader = ({
             },
           )}
         </p>
-        {name && COMPETITION_SESSIONS.includes(name) && (
-          <p className='font-semibold'>Laps: {session?.total_laps}</p>
-        )}
       </div>
     </div>
   );

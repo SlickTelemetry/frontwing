@@ -12583,6 +12583,7 @@ export type SessionDetailsFragment = {
   __typename?: 'sessions';
   name?: Session_Name_Choices_Enum | null;
   total_laps?: number | null;
+  scheduled_start_time?: string | null;
   scheduled_start_time_utc?: string | null;
 } & { ' $fragmentName'?: 'SessionDetailsFragment' };
 
@@ -13440,6 +13441,10 @@ export const SessionDetailsFragmentDoc = {
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'name' } },
           { kind: 'Field', name: { kind: 'Name', value: 'total_laps' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'scheduled_start_time' },
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'scheduled_start_time_utc' },
@@ -20090,6 +20095,10 @@ export const GetSessionDetailsDocument = {
         selections: [
           { kind: 'Field', name: { kind: 'Name', value: 'name' } },
           { kind: 'Field', name: { kind: 'Name', value: 'total_laps' } },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'scheduled_start_time' },
+          },
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'scheduled_start_time_utc' },

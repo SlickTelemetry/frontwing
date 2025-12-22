@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-  '\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time_utc\n  }\n': typeof types.SessionDetailsFragmentDoc;
+  '\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time\n    scheduled_start_time_utc\n  }\n': typeof types.SessionDetailsFragmentDoc;
   '\n  fragment EventWinners on drivers {\n    driver_sessions(\n      where: {\n        session: { event: { name: { _eq: $event } }, name: { _eq: Race } }\n        results: { classified_position: { _eq: "1" } }\n      }\n    ) {\n      constructorByConstructorId {\n        name\n        color\n      }\n    }\n    full_name\n    year\n  }\n': typeof types.EventWinnersFragmentDoc;
   '\n  fragment FIADocs on fia_documents {\n    title\n    url\n    publish_time\n  }\n': typeof types.FiaDocsFragmentDoc;
   '\n  fragment EventSessionCards on schedule {\n    session1\n    session1_date\n    session2\n    session2_date\n    session3\n    session3_date\n    session4\n    session4_date\n    session5\n    session5_date\n  }\n': typeof types.EventSessionCardsFragmentDoc;
@@ -51,7 +51,7 @@ type Documents = {
   '\n  query GetSessionLapTimes(\n    $year: Int!\n    $event: String!\n    $session: session_name_choices_enum!\n  ) @cached {\n    sessions(\n      limit: 1\n      where: {\n        event: { year: { _eq: $year }, name: { _eq: $event } }\n        name: { _eq: $session }\n      }\n    ) {\n      driver_sessions {\n        constructorByConstructorId {\n          name\n          color\n        }\n        driver {\n          abbreviation\n          full_name\n          number\n        }\n        laps_aggregate {\n          aggregate {\n            avg {\n              lap_time\n            }\n          }\n        }\n        laps(order_by: { lap_number: asc }) {\n          pitin_time\n          pitout_time\n          lap_number\n          lap_time\n          compound\n          session_time\n        }\n      }\n    }\n  }\n': typeof types.GetSessionLapTimesDocument;
 };
 const documents: Documents = {
-  '\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time_utc\n  }\n':
+  '\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time\n    scheduled_start_time_utc\n  }\n':
     types.SessionDetailsFragmentDoc,
   '\n  fragment EventWinners on drivers {\n    driver_sessions(\n      where: {\n        session: { event: { name: { _eq: $event } }, name: { _eq: Race } }\n        results: { classified_position: { _eq: "1" } }\n      }\n    ) {\n      constructorByConstructorId {\n        name\n        color\n      }\n    }\n    full_name\n    year\n  }\n':
     types.EventWinnersFragmentDoc,
@@ -141,8 +141,8 @@ export function graphql(source: string): unknown;
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: '\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time_utc\n  }\n',
-): (typeof documents)['\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time_utc\n  }\n'];
+  source: '\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time\n    scheduled_start_time_utc\n  }\n',
+): (typeof documents)['\n  fragment SessionDetails on sessions {\n    name\n    total_laps\n    scheduled_start_time\n    scheduled_start_time_utc\n  }\n'];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
