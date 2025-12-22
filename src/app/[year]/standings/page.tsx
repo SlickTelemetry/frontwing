@@ -33,11 +33,11 @@ const StandingsContent = () => {
 
   return (
     <HiddenItemProvider standings={standings}>
-      <div className='grid gap-4 p-4 lg:px-6 2xl:grid-cols-2'>
+      <div className='grid gap-4 p-4 lg:px-6 2xl:grid-cols-5'>
         <div className='col-span-full'>
           <Breadcrumbs />
         </div>
-        <div className='h-fit 2xl:order-2'>
+        <div className='h-fit 2xl:order-2 2xl:col-span-3'>
           <div className='rounded border'>
             <div className='bg-secondary/25 rounded border-b'>
               <StandingsChart events={standings.events} type={chartType} />
