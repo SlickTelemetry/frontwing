@@ -146,14 +146,13 @@ export const ChartViewController = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const chart = (searchParams.get('chart') || 'grid') as ChartKey;
+  const activeChart = (searchParams.get('chart') || 'grid') as ChartKey;
+
   const chargeChart = (tab: 'grid' | 'sectors' | 'laps' | 'stints') => {
     const params = new URLSearchParams(searchParams);
     params.set('chart', tab);
-    router.replace(`?${params.toString()}`);
+    router.push(`?${params.toString()}`, { scroll: false });
   };
-
-  // Make some sort of component w hook for the legend
 
   return (
     <>
@@ -165,7 +164,7 @@ export const ChartViewController = ({
               chargeChart(tab as 'grid' | 'sectors' | 'laps' | 'stints')
             }
             className='inline h-full cursor-pointer text-left'
-            variant={tab === chart ? 'default' : 'outline'}
+            variant={tab === activeChart ? 'default' : 'outline'}
             disabled={!ChartConfigs[tab].component}
           >
             <p className='font-semibold'>{ChartConfigs[tab].title}</p>
@@ -182,7 +181,7 @@ export const ChartViewController = ({
         </div>
         <div className='flex-1'>
           {/* TODO: Refactor for multiple charts that will have to use partial fragment data */}
-          {data && ChartConfigs[chart] && chart === 'grid' ? (
+          {data && ChartConfigs[activeChart] && activeChart === 'grid' ? (
             <Table>
               {sessionType.isCompetition && (
                 <CompetitionResults session={data.sessions} />
@@ -195,7 +194,7 @@ export const ChartViewController = ({
               )}
             </Table>
           ) : (
-            <>{ChartConfigs[chart]?.component}</>
+            <>{ChartConfigs[activeChart]?.component}</>
           )}
         </div>
       </div>
