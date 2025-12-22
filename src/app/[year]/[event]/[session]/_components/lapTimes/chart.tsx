@@ -1,13 +1,23 @@
 'use client';
 import { LineChart, LineSeriesOption } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
+import {
+  DataZoomComponent,
+  GridComponent,
+  TooltipComponent,
+} from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useEffect, useRef } from 'react';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
 
-echarts.use([LineChart, TooltipComponent, GridComponent, CanvasRenderer]);
+echarts.use([
+  LineChart,
+  DataZoomComponent,
+  TooltipComponent,
+  GridComponent,
+  CanvasRenderer,
+]);
 
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
@@ -57,7 +67,7 @@ export const LapTimesChart = ({
         params
           .filter((item) => item.value[1] !== null)
           .sort((a, b) => {
-            return (a.value[1] ?? 0) - (b.value[1] ?? 0);
+            return (b.value[1] ?? 0) - (a.value[1] ?? 0);
           })
           .forEach((item) => {
             const [_lapNum, lapTime, tyre] = item.value as [

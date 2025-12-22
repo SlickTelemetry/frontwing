@@ -4,6 +4,17 @@ import { formatLapTime } from '@/lib/utils';
 
 export const baseOptions: EChartsOption = {
   backgroundColor: 'transparent',
+  color: 'var(--foreground)',
+  dataZoom: [
+    {
+      type: 'slider',
+      xAxisIndex: 0,
+      start: 0,
+      end: 100,
+      bottom: 10,
+      handleSize: '120%',
+    },
+  ],
   tooltip: {
     trigger: 'axis',
     axisPointer: {
@@ -28,10 +39,10 @@ export const baseOptions: EChartsOption = {
     },
   },
   grid: {
-    left: '0%',
-    right: '2%',
-    bottom: '0%',
-    top: '2%',
+    bottom: 100,
+    left: 0,
+    right: 0,
+    top: 0,
   },
   xAxis: {
     type: 'category',
@@ -50,7 +61,6 @@ export const baseOptions: EChartsOption = {
     type: 'time',
     name: 'Lap Times',
     nameTextStyle: {
-      color: 'var(--foreground)',
       fontSize: '1rem',
     },
     axisLine: {

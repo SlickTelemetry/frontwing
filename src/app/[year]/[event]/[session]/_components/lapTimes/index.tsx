@@ -48,7 +48,7 @@ export const LapTimeContainer = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className='border-foreground flex h-125 flex-col rounded border p-4 lg:h-[75dvh]'>
+        <div className='border-foreground flex h-125 flex-col rounded border p-4 lg:h-[80dvh]'>
           <LapTimeChartContainer data={data} />
         </div>
       )}
@@ -66,7 +66,7 @@ const LapTimeChartContainer = ({
 
   return (
     <>
-      <div className='z-10 flex w-full flex-wrap items-center gap-4'>
+      <div className='z-10 flex w-full flex-wrap items-center gap-4 pb-4'>
         <h2 className='mr-auto flex-1 scroll-m-20 text-2xl font-semibold tracking-tight'>
           Raw Lap Times
         </h2>
