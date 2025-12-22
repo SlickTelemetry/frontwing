@@ -46,7 +46,7 @@
     "lodash.debounce": "latest",
     "lucide-react": "latest",
     "mapbox-gl": "latest",
-    "next": "latest",
+    "next": "15.5.8",
     "posthog-js": "latest",
     "posthog-node": "latest",
     "react": "latest",
