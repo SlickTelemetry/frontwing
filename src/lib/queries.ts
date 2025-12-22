@@ -313,7 +313,7 @@ export const GET_SESSION_FASTEST_TIMES = gql`
   }
 `;
 
-export const GET_SESSION_STINTS = gql`
+export const GET_SESSION_STINTS = graphql(`
   query GetSessionStints(
     $year: Int!
     $event: String!
@@ -327,6 +327,10 @@ export const GET_SESSION_STINTS = gql`
       }
     ) {
       driver_sessions {
+        constructorByConstructorId {
+          name
+          color
+        }
         driver {
           abbreviation
           full_name
@@ -343,7 +347,7 @@ export const GET_SESSION_STINTS = gql`
       }
     }
   }
-`;
+`);
 
 export const GET_SESSION_LAP_TIMES = graphql(`
   query GetSessionLapTimes(

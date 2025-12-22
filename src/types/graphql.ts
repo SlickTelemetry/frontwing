@@ -13364,6 +13364,11 @@ export type GetSessionStintsQuery = {
     __typename?: 'sessions';
     driver_sessions: Array<{
       __typename?: 'driver_sessions';
+      constructorByConstructorId?: {
+        __typename?: 'constructors';
+        name?: string | null;
+        color?: string | null;
+      } | null;
       driver?: {
         __typename?: 'drivers';
         abbreviation?: string | null;
@@ -21456,6 +21461,26 @@ export const GetSessionStintsDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      {
+                        kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'constructorByConstructorId',
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'color' },
+                            },
+                          ],
+                        },
+                      },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'driver' },

@@ -1,11 +1,8 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
 import * as echarts from 'echarts';
-import { EChartsOption } from 'echarts';
-import { CallbackDataParams } from 'echarts/types/dist/shared';
 import { useParams } from 'next/navigation';
-import { useMemo } from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { GET_SESSION_STINTS } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
@@ -15,39 +12,23 @@ import { Loader } from '@/components/Loader';
 import { ServerPageError } from '@/components/ServerError';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
+import { baseOptions } from '@/app/[year]/[event]/[session]/_components/stints/config';
 
 import {
   GetSessionStintsQuery,
-  GetSessionStintsQueryVariables,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
 
-type Stint = {
-  stint: number;
-  startLap: number;
-  endLap: number;
-  tyreLife: number;
-  tyreCompound: string;
-  freshTyre: boolean;
-  driver: string;
-};
-type StintMap = Record<number, Stint>;
-
-type ProcessedDriverStints = {
-  driver: string;
-  totalLaps: number;
-  stints: Stint[];
-};
-
 interface StintsEchartsChartProps {
-  driverSessions: GetSessionStintsQuery['sessions'][0]['driver_sessions'];
-  processedData: ProcessedDriverStints[] | undefined;
-  maxLaps: number;
+  driverSessions: GetSessionStintsQuery['sessions'][number]['driver_sessions'];
 }
 
 // Define a type for the custom data you want to attach to each bar
 interface CustomBarDataItem {
   value: [number | null, string];
+  stint: number;
+  constructor: string;
+  color: string | null;
   originalStartLap: number;
   originalEndLap: number;
   tyreCompound: string;
@@ -65,6 +46,7 @@ interface CustomBarDataItem {
   };
 }
 
+// TODO: Migrate to constants
 const tyreCompoundColors: Record<string, string> = {
   SOFT_NEW: 'hsl(6 78% 63%)',
   SOFT_OLD: 'hsl(6 79% 48%)',
@@ -84,79 +66,166 @@ const tyreCompoundColors: Record<string, string> = {
   UNKNOWN_OLD: 'hsl(282 39% 45%)',
 };
 
-const StintsChart: React.FC<StintsEchartsChartProps> = ({
-  driverSessions,
-  processedData,
-  maxLaps,
-}) => {
+// TODO: Migrate to separate file
+const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
   const { hiddenDrivers } = useSessionItems();
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(chartRef);
 
+  const setNoDataState = useCallback(() => {
+    if (!chartInstance.current) return;
+    chartInstance.current.setOption(
+      {
+        title: { text: 'No completed laps found to display' },
+        series: [],
+      },
+      { replaceMerge: ['series'] },
+    );
+  }, [chartInstance]);
+
+  const formatter = (params: {
+    seriesName: string;
+    data: CustomBarDataItem;
+    value: [number, string];
+  }) => {
+    let tooltipContent = '';
+
+    if (params) {
+      const driverName = (params.data as CustomBarDataItem).value[1];
+      tooltipContent += `<p style="font-weight: bold;">${driverName} ${params.data.color && `<span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${params.data.color};"></span>`} ${params.data.constructor}</p>`;
+    }
+    // console.log('params for tooltip:', params);
+
+    // params.forEach((param: any) => {
+    const data = params.data as CustomBarDataItem;
+    const stintNumber = parseInt(params.seriesName.replace('stint ', ''));
+    // Only show tooltip if there is actual data for the stint
+    if (data.value[0] === 0 || data.value === null) return;
+
+    const tyreColor =
+      tyreCompoundColors[
+        `${data.tyreCompound.toUpperCase()}_${data.freshTyre ? 'NEW' : 'OLD'}`
+      ] || tyreCompoundColors.UNKNOWN_NEW;
+
+    tooltipContent += `
+                <div>
+                  
+                  Stint ${stintNumber}: ${data.originalStartLap} - ${data.originalEndLap}<br/>
+                  <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${tyreColor};"></span> ${data.tyreCompound} ${data.freshTyre ? '(Fresh)' : '(Used)'}
+                </div>
+              `;
+    // });
+    return tooltipContent;
+  };
+
+  // Initialize base options and tooltip
   useEffect(() => {
-    if (chartInstance.current) {
-      if (!processedData || processedData.length === 0) {
-        chartInstance.current.setOption({});
-        return;
-      }
+    if (!chartInstance.current) return;
 
-      // Determine the maximum stint number across all drivers
-      const maxStintNumber = processedData.reduce((max, driverData) => {
-        return Math.max(max, ...driverData.stints.map((s) => s.stint));
-      }, 0);
+    chartInstance.current.setOption({
+      ...baseOptions,
+      tooltip: { ...baseOptions.tooltip, formatter },
+    });
+  }, [chartInstance]);
 
-      const drivers = processedData
-        .filter((d) => !hiddenDrivers.includes(d.driver))
-        .map((d) => d.driver);
+  useEffect(() => {
+    if (!chartInstance.current) return;
 
-      const series: echarts.SeriesOption[] = [];
+    // Handle no data
+    if (driverSessions.length <= 0) {
+      setNoDataState();
+      return;
+    }
 
-      for (let i = 1; i <= maxStintNumber; i++) {
-        const stintNumber = i;
-        const stintDataForSeries: CustomBarDataItem[] = [];
+    const series: echarts.SeriesOption[] = [];
+    const driversSet = new Set<string>(); // To collect unique driver names
+    let maxStintNumber = 0;
 
-        drivers.forEach((driverName) => {
-          const driverData = processedData.find((d) => d.driver === driverName);
-          const stint = driverData?.stints.find((s) => s.stint === stintNumber);
-          if (stint) {
-            const duration = stint.endLap - stint.startLap + 1;
-            stintDataForSeries.push({
-              value: [duration, driverName],
-              tyreCompound: stint.tyreCompound,
-              freshTyre: stint.freshTyre,
-              originalStartLap: stint.startLap,
-              originalEndLap: stint.endLap,
-              itemStyle: {
-                decal: stint.freshTyre
-                  ? undefined
-                  : {
-                      symbol: 'rect',
-                      symbolSize: 1,
-                      color: 'rgba(0,0,0,0.2)',
-                      dashArrayX: [1, 0],
-                      dashArrayY: [2, 5],
-                      rotation: -Math.PI / 4,
-                    },
-              },
-            });
-          }
-        });
+    // Dynamically determine the maximum stint number
+    driverSessions.forEach((ds) => {
+      maxStintNumber = Math.max(maxStintNumber, ds.laps.at(-1)?.stint ?? 0);
+    });
 
+    // Build series data for each stint
+    for (let stintNumber = 1; stintNumber <= maxStintNumber; stintNumber++) {
+      const stintDataForSeries: CustomBarDataItem[] = [];
+
+      driverSessions.forEach((ds) => {
+        const driverName = ds.driver?.abbreviation || '';
+        if (hiddenDrivers.includes(driverName)) return;
+
+        // Aggregate laps for the current stint
+        const stintData = ds.laps.reduce<CustomBarDataItem | null>(
+          (acc, lap, index) => {
+            if (lap.stint === stintNumber) {
+              driversSet.add(driverName);
+
+              if (!acc) {
+                return {
+                  value: [1, driverName], // Set stint number as value[0]
+                  stint: stintNumber,
+                  driver: ds.driver?.full_name || '',
+                  constructor: ds.constructorByConstructorId?.name || 'Unknown',
+                  color: ds.constructorByConstructorId?.color
+                    ? `#${ds.constructorByConstructorId?.color}`
+                    : null,
+                  tyreCompound: lap.tyre_compound?.value || 'unknown',
+                  freshTyre: lap.fresh_tyre || false,
+                  originalStartLap: index + 1,
+                  originalEndLap: index + 1,
+                  itemStyle: {
+                    decal: lap.fresh_tyre
+                      ? undefined
+                      : {
+                          symbol: 'rect',
+                          symbolSize: 1,
+                          color: 'rgba(0,0,0,0.2)',
+                          dashArrayX: [1, 0],
+                          dashArrayY: [2, 5],
+                          rotation: -Math.PI / 4,
+                        },
+                  },
+                };
+              } else {
+                acc.value[0] = index + 1;
+                acc.originalEndLap = index + 1; // Update end lap
+                return acc;
+              }
+            }
+            return acc;
+          },
+          null,
+        );
+
+        if (stintData) {
+          stintDataForSeries.push(stintData);
+        }
+      });
+
+      // Format bar series for chart
+      if (stintDataForSeries.length > 0) {
         series.push({
           name: `stint ${stintNumber}`,
           type: 'bar',
           stack: 'total', // Stack all stints for a driver together
-          emphasis: {
-            disabled: true,
+          backgroundStyle: {
+            color: 'var(--muted)',
           },
+          emphasis: { disabled: true },
           label: {
             show: true,
-            formatter: ({ value }) =>
-              value ? (value as [number, string])[0].toString() : '', // Display the value (lap count),
+            formatter: ({ value, ...params }) => {
+              if ((value as [number, string])?.[0] < 5) return ``;
+              return `S${(params?.data as CustomBarDataItem).stint}\nLaps: ${(value as [number, string])?.[0].toString() || ''}`;
+            },
+
             position: 'inside', // Position label inside the bar
             color: '#000', // Set label color for visibility
           },
           itemStyle: {
+            borderRadius: 4,
+            borderWidth: 2,
+            borderColor: 'transparent',
             color: (params) => {
               const data = params.data as CustomBarDataItem;
               const compoundKey = `${data.tyreCompound.toUpperCase()}_${
@@ -169,104 +238,27 @@ const StintsChart: React.FC<StintsEchartsChartProps> = ({
             },
           },
           data: stintDataForSeries,
-          // yAxisIndex: 0,
-          // xAxisIndex: 0,
         });
       }
-
-      const option: EChartsOption = {
-        backgroundColor: 'transparent',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        tooltip: {
-          trigger: 'axis', // Change trigger to axis for stacked bars
-          backgroundColor: 'rgba(0, 0, 0, 1)', // Dark background
-          borderColor: '#60A5FA', // Light blue border
-          borderWidth: 1,
-          borderRadius: 4,
-          textStyle: {
-            color: '#E2E8F0', // Light grey text
-          },
-          axisPointer: {
-            type: 'cross',
-            label: {
-              formatter(param) {
-                const val = param.value as number;
-                if (param.axisDimension === 'x') {
-                  return Math.floor(val);
-                }
-                return val;
-              },
-            },
-          },
-          formatter: function (params: CallbackDataParams[]) {
-            let tooltipContent = '';
-            // Sort params to ensure "stint 1", "stint 2", etc.
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            params.sort((a: any, b: any) => {
-              const stintA = parseInt(a.seriesName.replace('stint ', ''));
-              const stintB = parseInt(b.seriesName.replace('stint ', ''));
-              return stintA - stintB;
-            });
-
-            if (params.length > 0) {
-              const driverName = (params[0].data as CustomBarDataItem).value[1];
-              tooltipContent += `<p style="font-weight: bold;">Driver: ${driverName}</p>`;
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            params.forEach((param: any) => {
-              const data = param.data as CustomBarDataItem;
-              const stintNumber = parseInt(
-                param.seriesName.replace('stint ', ''),
-              );
-              // Only show tooltip if there is actual data for the stint
-              if (data.value[0] === 0 || data.value === null) return;
-
-              const tyreColor =
-                tyreCompoundColors[
-                  `${data.tyreCompound.toUpperCase()}_${
-                    data.freshTyre ? 'NEW' : 'OLD'
-                  }`
-                ] || tyreCompoundColors.UNKNOWN_NEW;
-
-              tooltipContent += `
-                <div>
-                  <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${tyreColor};"></span>
-                  Stint ${stintNumber}: Laps ${data.originalStartLap} - ${data.originalEndLap}<br/>
-                  Tyre: ${data.tyreCompound} ${data.freshTyre ? '(Fresh)' : '(Used)'}
-                </div>
-              `;
-            });
-            return tooltipContent;
-          },
-        },
-        grid: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-        xAxis: {
-          type: 'value',
-          // data: Array.from({ length: maxLaps }, (_, i) => i + 1),
-          name: 'Lap Number',
-          nameLocation: 'middle',
-          nameGap: 25,
-        },
-        yAxis: {
-          type: 'category',
-          data: drivers,
-          name: 'Driver',
-          nameLocation: 'middle',
-          nameGap: 40,
-        },
-        series: series,
-      };
-
-      chartInstance.current.setOption(option);
     }
-  }, [processedData, maxLaps, hiddenDrivers, chartInstance, driverSessions]);
+
+    const drivers = Array.from(driversSet);
+
+    if (drivers.length === 0) {
+      setNoDataState();
+      return;
+    }
+
+    // Update chart options
+    chartInstance.current.setOption(
+      {
+        yAxis: { data: drivers },
+        series: series,
+        title: { text: '' },
+      },
+      { replaceMerge: ['series'] },
+    );
+  }, [chartInstance, driverSessions, hiddenDrivers, setNoDataState]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };
@@ -278,73 +270,46 @@ const Stints = () => {
     data: sessionData,
     loading,
     error,
-  } = useQuery<GetSessionStintsQuery, GetSessionStintsQueryVariables>(
-    GET_SESSION_STINTS,
-    {
-      variables: {
-        year: parseInt(year as string),
-        event: eventLocationDecode(event as string),
-        session: sessionDecode(session as string) as Session_Name_Choices_Enum,
-      },
+  } = useQuery(GET_SESSION_STINTS, {
+    variables: {
+      year: parseInt(year as string),
+      event: eventLocationDecode(event as string),
+      session: sessionDecode(session as string) as Session_Name_Choices_Enum,
     },
-  );
+  });
 
-  // 🛠️ Process data for BarStack
-  const data = useMemo(() => {
-    let maxLaps = 0; // Track the largest endLap
+  if (error || (!sessionData && !loading)) return <ServerPageError />;
 
-    const processedData = sessionData?.sessions[0]?.driver_sessions
-      .map((ds) => {
-        const stintMap: StintMap = {};
-
-        ds.laps.forEach((lap, index) => {
-          if (lap.stint === null || lap.stint === undefined) return;
-
-          if (!stintMap[lap.stint]) {
-            stintMap[lap.stint] = {
-              stint: lap.stint || 1,
-              startLap: index + 1,
-              endLap: index + 1, // Defaults to same lap; will be updated
-              tyreLife: lap.tyre_life || 1,
-              tyreCompound: lap.tyre_compound?.value || 'unknown',
-              freshTyre: lap.fresh_tyre || false,
-              driver: ds.driver?.abbreviation || 'Unknown',
-            };
-          } else {
-            stintMap[lap.stint].endLap = index + 1;
-          }
-
-          // Track max lap
-          maxLaps = Math.max(maxLaps, index + 1);
-        });
-
-        return {
-          driver: ds.driver?.abbreviation || 'Unknown',
-          totalLaps: ds.laps.length, // Store lap count for sorting
-          stints: Object.values(stintMap),
-        };
-      })
-      .sort((a, b) => a.totalLaps - b.totalLaps); // ✅ Sort drivers by most laps
-
-    return { processedData, maxLaps };
-  }, [sessionData]);
-
-  const { processedData, maxLaps } = data;
-
-  if (loading) return <Loader />;
-  if (error || !sessionData) return <ServerPageError />;
+  const driverSessions = sessionData?.sessions[0]?.driver_sessions ?? [];
 
   return (
-    <>
-      <div className='h-150 rounded border p-2'>
-        <h3 className='text-center text-lg font-semibold'>Tyre Analysis</h3>
-        <StintsChart
-          driverSessions={sessionData?.sessions[0]?.driver_sessions || []}
-          processedData={processedData}
-          maxLaps={maxLaps}
-        />
+    <div className='grid gap-4'>
+      <ChartContainer title='Tyre Analysis' loading={loading}>
+        <StintsChart driverSessions={driverSessions} />
+      </ChartContainer>
+    </div>
+  );
+};
+
+const ChartContainer = ({
+  title,
+  children,
+  loading,
+}: {
+  title: string;
+  children: React.ReactNode;
+  loading: boolean;
+}) => {
+  return (
+    <div className='border-foreground flex h-125 flex-col rounded border p-4 lg:h-[80dvh]'>
+      <div className='z-10 flex w-full flex-wrap items-center gap-4 pb-4'>
+        <h2 className='mr-auto flex-1 scroll-m-20 text-2xl font-semibold tracking-tight'>
+          {title}
+        </h2>
       </div>
-    </>
+      {loading && <Loader />}
+      {!loading && children}
+    </div>
   );
 };
 
