@@ -13382,6 +13382,11 @@ export type GetSessionStintsQuery = {
         fresh_tyre?: boolean | null;
         tyre_compound?: { __typename?: 'tyre_compounds'; value: string } | null;
       }>;
+      results: Array<{
+        __typename?: 'results';
+        finishing_position?: number | null;
+      }>;
+      fastest_lap: Array<{ __typename?: 'laps'; lap_time?: number | null }>;
     }>;
   }>;
 };
@@ -21532,6 +21537,57 @@ export const GetSessionStintsDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'fresh_tyre' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'results' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'finishing_position',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'fastest_lap' },
+                        name: { kind: 'Name', value: 'laps' },
+                        arguments: [
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'limit' },
+                            value: { kind: 'IntValue', value: '1' },
+                          },
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'order_by' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'lap_time' },
+                                  value: { kind: 'EnumValue', value: 'asc' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_time' },
                             },
                           ],
                         },

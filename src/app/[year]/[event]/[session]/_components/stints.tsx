@@ -5,7 +5,12 @@ import { useParams } from 'next/navigation';
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import { GET_SESSION_STINTS } from '@/lib/queries';
-import { eventLocationDecode, sessionDecode } from '@/lib/utils';
+import {
+  eventLocationDecode,
+  sessionDecode,
+  sortFastestLaps,
+  sortQuali,
+} from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
 import { Loader } from '@/components/Loader';
@@ -25,7 +30,7 @@ interface StintsEchartsChartProps {
 
 // Define a type for the custom data you want to attach to each bar
 interface CustomBarDataItem {
-  value: [number | null, string];
+  value: [number, string];
   stint: number;
   constructor: string;
   color: string | null;
@@ -48,8 +53,8 @@ interface CustomBarDataItem {
 
 // TODO: Migrate to constants
 const tyreCompoundColors: Record<string, string> = {
-  SOFT_NEW: 'hsl(6 78% 63%)',
-  SOFT_OLD: 'hsl(6 79% 48%)',
+  SOFT_OLD: 'hsl(6 78% 63%)',
+  SOFT_NEW: 'hsl(6 79% 48%)',
   MEDIUM_NEW: 'hsl(48 89% 62%)',
   MEDIUM_OLD: 'hsl(38 85% 61%)',
   HARD_NEW: 'hsl(192 16% 92%)',
@@ -90,15 +95,10 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
   }) => {
     let tooltipContent = '';
 
-    if (params) {
-      const driverName = (params.data as CustomBarDataItem).value[1];
-      tooltipContent += `<p style="font-weight: bold;">${driverName} ${params.data.color && `<span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${params.data.color};"></span>`} ${params.data.constructor}</p>`;
-    }
-    // console.log('params for tooltip:', params);
-
-    // params.forEach((param: any) => {
-    const data = params.data as CustomBarDataItem;
     const stintNumber = parseInt(params.seriesName.replace('stint ', ''));
+    tooltipContent += `<p class="font-bold">Stint ${stintNumber}</p><hr class="my-2"/>`;
+
+    const data = params.data as CustomBarDataItem;
     // Only show tooltip if there is actual data for the stint
     if (data.value[0] === 0 || data.value === null) return;
 
@@ -109,11 +109,25 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
 
     tooltipContent += `
                 <div>
-                  
-                  Stint ${stintNumber}: ${data.originalStartLap} - ${data.originalEndLap}<br/>
-                  <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${tyreColor};"></span> ${data.tyreCompound} ${data.freshTyre ? '(Fresh)' : '(Used)'}
-                </div>
+                  <div class="flex-1 flex gap-2 items-center">
+                    <div class="size-4 rounded-full" style="background-color: ${tyreColor};"></div>
+                      <div>
+                        <p>${data.tyreCompound}</p>
+                        <p>${data.originalEndLap + 1 - data.originalStartLap} Laps</p>
+                      </div>
+                      <div>
+                        <p>(${data.freshTyre ? 'Fresh' : 'Used'})</p>
+                        <p>(${data.originalStartLap} - ${data.originalEndLap})</p>
+                      </div>
+                    </div>
+                </div><hr class="my-2"/>
               `;
+
+    const driverName = (params.data as CustomBarDataItem).value[1];
+    tooltipContent += `<div class="flex gap-2 items-center">${params.data.color && `<div class="size-4 rounded-full" style="background-color: ${params.data.color};"></div>`}<div><p class="font-semibold">${driverName}</p><p>${params.data.constructor}</p></div></div>`;
+    // console.log('params for tooltip:', params);
+
+    // params.forEach((param: any) => {
     // });
     return tooltipContent;
   };
@@ -145,6 +159,11 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     driverSessions.forEach((ds) => {
       maxStintNumber = Math.max(maxStintNumber, ds.laps.at(-1)?.stint ?? 0);
     });
+
+    // Extract driver names in sorted order
+    const sortedDriverNames = driverSessions
+      .map((ds) => ds.driver?.abbreviation || '')
+      .filter((name) => !hiddenDrivers.includes(name));
 
     // Build series data for each stint
     for (let stintNumber = 1; stintNumber <= maxStintNumber; stintNumber++) {
@@ -187,9 +206,8 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
                   },
                 };
               } else {
-                acc.value[0] = index + 1;
+                acc.value[0] = acc.value[0] + 1;
                 acc.originalEndLap = index + 1; // Update end lap
-                return acc;
               }
             }
             return acc;
@@ -215,8 +233,9 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
           label: {
             show: true,
             formatter: ({ value, ...params }) => {
-              if ((value as [number, string])?.[0] < 5) return ``;
-              return `S${(params?.data as CustomBarDataItem).stint}\nLaps: ${(value as [number, string])?.[0].toString() || ''}`;
+              const data = params.data as CustomBarDataItem;
+              const val = value as CustomBarDataItem['value'];
+              return `S${data.stint}\n${val[0]} Lap${val[0] > 1 ? 's' : ''}`;
             },
 
             position: 'inside', // Position label inside the bar
@@ -242,9 +261,7 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
       }
     }
 
-    const drivers = Array.from(driversSet);
-
-    if (drivers.length === 0) {
+    if (sortedDriverNames.length === 0) {
       setNoDataState();
       return;
     }
@@ -252,7 +269,7 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     // Update chart options
     chartInstance.current.setOption(
       {
-        yAxis: { data: drivers },
+        yAxis: { data: sortedDriverNames },
         series: series,
         title: { text: '' },
       },
@@ -263,7 +280,15 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };
 
-const Stints = () => {
+const Stints = ({
+  sessionType,
+}: {
+  sessionType: {
+    isCompetition: boolean;
+    isQualifying: boolean;
+    isPractice: boolean;
+  };
+}) => {
   const { year, event, session } = useParams();
 
   const {
@@ -280,7 +305,18 @@ const Stints = () => {
 
   if (error || (!sessionData && !loading)) return <ServerPageError />;
 
-  const driverSessions = sessionData?.sessions[0]?.driver_sessions ?? [];
+  let driverSessions = sessionData?.sessions[0]?.driver_sessions || [];
+
+  // Sorting logic based on session type
+  if (sessionType.isQualifying || sessionType.isCompetition) {
+    driverSessions = sortQuali(
+      driverSessions,
+    ) as GetSessionStintsQuery['sessions'][number]['driver_sessions'];
+  } else if (sessionType.isPractice) {
+    driverSessions = sortFastestLaps(
+      driverSessions,
+    ) as GetSessionStintsQuery['sessions'][number]['driver_sessions'];
+  }
 
   return (
     <div className='grid gap-4'>

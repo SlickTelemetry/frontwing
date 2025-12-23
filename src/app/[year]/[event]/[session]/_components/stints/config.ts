@@ -13,7 +13,6 @@ export const baseOptions: EChartsOption = {
   tooltip: {
     trigger: 'item', // Change trigger to axis for stacked bars
     backgroundColor: 'rgba(0, 0, 0, 1)', // Dark background
-    borderColor: '#60A5FA', // Light blue border
     borderWidth: 1,
     borderRadius: 4,
     textStyle: {
