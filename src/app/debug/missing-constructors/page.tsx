@@ -14,14 +14,16 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const GET_DRIVERS_WITH_CONSTRUCTORS = gql(`
-  query GetDriversWithConstructors {
+const GET_DRIVERS_WITH_CONSTRUCTORS = gql`
+  query GetDriversWithConstructors @cached {
     drivers(where: { year: { _gte: 2018 } }, order_by: { full_name: asc }) {
       full_name
       number
       country_code
       year
-      driver_sessions(order_by: { session: { event: { year: desc }, name: asc } }) {
+      driver_sessions(
+        order_by: { session: { event: { year: desc }, name: asc } }
+      ) {
         constructorByConstructorId {
           name
         }
@@ -39,7 +41,7 @@ const GET_DRIVERS_WITH_CONSTRUCTORS = gql(`
       }
     }
   }
-`);
+`;
 
 interface DriverSessionGroup {
   season: number;
@@ -193,7 +195,7 @@ export default function MissingConstructorsTestPage() {
             defaultValue={sortedSeasons[0]?.season.toString()}
             className='w-full'
           >
-            <TabsList className='mb-6 grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
+            <TabsList className='mb-12 grid h-auto w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
               {sortedSeasons.map((group) => (
                 <TabsTrigger key={group.season} value={group.season.toString()}>
                   {group.season}

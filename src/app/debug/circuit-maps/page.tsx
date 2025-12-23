@@ -1,5 +1,6 @@
 'use client';
 
+import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 
@@ -16,11 +17,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-import { graphql } from '@/types';
 import type { GetAllCircuitsQuery } from '@/types/graphql';
 
-const GET_ALL_CIRCUITS = graphql(`
-  query GetAllCircuits {
+const GET_ALL_CIRCUITS = gql`
+  query GetAllCircuits @cached {
     circuits(order_by: { year: desc, location: asc }) {
       year
       location
@@ -28,7 +28,11 @@ const GET_ALL_CIRCUITS = graphql(`
       ...CircuitDetails
     }
   }
-`);
+
+  fragment CircuitDetails on circuits {
+    circuit_details
+  }
+`;
 
 export default function CircuitMapsTestPage() {
   // Group circuits by year
@@ -155,7 +159,7 @@ export default function CircuitMapsTestPage() {
               <div className='flex w-full justify-center py-4'>
                 <CircuitMap
                   circuitData={selectedCircuit}
-                  className='max-h-[600px] w-full'
+                  className='max-h-150 w-full'
                   arrowAlgorithm={arrowAlgorithm}
                 />
               </div>
@@ -192,7 +196,7 @@ function CircuitMapItem({
         <CircuitMap
           circuitData={circuit}
           small
-          className='max-h-[150px]'
+          className='max-h-37.5'
           arrowAlgorithm={arrowAlgorithm}
         />
       </div>
