@@ -309,7 +309,7 @@ export const CircuitMap = ({
 
   const sizeClasses = clsx({
     'max-h-[75px] w-fit': small,
-    'max-h-[175px] hidden lg:block': !small,
+    'max-h-[75px] lg:max-h-[175px] lg:block': !small,
   });
 
   return (

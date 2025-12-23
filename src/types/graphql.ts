@@ -12942,6 +12942,41 @@ export type GetAllCircuitsQuery = {
   >;
 };
 
+export type GetDriversWithConstructorsQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetDriversWithConstructorsQuery = {
+  __typename?: 'query_root';
+  drivers: Array<{
+    __typename?: 'drivers';
+    full_name?: string | null;
+    number?: string | null;
+    country_code?: string | null;
+    year?: number | null;
+    driver_sessions: Array<{
+      __typename?: 'driver_sessions';
+      constructorByConstructorId?: {
+        __typename?: 'constructors';
+        name?: string | null;
+      } | null;
+      session?: {
+        __typename?: 'sessions';
+        name?: Session_Name_Choices_Enum | null;
+        date?: string | null;
+        event?: {
+          __typename?: 'events';
+          year?: number | null;
+          round_number?: number | null;
+          name?: string | null;
+          location?: string | null;
+          country?: string | null;
+        } | null;
+      } | null;
+    }>;
+  }>;
+};
+
 export type CircuitDetailsFragment = {
   __typename?: 'circuits';
   circuit_details?: unknown | null;
@@ -16690,6 +16725,9 @@ export const GetAllCircuitsDocument = {
       kind: 'OperationDefinition',
       operation: 'query',
       name: { kind: 'Name', value: 'GetAllCircuits' },
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
@@ -16749,6 +16787,198 @@ export const GetAllCircuitsDocument = {
     },
   ],
 } as unknown as DocumentNode<GetAllCircuitsQuery, GetAllCircuitsQueryVariables>;
+export const GetDriversWithConstructorsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDriversWithConstructors' },
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'drivers' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'year' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: '_gte' },
+                            value: { kind: 'IntValue', value: '2018' },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'full_name' },
+                      value: { kind: 'EnumValue', value: 'asc' },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'full_name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'country_code' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'driver_sessions' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'order_by' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'session' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'event' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: { kind: 'Name', value: 'year' },
+                                        value: {
+                                          kind: 'EnumValue',
+                                          value: 'desc',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'name' },
+                                  value: { kind: 'EnumValue', value: 'asc' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'constructorByConstructorId',
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'session' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'date' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'event' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'year' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'round_number',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'location' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'country' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDriversWithConstructorsQuery,
+  GetDriversWithConstructorsQueryVariables
+>;
 export const GetSeasonEventNamesDocument = {
   kind: 'Document',
   definitions: [
