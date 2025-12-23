@@ -1,6 +1,5 @@
 'use client';
 
-import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 
@@ -14,7 +13,9 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const GET_DRIVERS_WITH_CONSTRUCTORS = gql`
+import { graphql } from '@/types';
+
+const GET_DRIVERS_WITH_CONSTRUCTORS = graphql(`
   query GetDriversWithConstructors @cached {
     drivers(where: { year: { _gte: 2018 } }, order_by: { full_name: asc }) {
       full_name
@@ -41,7 +42,7 @@ const GET_DRIVERS_WITH_CONSTRUCTORS = gql`
       }
     }
   }
-`;
+`);
 
 interface DriverSessionGroup {
   season: number;

@@ -1,6 +1,5 @@
 'use client';
 
-import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 
@@ -17,9 +16,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+import { graphql } from '@/types';
 import type { GetAllCircuitsQuery } from '@/types/graphql';
 
-const GET_ALL_CIRCUITS = gql`
+type CircuitType = GetAllCircuitsQuery['circuits'][number];
+
+const GET_ALL_CIRCUITS = graphql(`
   query GetAllCircuits @cached {
     circuits(order_by: { year: desc, location: asc }) {
       year
@@ -28,15 +30,10 @@ const GET_ALL_CIRCUITS = gql`
       ...CircuitDetails
     }
   }
-
-  fragment CircuitDetails on circuits {
-    circuit_details
-  }
-`;
+`);
 
 export default function CircuitMapsTestPage() {
   // Group circuits by year
-  type CircuitType = NonNullable<GetAllCircuitsQuery['circuits']>[number];
 
   const [selectedCircuit, setSelectedCircuit] = useState<CircuitType | null>(
     null,
@@ -44,8 +41,7 @@ export default function CircuitMapsTestPage() {
   const [arrowAlgorithm, setArrowAlgorithm] =
     useState<ArrowPlacementAlgorithm>('shoelace');
 
-  const { data, loading, error } =
-    useQuery<GetAllCircuitsQuery>(GET_ALL_CIRCUITS);
+  const { data, loading, error } = useQuery(GET_ALL_CIRCUITS);
 
   if (loading) {
     return (
@@ -124,7 +120,9 @@ export default function CircuitMapsTestPage() {
                     key={`${year}-${circuit.location}-${idx}`}
                     circuit={circuit}
                     arrowAlgorithm={arrowAlgorithm}
-                    onClick={() => setSelectedCircuit(circuit)}
+                    onClick={() => {
+                      setSelectedCircuit(circuit);
+                    }}
                   />
                 ))}
               </div>
@@ -157,6 +155,7 @@ export default function CircuitMapsTestPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className='flex w-full justify-center py-4'>
+                {/* {console.log('circuit', selectedCircuit)} */}
                 <CircuitMap
                   circuitData={selectedCircuit}
                   className='max-h-150 w-full'
@@ -176,7 +175,7 @@ function CircuitMapItem({
   arrowAlgorithm,
   onClick,
 }: {
-  circuit: NonNullable<GetAllCircuitsQuery['circuits']>[number];
+  circuit: CircuitType;
   arrowAlgorithm: ArrowPlacementAlgorithm;
   onClick: () => void;
 }) {
