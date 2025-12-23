@@ -1,6 +1,6 @@
 'use client';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { JSX } from 'react';
+import { Activity } from 'react';
 
 import { COMPETITION_SESSIONS } from '@/lib/constants';
 
@@ -22,10 +22,15 @@ import Stints from './_components/stints';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 import {
-  GetEventDetailsQuery,
   GetSessionDetailsQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
+
+type SessionType = {
+  isCompetition: boolean;
+  isQualifying: boolean;
+  isPractice: boolean;
+};
 
 const SessionDetails = graphql(`
   fragment SessionDetails on sessions {
@@ -98,29 +103,23 @@ const ChartConfigs: Record<
   {
     title: string;
     description: string;
-    component?: React.ReactNode | ((data: GetEventDetailsQuery) => JSX.Element);
   }
 > = {
   grid: {
     title: 'Results',
     description: 'Table of drivers',
-    // TODO: Loader goes here
-    component: <></>,
   },
   laps: {
     title: 'Lap Times',
     description: 'Compare driver laps',
-    component: <LapTimeContainer />,
   },
   stints: {
     title: 'Strategy',
     description: 'Tyres & Pit Stops',
-    component: <Stints />,
   },
   sectors: {
     title: 'Fastest Laps',
     description: 'Best laps & sectors',
-    component: <SectorTimes />,
   },
   // 'top speeds': {
   //   title: 'Top Speeds',
@@ -138,11 +137,7 @@ export const ChartViewController = ({
   sessionType,
 }: {
   data?: GetSessionDetailsQuery;
-  sessionType: {
-    isCompetition: boolean;
-    isQualifying: boolean;
-    isPractice: boolean;
-  };
+  sessionType: SessionType;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -165,7 +160,6 @@ export const ChartViewController = ({
             }
             className='inline h-full cursor-pointer text-left'
             variant={tab === activeChart ? 'default' : 'outline'}
-            disabled={!ChartConfigs[tab].component}
           >
             <p className='font-semibold'>{ChartConfigs[tab].title}</p>
             <p className='font-light text-wrap'>
@@ -180,22 +174,28 @@ export const ChartViewController = ({
           <DriverFilters />
         </div>
         <div className='flex-1'>
-          {/* TODO: Refactor for multiple charts that will have to use partial fragment data */}
-          {data && ChartConfigs[activeChart] && activeChart === 'grid' ? (
+          <Activity mode={activeChart === 'grid' ? 'visible' : 'hidden'}>
             <Table>
-              {sessionType.isCompetition && (
+              {data && sessionType.isCompetition && (
                 <CompetitionResults session={data.sessions} />
               )}
-              {sessionType.isQualifying && (
+              {data && sessionType.isQualifying && (
                 <QualifyingResults session={data.sessions} />
               )}
-              {sessionType.isPractice && (
+              {data && sessionType.isPractice && (
                 <PracticeResults session={data.sessions} />
               )}
             </Table>
-          ) : (
-            <>{ChartConfigs[activeChart]?.component}</>
-          )}
+          </Activity>
+          <Activity mode={activeChart === 'laps' ? 'visible' : 'hidden'}>
+            <LapTimeContainer />,
+          </Activity>
+          <Activity mode={activeChart === 'stints' ? 'visible' : 'hidden'}>
+            <Stints sessionType={sessionType} />,
+          </Activity>
+          <Activity mode={activeChart === 'sectors' ? 'visible' : 'hidden'}>
+            <SectorTimes />,
+          </Activity>
         </div>
       </div>
     </>

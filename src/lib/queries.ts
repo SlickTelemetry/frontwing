@@ -344,6 +344,13 @@ export const GET_SESSION_STINTS = graphql(`
           tyre_life
           fresh_tyre
         }
+
+        results {
+          finishing_position
+        }
+        fastest_lap: laps(limit: 1, order_by: { lap_time: asc }) {
+          lap_time
+        }
       }
     }
   }
