@@ -31,7 +31,11 @@ export function DriverBadges({
 
   return (
     <div
-      className={clsx(props.className, 'flex gap-x-2', fullWidth && 'w-full')}
+      className={clsx(
+        props.className,
+        'flex flex-wrap gap-2',
+        fullWidth && 'w-full',
+      )}
     >
       {drivers.map((driver, idx) => (
         <Badge
@@ -39,8 +43,9 @@ export function DriverBadges({
           variant='outline'
           onClick={onDriverClick ? (e) => onDriverClick(driver, e) : undefined}
           className={[
+            'min-w-12',
             getBorderStyle(idx),
-            fullWidth ? 'flex-1' : 'min-w-12',
+            fullWidth && 'flex-1',
             onDriverClick && 'cursor-pointer select-none',
             hiddenItems?.includes(driver) ? 'opacity-50' : 'opacity-100',
           ]
