@@ -69,6 +69,22 @@ export default function MissingConstructorsTestPage() {
     null,
   );
 
+  // track which seasons are expanded in the sidebar
+  const [expandedSeasons, setExpandedSeasons] = useState<
+    Record<number, boolean>
+  >({});
+
+  const toggleSeason = (season: number) =>
+    setExpandedSeasons((prev) => ({ ...prev, [season]: !prev[season] }));
+
+  // track which session types are expanded in the sidebar
+  const [expandedSessionTypes, setExpandedSessionTypes] = useState<
+    Record<string, boolean>
+  >({});
+
+  const toggleSessionType = (type: string) =>
+    setExpandedSessionTypes((prev) => ({ ...prev, [type]: !prev[type] }));
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, loading, error } = useQuery<any>(GET_DRIVERS_WITH_CONSTRUCTORS);
 
@@ -166,16 +182,55 @@ export default function MissingConstructorsTestPage() {
     0,
   );
 
+  // Calculate stats by session type
+  const sessionTypeStats = new Map<string, number>();
+  const sessionTypeByYear = new Map<string, Map<number, number>>();
+  const sessionTypePerSeason = new Map<number, Map<string, number>>();
+
+  sortedSeasons.forEach((season) => {
+    season.sessions.forEach((session) => {
+      const count = session.drivers.length;
+      const sessionType = session.sessionName;
+
+      // Total count for session type
+      sessionTypeStats.set(
+        sessionType,
+        (sessionTypeStats.get(sessionType) || 0) + count,
+      );
+
+      // Count by year for this session type
+      if (!sessionTypeByYear.has(sessionType)) {
+        sessionTypeByYear.set(sessionType, new Map());
+      }
+      const yearMap = sessionTypeByYear.get(sessionType)!;
+      yearMap.set(season.season, (yearMap.get(season.season) || 0) + count);
+
+      // Count by session type for this specific season
+      if (!sessionTypePerSeason.has(season.season)) {
+        sessionTypePerSeason.set(season.season, new Map());
+      }
+      const perSeasonMap = sessionTypePerSeason.get(season.season)!;
+      perSeasonMap.set(
+        sessionType,
+        (perSeasonMap.get(sessionType) || 0) + count,
+      );
+    });
+  });
+
+  const sortedSessionTypes = Array.from(sessionTypeStats.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([type, count]) => ({ type, count }));
+
   return (
     <>
       <div className='bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 border-b backdrop-blur'>
-        <div className='container mx-auto px-8 py-4'>
-          <div className='flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
+        <div className='container mx-auto px-4 py-2 sm:px-8 sm:py-4'>
+          <div className='flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-4'>
             <div>
-              <h1 className='text-4xl font-extrabold'>
+              <h1 className='text-2xl font-extrabold sm:text-4xl'>
                 Missing Constructors Test
               </h1>
-              <p className='text-muted-foreground mt-2'>
+              <p className='text-muted-foreground mt-1 text-xs sm:mt-2 sm:text-sm'>
                 Showing {totalCount} driver session entries with null/missing
                 constructors
               </p>
@@ -185,91 +240,280 @@ export default function MissingConstructorsTestPage() {
       </div>
 
       <div className='container mx-auto p-8'>
-        {sortedSeasons.length === 0 ? (
-          <div className='bg-card rounded-lg border p-8 text-center'>
-            <p className='text-muted-foreground text-lg'>
-              No drivers with missing constructors found. Great job! 🎉
-            </p>
-          </div>
-        ) : (
-          <Tabs
-            defaultValue={sortedSeasons[0]?.season.toString()}
-            className='w-full'
-          >
-            <TabsList className='mb-12 grid h-auto w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
-              {sortedSeasons.map((group) => (
-                <TabsTrigger key={group.season} value={group.season.toString()}>
-                  {group.season}
-                  <Badge variant='secondary' className='ml-2'>
-                    {group.sessions.reduce(
-                      (sum, s) => sum + s.drivers.length,
-                      0,
-                    )}
-                  </Badge>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {sortedSeasons.map((group) => (
-              <TabsContent key={group.season} value={group.season.toString()}>
-                <div className='space-y-6'>
-                  {group.sessions.map((session, idx) => (
-                    <div
-                      key={`${group.season}-${session.eventRound}-${session.sessionName}-${idx}`}
-                      className='bg-card rounded-lg border p-6'
-                    >
-                      <div className='mb-4 flex items-start justify-between'>
-                        <div>
-                          <h3 className='text-xl font-bold'>
-                            {session.eventRound}. {session.eventName}
-                          </h3>
-                          <p className='text-muted-foreground text-sm'>
-                            {session.sessionName}
-                            {session.date && (
-                              <>
-                                {' '}
-                                • {new Date(session.date).toLocaleDateString()}
-                              </>
-                            )}
-                          </p>
-                        </div>
-                        <Badge variant='outline'>
-                          {session.drivers.length} drivers
+        <div className='grid gap-8 lg:grid-cols-4'>
+          {/* Main content */}
+          <div className='lg:col-span-3'>
+            {sortedSeasons.length === 0 ? (
+              <div className='bg-card rounded-lg border p-8 text-center'>
+                <p className='text-muted-foreground text-lg'>
+                  No drivers with missing constructors found. Great job! 🎉
+                </p>
+              </div>
+            ) : (
+              <Tabs
+                defaultValue={sortedSeasons[0]?.season.toString()}
+                className='w-full'
+              >
+                <div className='bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-20 z-40 -mx-8 mb-12 px-8 py-3 backdrop-blur'>
+                  <TabsList className='grid h-auto w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
+                    {sortedSeasons.map((group) => (
+                      <TabsTrigger
+                        key={group.season}
+                        value={group.season.toString()}
+                      >
+                        {group.season}
+                        <Badge variant='secondary' className='ml-2'>
+                          {group.sessions.reduce(
+                            (sum, s) => sum + s.drivers.length,
+                            0,
+                          )}
                         </Badge>
-                      </div>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
 
-                      <div className='grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
-                        {session.drivers.map((driver, idx) => (
-                          <button
-                            key={`driver-${idx}`}
-                            onClick={() => setSelectedSession(session)}
-                            className='bg-background hover:bg-muted/50 rounded-md border p-3 text-left transition-colors'
-                          >
-                            <div className='flex items-baseline gap-2'>
-                              {driver.driverNumber !== null && (
-                                <span className='text-muted-foreground font-mono text-xs'>
-                                  #{driver.driverNumber}
-                                </span>
-                              )}
-                              <p className='font-semibold'>
-                                {driver.driverName}
+                {sortedSeasons.map((group) => (
+                  <TabsContent
+                    key={group.season}
+                    value={group.season.toString()}
+                  >
+                    <div className='space-y-6'>
+                      {group.sessions.map((session, idx) => (
+                        <div
+                          key={`${group.season}-${session.eventRound}-${session.sessionName}-${idx}`}
+                          className='bg-card rounded-lg border p-6'
+                        >
+                          <div className='mb-4 flex items-start justify-between'>
+                            <div>
+                              <h3 className='text-xl font-bold'>
+                                {session.eventRound}. {session.eventName}
+                              </h3>
+                              <p className='text-muted-foreground text-sm'>
+                                {session.sessionName}
+                                {session.date && (
+                                  <>
+                                    {' '}
+                                    •{' '}
+                                    {new Date(
+                                      session.date,
+                                    ).toLocaleDateString()}
+                                  </>
+                                )}
                               </p>
                             </div>
-                            {driver.countryCode && (
-                              <p className='text-muted-foreground text-xs uppercase'>
-                                {driver.countryCode}
-                              </p>
-                            )}
-                          </button>
+                            <Badge variant='outline'>
+                              {session.drivers.length} drivers
+                            </Badge>
+                          </div>
+
+                          <div className='grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+                            {session.drivers.map((driver, idx) => (
+                              <button
+                                key={`driver-${idx}`}
+                                onClick={() => setSelectedSession(session)}
+                                className='bg-background hover:bg-muted/50 rounded-md border p-3 text-left transition-colors'
+                              >
+                                <div className='flex items-baseline gap-2'>
+                                  {driver.driverNumber !== null && (
+                                    <span className='text-muted-foreground font-mono text-xs'>
+                                      #{driver.driverNumber}
+                                    </span>
+                                  )}
+                                  <p className='font-semibold'>
+                                    {driver.driverName}
+                                  </p>
+                                </div>
+                                {driver.countryCode && (
+                                  <p className='text-muted-foreground text-xs uppercase'>
+                                    {driver.countryCode}
+                                  </p>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            )}
+          </div>
+
+          {/* Stats Sidebar */}
+          {sortedSeasons.length > 0 && (
+            <div className='lg:col-span-1'>
+              <div className='sticky top-24 h-[calc(100vh-200px)] overflow-y-auto'>
+                <div className='bg-card rounded-lg border p-6'>
+                  <h2 className='mb-4 text-lg font-bold'>Quick Stats</h2>
+                  <div className='space-y-3'>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-muted-foreground text-sm'>
+                        Total Missing
+                      </span>
+                      <span className='text-lg font-bold'>{totalCount}</span>
+                    </div>
+                    <div className='border-t pt-3' />
+                    <div className='flex items-center justify-between'>
+                      <span className='text-muted-foreground text-sm'>
+                        Seasons Affected
+                      </span>
+                      <span className='text-lg font-bold'>
+                        {sortedSeasons.length}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-muted-foreground text-sm'>
+                        Total Events
+                      </span>
+                      <span className='text-lg font-bold'>
+                        {sortedSeasons.reduce(
+                          (sum, s) => sum + s.sessions.length,
+                          0,
+                        )}
+                      </span>
+                    </div>
+                    <div className='border-t pt-3' />
+                    <div>
+                      <span className='text-muted-foreground text-xs font-semibold'>
+                        BY SESSION TYPE
+                      </span>
+                      <div className='mt-2 space-y-1'>
+                        {sortedSessionTypes.map(({ type, count }) => (
+                          <div
+                            key={type}
+                            className='flex items-center justify-between text-sm'
+                          >
+                            <span className='text-muted-foreground'>
+                              {type}
+                            </span>
+                            <span className='font-semibold'>{count}</span>
+                          </div>
                         ))}
                       </div>
                     </div>
-                  ))}
+                    <div className='border-t pt-3' />
+                    <div>
+                      <span className='text-muted-foreground text-xs font-semibold'>
+                        BY SEASON
+                      </span>
+                      <div className='mt-2 space-y-1'>
+                        {sortedSeasons.map((season) => {
+                          const perSeason = sessionTypePerSeason.get(
+                            season.season,
+                          );
+                          const seasonTotal = season.sessions.reduce(
+                            (sum, s) => sum + s.drivers.length,
+                            0,
+                          );
+
+                          return (
+                            <div key={season.season} className='pb-2'>
+                              <div className='flex items-center justify-between text-sm'>
+                                <button
+                                  type='button'
+                                  onClick={() => toggleSeason(season.season)}
+                                  className='flex items-center gap-2'
+                                  aria-expanded={
+                                    !!expandedSeasons[season.season]
+                                  }
+                                >
+                                  <span className='text-muted-foreground'>
+                                    {expandedSeasons[season.season] ? '▾' : '▸'}
+                                  </span>
+                                  <span className='text-muted-foreground'>
+                                    {season.season}
+                                  </span>
+                                </button>
+                                <span className='font-semibold'>
+                                  {seasonTotal}
+                                </span>
+                              </div>
+
+                              {expandedSeasons[season.season] &&
+                                perSeason &&
+                                perSeason.size > 0 && (
+                                  <div className='mt-1 ml-3 space-y-0.5 text-xs'>
+                                    {Array.from(perSeason.entries())
+                                      .sort((a, b) => b[1] - a[1])
+                                      .map(([type, count]) => (
+                                        <div
+                                          key={`${season.season}-${type}`}
+                                          className='text-muted-foreground flex justify-between'
+                                        >
+                                          <span>{type}</span>
+                                          <span className='font-medium'>
+                                            {count}
+                                          </span>
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className='border-t pt-3' />
+                    <div>
+                      <span className='text-muted-foreground text-xs font-semibold'>
+                        SESSION TYPE BY YEAR
+                      </span>
+                      <div className='mt-2 space-y-2'>
+                        {sortedSessionTypes.map(({ type, count }) => {
+                          const yearMap = sessionTypeByYear.get(type);
+                          if (!yearMap || yearMap.size === 0) return null;
+
+                          const sortedYears = Array.from(
+                            yearMap.entries(),
+                          ).sort((a, b) => b[0] - a[0]);
+
+                          return (
+                            <div key={type} className='text-xs'>
+                              <div className='flex items-center justify-between'>
+                                <button
+                                  type='button'
+                                  onClick={() => toggleSessionType(type)}
+                                  className='flex items-center gap-2'
+                                  aria-expanded={!!expandedSessionTypes[type]}
+                                >
+                                  <span className='text-muted-foreground'>
+                                    {expandedSessionTypes[type] ? '▾' : '▸'}
+                                  </span>
+                                  <span className='font-semibold'>{type}</span>
+                                </button>
+                                <span className='text-muted-foreground text-sm font-medium'>
+                                  {count}
+                                </span>
+                              </div>
+
+                              {expandedSessionTypes[type] && (
+                                <div className='mt-1 ml-3 space-y-0.5'>
+                                  {sortedYears.map(([year, ycount]) => (
+                                    <div
+                                      key={`${type}-${year}`}
+                                      className='text-muted-foreground flex justify-between text-xs'
+                                    >
+                                      <span>{year}</span>
+                                      <span className='font-medium'>
+                                        {ycount}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <Dialog
