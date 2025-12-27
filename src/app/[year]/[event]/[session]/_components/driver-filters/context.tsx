@@ -1,3 +1,4 @@
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   createContext,
   useCallback,
@@ -41,8 +42,21 @@ export function SessionItemProvider({
   sessions?: GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
   initialHiddenDrivers?: string[];
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const initAppliedRef = useRef(false);
   const [hiddenItems, dispatch] = useReducer(visibilityReducer, {});
+
+  // Get all available driver abbreviations
+  const allDriverAbbreviations = useMemo(() => {
+    return (
+      sessions
+        ?.map((ds) => ds.driver?.abbreviation)
+        .filter((abbr): abbr is string => !!abbr) ?? []
+    );
+  }, [sessions]);
+
   const hiddenKeys = useMemo(() => {
     const hiddenConstructors = new Set<string>();
 
@@ -67,14 +81,79 @@ export function SessionItemProvider({
       .concat(Array.from(hiddenConstructors));
   }, [hiddenItems, sessions]);
 
+  // Calculate selected drivers (not hidden)
+  const selectedDrivers = useMemo(() => {
+    return allDriverAbbreviations.filter((abbr) => !hiddenItems[abbr]);
+  }, [allDriverAbbreviations, hiddenItems]);
+
+  // Initialize from search params or initialHiddenDrivers
   useEffect(() => {
-    if (initAppliedRef.current || !initialHiddenDrivers?.length) return;
-    dispatch({
-      type: 'SET_HIDDEN',
-      payload: { ids: initialHiddenDrivers, value: true },
-    });
+    if (initAppliedRef.current || !allDriverAbbreviations.length) return;
+
+    const driversParam = searchParams.get('drivers');
+
+    if (driversParam) {
+      // Parse selected drivers from search params
+      const selectedFromParams = driversParam.split(',').filter(Boolean);
+      const hiddenFromParams = allDriverAbbreviations.filter(
+        (abbr) => !selectedFromParams.includes(abbr),
+      );
+
+      if (hiddenFromParams.length > 0) {
+        dispatch({
+          type: 'SET_HIDDEN',
+          payload: { ids: hiddenFromParams, value: true },
+        });
+      }
+    } else if (initialHiddenDrivers?.length) {
+      // Fallback to initialHiddenDrivers if no search params
+      dispatch({
+        type: 'SET_HIDDEN',
+        payload: { ids: initialHiddenDrivers, value: true },
+      });
+    }
+
     initAppliedRef.current = true;
-  }, [initialHiddenDrivers]);
+  }, [searchParams, initialHiddenDrivers, allDriverAbbreviations]);
+
+  // Update search params when selected drivers change
+  useEffect(() => {
+    if (!initAppliedRef.current || !allDriverAbbreviations.length) return; // Don't update on initial load or before sessions load
+
+    const params = new URLSearchParams(searchParams);
+    const currentDriversParam = params.get('drivers') || '';
+    const newDriversParam =
+      selectedDrivers.length === allDriverAbbreviations.length
+        ? '' // All drivers selected, remove the param
+        : selectedDrivers.join(',');
+
+    // Only update if the value actually changed
+    if (currentDriversParam !== newDriversParam) {
+      // Remove drivers param to rebuild manually
+      params.delete('drivers');
+
+      // Build query string manually to avoid encoding the pipe separator
+      const queryParts: string[] = [];
+
+      // Add all other params (properly encoded)
+      params.forEach((value, key) => {
+        queryParts.push(
+          `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+        );
+      });
+
+      // Add drivers param first (unencoded pipe separator)
+      if (newDriversParam) {
+        queryParts.push(`drivers=${newDriversParam}`);
+      }
+
+      const newUrl =
+        queryParts.length > 0
+          ? `${pathname}?${queryParts.join('&')}`
+          : pathname;
+      router.replace(newUrl, { scroll: false });
+    }
+  }, [selectedDrivers, allDriverAbbreviations, searchParams, router, pathname]);
 
   const setHidden = useCallback(
     (ids: string[], value: boolean) =>
