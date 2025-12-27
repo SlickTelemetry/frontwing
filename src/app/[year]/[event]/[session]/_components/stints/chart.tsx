@@ -57,7 +57,7 @@ const tyreCompoundColors: Record<string, string> = {
 };
 
 export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
-  const { hiddenDrivers } = useSessionItems();
+  const { hiddenItems } = useSessionItems();
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(chartRef);
 
@@ -143,7 +143,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     // Extract driver names in sorted order
     const sortedDriverNames = driverSessions
       .map((ds) => ds.driver?.abbreviation || '')
-      .filter((name) => !hiddenDrivers.includes(name));
+      .filter((name) => !hiddenItems.includes(name));
 
     // Build series data for each stint
     for (let stintNumber = 1; stintNumber <= maxStintNumber; stintNumber++) {
@@ -151,7 +151,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
 
       driverSessions.forEach((ds) => {
         const driverName = ds.driver?.abbreviation || '';
-        if (hiddenDrivers.includes(driverName)) return;
+        if (hiddenItems.includes(driverName)) return;
 
         // Aggregate laps for the current stint
         const stintData = ds.laps.reduce<CustomBarDataItem | null>(
@@ -259,7 +259,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
       },
       { replaceMerge: ['series'] },
     );
-  }, [chartInstance, driverSessions, hiddenDrivers, setNoDataState]);
+  }, [chartInstance, driverSessions, hiddenItems, setNoDataState]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };

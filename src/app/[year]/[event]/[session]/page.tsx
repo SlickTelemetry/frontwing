@@ -74,7 +74,7 @@ export default function SessionPage({
 
   return (
     <SessionItemProvider
-      sessions={sortedSessions}
+      sessions={driverSessions}
       initialHiddenDrivers={initialHiddenDrivers}
     >
       <div className='p-4 lg:p-6'>
@@ -89,6 +89,7 @@ export default function SessionPage({
 
         <ChartViewController
           data={data}
+          sortedSessions={sortedSessions}
           sessionType={{ isCompetition, isQualifying, isPractice }}
         />
       </div>
