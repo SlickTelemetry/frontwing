@@ -24,6 +24,7 @@ import { useECharts } from '@/hooks/use-EChart';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 import { baseOptions } from '@/app/[year]/[event]/[session]/_components/lapTimes/config';
+import { tyreCompoundColors } from '@/app/[year]/[event]/[session]/constants';
 
 export const LapTimesChart = ({
   data,
@@ -63,7 +64,8 @@ export const LapTimesChart = ({
       if (params && params.length > 0 && params[0]?.value) {
         // value[0] is a zero-based index, display as 1-based lap number
         const lapIdx = Number(params[0].value[0] ?? 0);
-        tooltipContent = `<div class='font-bold text-white'>Lap: ${lapIdx + 1}</div>`;
+        tooltipContent = `<div class='font-bold text-foreground'>Lap: ${lapIdx + 1}</div>`;
+        tooltipContent += `<div class="grid grid-cols-[auto_1fr_1fr] items-center">`;
         params
           .filter((item) => item.value[1] !== null)
           .sort((a, b) => {
@@ -79,9 +81,21 @@ export const LapTimesChart = ({
               driverColorMap.get(item.seriesName ?? '') || '#FFFFFF';
             if (lapTime) {
               const formattedTime = formatLapTime(lapTime ?? 0);
-              tooltipContent += `<div><span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${driverColor};"></span><span style="color:${driverColor}">${item.seriesName}</span>: ${formattedTime} ${tyre}</div>`;
+              tooltipContent += `
+                <div class="flex gap-1 items-center w-fit mr-1">
+                  <div class="rounded-full size-3" style="background-color:${driverColor};"></div>
+                  <p style="color:${driverColor}">${item.seriesName}:</p>
+                </div>
+                <p>${formattedTime}</p>
+                <div class="flex gap-1 items-center justify-end">
+                  <p>${tyre}</p>
+                  <div class="rounded-full size-3" style="background-color:${tyreCompoundColors[tyre + '_NEW']};"></div>
+                </div>
+                <hr class="col-span-full"/>
+              `;
             }
           });
+        tooltipContent += `</div>`;
       }
       return tooltipContent;
     };
