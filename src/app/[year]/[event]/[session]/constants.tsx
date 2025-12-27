@@ -1,0 +1,18 @@
+export const tyreCompoundColors: Record<string, string> = {
+  SOFT_OLD: 'hsl(6 78% 63%)',
+  SOFT_NEW: 'hsl(6 79% 48%)',
+  MEDIUM_NEW: 'hsl(48 89% 62%)',
+  MEDIUM_OLD: 'hsl(38 85% 61%)',
+  HARD_NEW: 'hsl(192 16% 92%)',
+  HARD_OLD: 'hsl(192 15% 74%)',
+  INTERMEDIATE_NEW: 'hsl(145 63% 53%)',
+  INTERMEDIATE_OLD: 'hsl(145 65% 40%)',
+  WET_NEW: 'hsl(204 70% 53%)',
+  WET_OLD: 'hsl(204 67% 41%)',
+  ULTRASOFT_NEW: 'hsl(305 100% 80%)',
+  ULTRASOFT_OLD: 'hsl(305 100% 50%)',
+  HYPERSOFT_NEW: 'hsl(348 100% 85%)',
+  HYPERSOFT_OLD: 'hsl(348 100% 65%)',
+  UNKNOWN_NEW: 'hsl(282 35% 58%)',
+  UNKNOWN_OLD: 'hsl(282 39% 45%)',
+};
