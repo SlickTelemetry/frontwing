@@ -8,19 +8,28 @@ import { Button } from '@/components/ui/button';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 
+import { GetSessionDetailsQuery } from '@/types/graphql';
+
 export const DriverFilters = ({
-  showDrivers = true,
+  driverSessions,
 }: {
-  showDrivers?: boolean;
+  driverSessions?: GetSessionDetailsQuery['sessions'][0]['driver_sessions'];
 }) => {
   const {
-    data,
-    constructorDriversMap,
+    hiddenItems,
     resetHidden,
     setAllHidden,
     toggleConstructor,
     toggleDrivers,
   } = useSessionItems();
+
+  if (!driverSessions?.length) return;
+
+  const constructorsWithDrivers = getConstructorsWithDrivers(
+    driverSessions,
+    hiddenItems,
+  );
+
   return (
     <>
       <div className='flex w-full gap-4'>
@@ -41,61 +50,96 @@ export const DriverFilters = ({
           Clear All
         </Button>
       </div>
-      {constructorDriversMap
-        .keys()
-        .toArray()
-        .map((team) => {
-          const constructor = data.constructors.find((c) => c.name === team);
-          const color = constructor?.color;
+      {constructorsWithDrivers.map((constructor) => (
+        <div
+          key={constructor.name}
+          role='button'
+          tabIndex={0}
+          className='focus-visible:border-ring focus-visible:ring-ring/50 flex cursor-pointer flex-col justify-between gap-1 rounded border p-2 py-1 outline-none focus-visible:ring-[3px]'
+          style={{ borderColor: constructor.color }}
+          onClick={() => toggleConstructor(constructor.name)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleConstructor(constructor.name);
+            }
+          }}
+          aria-label={`Toggle ${constructor.name}`}
+          aria-pressed={constructor.isHidden}
+        >
+          {/* Constructor Name Toggle */}
+          <div
+            className={clsx(
+              'flex items-center gap-1',
+              constructor.isHidden ? 'opacity-50' : 'opacity-100',
+            )}
+          >
+            <Circle fill={constructor.color} stroke='none' className='size-3' />
+            <p className='truncate'>{constructor.name}</p>
+          </div>
 
-          const drivers = constructorDriversMap.get(team) ?? [];
-          return (
-            <div
-              key={team}
-              role='button'
-              tabIndex={0}
-              className='focus-visible:border-ring focus-visible:ring-ring/50 flex cursor-pointer flex-col justify-between gap-1 rounded border p-2 py-1 outline-none focus-visible:ring-[3px]'
-              style={{ borderColor: color }}
-              onClick={() => toggleConstructor(team)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggleConstructor(team);
-                }
-              }}
-              aria-label={`Toggle ${team}`}
-              aria-pressed={
-                data.constructors.find((c) => c.name === team)?.isHidden
-              }
-            >
-              {/* **Constructor Name Toggle** */}
-              <div
-                className={clsx(
-                  'flex items-center gap-1',
-                  data.constructors.find((c) => c.name === team)?.isHidden
-                    ? 'opacity-50'
-                    : 'opacity-100',
-                )}
-              >
-                <Circle fill={color} stroke='none' className='size-3' />
-                <p className='truncate'>{team}</p>
-              </div>
-
-              <DriverBadges
-                drivers={drivers}
-                color={color as string}
-                onDriverClick={(driver, e) => {
-                  e.stopPropagation();
-                  toggleDrivers([driver]);
-                }}
-                hiddenItems={data.drivers
-                  .filter((d) => (showDrivers ? d.isHidden : true))
-                  .map((d) => d.abbreviation ?? '')}
-                fullWidth
-              />
-            </div>
-          );
-        })}
+          <DriverBadges
+            drivers={constructor.drivers.map(
+              (driver) => driver?.abbreviation ?? '',
+            )}
+            color={constructor.color as string}
+            onDriverClick={(driver, e) => {
+              e.stopPropagation();
+              toggleDrivers([driver]);
+            }}
+            hiddenItems={hiddenItems}
+            fullWidth
+          />
+        </div>
+      ))}
     </>
   );
+};
+
+const getConstructorsWithDrivers = (
+  sessions: GetSessionDetailsQuery['sessions'][number]['driver_sessions'],
+  hiddenItems: string[],
+) => {
+  // Create a map to group drivers by constructor
+  const constructorMap = new Map<
+    string,
+    {
+      name: string;
+      color: string;
+      drivers: (GetSessionDetailsQuery['sessions'][number]['driver_sessions'][number]['driver'] & {
+        isHidden: boolean;
+      })[];
+      isHidden: boolean;
+    }
+  >();
+
+  sessions.forEach((session) => {
+    const constructorName =
+      session.constructorByConstructorId?.name ?? 'Unknown';
+    const constructorColor = session.constructorByConstructorId?.color
+      ? `#${session.constructorByConstructorId.color}`
+      : 'var(--foreground)';
+
+    // If the constructor doesn't exist in the map, initialize it
+    if (!constructorMap.has(constructorName)) {
+      constructorMap.set(constructorName, {
+        name: constructorName,
+        color: constructorColor,
+        drivers: [],
+        isHidden: hiddenItems.includes(constructorName),
+      });
+    }
+
+    // Add the driver to the constructor's drivers list
+    const driver = session.driver;
+    if (driver) {
+      constructorMap.get(constructorName)?.drivers.push({
+        abbreviation: driver.abbreviation,
+        isHidden: hiddenItems.includes(driver.abbreviation ?? ''),
+      });
+    }
+  });
+
+  // Convert the map to an array of constructors
+  return Array.from(constructorMap.values());
 };

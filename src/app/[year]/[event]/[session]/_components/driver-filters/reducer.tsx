@@ -4,7 +4,7 @@ type VisibilityAction =
   | {
       type: 'SET_HIDDEN';
       payload: {
-        ids: string[];
+        ids: (string | null | undefined)[];
         value: boolean;
       };
     }
@@ -23,6 +23,7 @@ export function visibilityReducer(
       const { ids: setIds, value } = action.payload;
       const newState = { ...state };
       setIds.forEach((id) => {
+        if (!id) return;
         newState[id] = value;
       });
       return newState;

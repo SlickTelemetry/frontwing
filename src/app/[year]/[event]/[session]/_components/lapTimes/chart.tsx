@@ -34,7 +34,7 @@ export const LapTimesChart = ({
   showPitIn: boolean;
   hideOutliers: number | null;
 }) => {
-  const { hiddenDrivers } = useSessionItems();
+  const { hiddenItems } = useSessionItems();
 
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(chartRef);
@@ -101,7 +101,7 @@ export const LapTimesChart = ({
 
     const driverSessions =
       data?.sessions?.[0]?.driver_sessions?.filter(
-        (s) => !hiddenDrivers.includes(s?.driver?.abbreviation ?? ''),
+        (s) => !hiddenItems.includes(s?.driver?.abbreviation ?? ''),
       ) || [];
 
     const allLaps = Array.from({
@@ -182,7 +182,7 @@ export const LapTimesChart = ({
       },
       { replaceMerge: ['series'] },
     );
-  }, [chartInstance, data?.sessions, hiddenDrivers, hideOutliers, showPitIn]);
+  }, [chartInstance, data?.sessions, hiddenItems, hideOutliers, showPitIn]);
 
   return (
     <>

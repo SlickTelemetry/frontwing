@@ -73,7 +73,7 @@ export interface DriverTimes {
 }
 
 const SectorTimes = () => {
-  const { hiddenDrivers } = useSessionItems();
+  const { hiddenItems } = useSessionItems();
   const { year, event, session: sessionParam } = useParams();
   const { data, loading, error } = useQuery<
     GetSessionFastestTimesQuery,
@@ -99,7 +99,7 @@ const SectorTimes = () => {
   const driverSessions = data?.sessions[0].driver_sessions || [];
 
   const driverTimes: DriverTimes[] = driverSessions
-    .filter((ds) => !hiddenDrivers.includes(ds.driver?.abbreviation ?? ''))
+    .filter((ds) => !hiddenItems.includes(ds.driver?.abbreviation ?? ''))
     .map((ds) => {
       const sector1 =
         ds.fastest_sector1.length > 0 && ds.fastest_sector1[0].sector1 !== null

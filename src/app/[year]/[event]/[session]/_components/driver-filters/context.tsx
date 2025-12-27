@@ -13,24 +13,13 @@ import { visibilityReducer } from '@/app/[year]/[event]/[session]/_components/dr
 import { GetSessionDetailsQuery } from '@/types/graphql';
 
 type SessionItemContextValue = {
-  data: {
-    drivers: (GetSessionDetailsQuery['sessions'][number]['driver_sessions'][number]['driver'] & {
-      isHidden: boolean;
-    })[];
-    constructors: {
-      name: string;
-      color: string;
-      isHidden: boolean;
-    }[];
-  };
-  constructorDriversMap: Map<string, string[]>;
+  hiddenItems: string[];
   // New explicit APIs
   setHidden: (ids: string[], value: boolean) => void;
   resetHidden: () => void;
   setAllHidden: () => void;
   toggleConstructor: (team: string) => void;
   toggleDrivers: (ids: string[]) => void;
-  hiddenDrivers: string[];
 };
 
 const SessionItemContext = createContext<SessionItemContextValue | null>(null);
@@ -52,145 +41,34 @@ export function SessionItemProvider({
   sessions?: GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
   initialHiddenDrivers?: string[];
 }) {
-  const [hiddenItems, dispatch] = useReducer(visibilityReducer, {});
   const initAppliedRef = useRef(false);
+  const [hiddenItems, dispatch] = useReducer(visibilityReducer, {});
+  const hiddenKeys = useMemo(() => {
+    const hiddenConstructors = new Set<string>();
 
-  const {
-    memoizedDrivers,
-    memoizedConstructors,
-    driverLookupMap, // New
-    constructorDriversMap, // New
-  } = useMemo(() => {
-    if (!sessions?.length) {
-      return {
-        memoizedDrivers: [],
-        memoizedConstructors: [],
-        driverLookupMap: {},
-        constructorDriversMap: new Map<string, string[]>(),
-      };
-    }
+    // Check if all drivers of a constructor are hidden
+    sessions?.forEach((ds) => {
+      const constructorName = ds.constructorByConstructorId?.name;
+      const driverAbbreviation = ds.driver?.abbreviation;
 
-    const constructors = Array.from(
-      new Map(
-        sessions.map((c) => {
-          const name = c.constructorByConstructorId?.name ?? 'Unknown';
-          const color = c.constructorByConstructorId?.color;
-          return [
-            name,
-            {
-              name,
-              color: color ? `#${color}` : 'var(--foreground)',
-            },
-          ];
-        }),
-      ).values(),
-    );
+      if (constructorName && driverAbbreviation) {
+        const allDriversHidden = sessions
+          .filter((s) => s.constructorByConstructorId?.name === constructorName)
+          .every((s) => hiddenItems[s.driver?.abbreviation ?? '']);
 
-    const driverLookupMap: Record<
-      string,
-      GetSessionDetailsQuery['sessions'][number]['driver_sessions'][number]
-    > = {};
-    const constructorDriversMap = new Map<string, string[]>();
-
-    constructors.forEach((constructor) => {
-      constructorDriversMap.set(constructor.name, []);
-    });
-
-    sessions.forEach((c) => {
-      const driver = c.driver;
-      const abbr = driver?.abbreviation ?? '';
-      const constructor = c.constructorByConstructorId?.name ?? 'Unknown';
-      // Populate driver lookup
-      driverLookupMap[abbr] = c;
-
-      // Populate constructor drivers map
-      if (constructorDriversMap.has(constructor)) {
-        constructorDriversMap
-          .get(constructor)
-          ?.push(driver?.abbreviation ?? '');
+        if (allDriversHidden) {
+          hiddenConstructors.add(constructorName);
+        }
       }
     });
 
-    return {
-      memoizedDrivers: sessions,
-      memoizedConstructors: constructors,
-      driverLookupMap,
-      constructorDriversMap,
-    };
-  }, [sessions]);
+    return Object.keys(hiddenItems)
+      .filter((key) => hiddenItems[key])
+      .concat(Array.from(hiddenConstructors));
+  }, [hiddenItems, sessions]);
 
-  const setHidden = useCallback((ids: string[], value: boolean) => {
-    dispatch({ type: 'SET_HIDDEN', payload: { ids, value } });
-  }, []);
-
-  const resetHidden = useCallback(() => {
-    dispatch({ type: 'RESET' });
-  }, []);
-
-  const setAllHidden = useCallback(() => {
-    const allIds = [
-      ...Object.keys(driverLookupMap),
-      ...memoizedConstructors.map((c) => c.name ?? ''),
-    ];
-    dispatch({ type: 'SET_HIDDEN', payload: { ids: allIds, value: true } });
-  }, [driverLookupMap, memoizedConstructors]);
-
-  const toggleConstructor = useCallback(
-    (team: string) => {
-      const isHidden = !!hiddenItems[team];
-      const drivers = constructorDriversMap.get(team) ?? [];
-      setHidden([team, ...drivers], !isHidden);
-    },
-    [constructorDriversMap, hiddenItems, setHidden],
-  );
-
-  const toggleDrivers = useCallback(
-    (ids: string[]) => {
-      const toHide: string[] = [];
-      const toShow: string[] = [];
-      ids.forEach((id) => {
-        if (hiddenItems[id]) toShow.push(id);
-        else toHide.push(id);
-      });
-      if (toHide.length) setHidden(toHide, true);
-      if (toShow.length) setHidden(toShow, false);
-    },
-    [hiddenItems, setHidden],
-  );
-
-  const data = useMemo(() => {
-    // Combine drivers data with visibility status
-    const driversWithVisibility = memoizedDrivers.map((d) => ({
-      ...d.driver,
-      isHidden: !!hiddenItems[d.driver?.abbreviation ?? ''], // Fast lookup
-    }));
-
-    // Combine constructors data with visibility status
-    const constructorsWithVisibility = memoizedConstructors.map((c) => ({
-      ...c,
-      isHidden: !!hiddenItems[c.name], // Fast lookup
-    }));
-
-    return {
-      drivers: driversWithVisibility,
-      constructors: constructorsWithVisibility,
-    };
-  }, [memoizedDrivers, memoizedConstructors, hiddenItems]); // Depends on base data and visibility state
-
-  const hiddenDrivers = data.drivers
-    .filter((d) => d.isHidden)
-    .map((d) => d.abbreviation ?? '');
-
-  // Apply initial hidden drivers only once when provider initializes or
-  // when we first receive a non-empty `initialHiddenDrivers` value for this session.
   useEffect(() => {
-    // Only apply once per session load
-    if (initAppliedRef.current) return;
-
-    // Don't apply if we don't have any drivers yet or there is nothing to apply
-    if (!initialHiddenDrivers || initialHiddenDrivers.length === 0) return;
-
-    // Apply initial hidden drivers (idempotent SET_HIDDEN)
+    if (initAppliedRef.current || !initialHiddenDrivers?.length) return;
     dispatch({
       type: 'SET_HIDDEN',
       payload: { ids: initialHiddenDrivers, value: true },
@@ -198,13 +76,52 @@ export function SessionItemProvider({
     initAppliedRef.current = true;
   }, [initialHiddenDrivers]);
 
+  const setHidden = useCallback(
+    (ids: string[], value: boolean) =>
+      dispatch({ type: 'SET_HIDDEN', payload: { ids, value } }),
+    [],
+  );
+
+  const resetHidden = useCallback(() => dispatch({ type: 'RESET' }), []);
+
+  const setAllHidden = useCallback(() => {
+    const allIds =
+      sessions?.flatMap((ds) => [
+        ds.constructorByConstructorId?.name,
+        ds.driver?.abbreviation,
+      ]) ?? [];
+    dispatch({ type: 'SET_HIDDEN', payload: { ids: allIds, value: true } });
+  }, [sessions]);
+
+  const toggleConstructor = useCallback(
+    (team: string) => {
+      const isHidden = !!hiddenItems[team];
+      const driverIds =
+        sessions
+          ?.filter((ds) => ds.constructorByConstructorId?.name === team)
+          .map((ds) => ds.driver?.abbreviation ?? '') ?? [];
+      setHidden([team, ...driverIds], !isHidden);
+    },
+    [hiddenItems, sessions, setHidden],
+  );
+
+  const toggleDrivers = useCallback(
+    (ids: string[]) => {
+      const [toHide, toShow] = ids.reduce(
+        ([hide, show], id) =>
+          hiddenItems[id] ? [hide, [...show, id]] : [[...hide, id], show],
+        [[], []] as [string[], string[]],
+      );
+      if (toHide.length) setHidden(toHide, true);
+      if (toShow.length) setHidden(toShow, false);
+    },
+    [hiddenItems, setHidden],
+  );
+
   return (
     <SessionItemContext.Provider
       value={{
-        // Data
-        constructorDriversMap,
-        data,
-        hiddenDrivers,
+        hiddenItems: hiddenKeys,
         // Actions
         setHidden,
         resetHidden,

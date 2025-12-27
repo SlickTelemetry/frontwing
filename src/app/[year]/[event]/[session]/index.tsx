@@ -134,9 +134,11 @@ type ChartKey = keyof typeof ChartConfigs;
 
 export const ChartViewController = ({
   data,
+  sortedSessions,
   sessionType,
 }: {
   data?: GetSessionDetailsQuery;
+  sortedSessions: GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
   sessionType: SessionType;
 }) => {
   const router = useRouter();
@@ -171,7 +173,9 @@ export const ChartViewController = ({
 
       <div className='relative flex gap-8'>
         <div className='sticky top-20 grid h-fit w-1/4 max-w-62.5 gap-2'>
-          <DriverFilters />
+          {/* TODO: need to do some sorting before passing to each chart */}
+
+          <DriverFilters driverSessions={sortedSessions} />
         </div>
         <div className='flex-1'>
           <Activity mode={activeChart === 'grid' ? 'visible' : 'hidden'}>
