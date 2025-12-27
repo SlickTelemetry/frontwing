@@ -12,7 +12,7 @@ import {
   eventLocationDecode,
   sessionDecode,
   sortFastestLaps,
-  sortQuali,
+  sortResults,
 } from '@/lib/utils';
 
 import { EventDetails } from '@/components/event-details';
@@ -58,7 +58,7 @@ export default function SessionPage({
   let sortedSessions = driverSessions;
   if (data) {
     if (isQualifying || isCompetition) {
-      sortedSessions = sortQuali(
+      sortedSessions = sortResults(
         driverSessions,
       ) as GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
     }

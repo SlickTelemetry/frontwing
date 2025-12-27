@@ -1,28 +1,13 @@
 'use client';
-import { useQuery } from '@apollo/client/react';
 import * as echarts from 'echarts';
-import { useParams } from 'next/navigation';
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-import { GET_SESSION_STINTS } from '@/lib/queries';
-import {
-  eventLocationDecode,
-  sessionDecode,
-  sortFastestLaps,
-  sortQuali,
-} from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
-
-import { Loader } from '@/components/Loader';
-import { ServerPageError } from '@/components/ServerError';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 import { baseOptions } from '@/app/[year]/[event]/[session]/_components/stints/config';
 
-import {
-  GetSessionStintsQuery,
-  Session_Name_Choices_Enum,
-} from '@/types/graphql';
+import { GetSessionStintsQuery } from '@/types/graphql';
 
 interface StintsEchartsChartProps {
   driverSessions: GetSessionStintsQuery['sessions'][number]['driver_sessions'];
@@ -71,8 +56,7 @@ const tyreCompoundColors: Record<string, string> = {
   UNKNOWN_OLD: 'hsl(282 39% 45%)',
 };
 
-// TODO: Migrate to separate file
-const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
+export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
   const { hiddenDrivers } = useSessionItems();
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(chartRef);
@@ -102,6 +86,9 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     // Only show tooltip if there is actual data for the stint
     if (data.value[0] === 0 || data.value === null) return;
 
+    const driverName = (params.data as CustomBarDataItem).value[1];
+    tooltipContent += `<div class="flex gap-2 items-center">${params.data.color && `<div class="size-4 rounded-full" style="background-color: ${params.data.color};"></div>`}<div><p class="font-semibold">${driverName}</p><p>${params.data.constructor}</p></div></div><hr class="my-2"/>`;
+
     const tyreColor =
       tyreCompoundColors[
         `${data.tyreCompound.toUpperCase()}_${data.freshTyre ? 'NEW' : 'OLD'}`
@@ -120,15 +107,8 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
                         <p>(${data.originalStartLap} - ${data.originalEndLap})</p>
                       </div>
                     </div>
-                </div><hr class="my-2"/>
+                </div>
               `;
-
-    const driverName = (params.data as CustomBarDataItem).value[1];
-    tooltipContent += `<div class="flex gap-2 items-center">${params.data.color && `<div class="size-4 rounded-full" style="background-color: ${params.data.color};"></div>`}<div><p class="font-semibold">${driverName}</p><p>${params.data.constructor}</p></div></div>`;
-    // console.log('params for tooltip:', params);
-
-    // params.forEach((param: any) => {
-    // });
     return tooltipContent;
   };
 
@@ -235,7 +215,11 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
             formatter: ({ value, ...params }) => {
               const data = params.data as CustomBarDataItem;
               const val = value as CustomBarDataItem['value'];
-              return `S${data.stint}\n${val[0]} Lap${val[0] > 1 ? 's' : ''}`;
+              let label = `S${data.stint}`;
+              if (val[0] > 2) {
+                label += `\n${val[0]} Lap${val[0] > 1 ? 's' : ''}`;
+              }
+              return label;
             },
 
             position: 'inside', // Position label inside the bar
@@ -279,74 +263,3 @@ const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };
-
-const Stints = ({
-  sessionType,
-}: {
-  sessionType: {
-    isCompetition: boolean;
-    isQualifying: boolean;
-    isPractice: boolean;
-  };
-}) => {
-  const { year, event, session } = useParams();
-
-  const {
-    data: sessionData,
-    loading,
-    error,
-  } = useQuery(GET_SESSION_STINTS, {
-    variables: {
-      year: parseInt(year as string),
-      event: eventLocationDecode(event as string),
-      session: sessionDecode(session as string) as Session_Name_Choices_Enum,
-    },
-  });
-
-  if (error || (!sessionData && !loading)) return <ServerPageError />;
-
-  let driverSessions = sessionData?.sessions[0]?.driver_sessions || [];
-
-  // Sorting logic based on session type
-  if (sessionType.isQualifying || sessionType.isCompetition) {
-    driverSessions = sortQuali(
-      driverSessions,
-    ) as GetSessionStintsQuery['sessions'][number]['driver_sessions'];
-  } else if (sessionType.isPractice) {
-    driverSessions = sortFastestLaps(
-      driverSessions,
-    ) as GetSessionStintsQuery['sessions'][number]['driver_sessions'];
-  }
-
-  return (
-    <div className='grid gap-4'>
-      <ChartContainer title='Tyre Analysis' loading={loading}>
-        <StintsChart driverSessions={driverSessions} />
-      </ChartContainer>
-    </div>
-  );
-};
-
-const ChartContainer = ({
-  title,
-  children,
-  loading,
-}: {
-  title: string;
-  children: React.ReactNode;
-  loading: boolean;
-}) => {
-  return (
-    <div className='border-foreground flex h-125 flex-col rounded border p-4 lg:h-[80dvh]'>
-      <div className='z-10 flex w-full flex-wrap items-center gap-4 pb-4'>
-        <h2 className='mr-auto flex-1 scroll-m-20 text-2xl font-semibold tracking-tight'>
-          {title}
-        </h2>
-      </div>
-      {loading && <Loader />}
-      {!loading && children}
-    </div>
-  );
-};
-
-export default Stints;

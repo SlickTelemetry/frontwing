@@ -343,14 +343,23 @@ export const GET_SESSION_STINTS = graphql(`
           }
           tyre_life
           fresh_tyre
+          lap_start_date
         }
 
         results {
           finishing_position
+          q1_time
+          q2_time
+          q3_time
         }
         fastest_lap: laps(limit: 1, order_by: { lap_time: asc }) {
           lap_time
         }
+      }
+      race_control_messages(
+        where: { scope: { _eq: Track }, flag: { _in: [CHEQUERED] } }
+      ) {
+        time
       }
     }
   }

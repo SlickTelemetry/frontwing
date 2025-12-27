@@ -13380,13 +13380,21 @@ export type GetSessionStintsQuery = {
         stint?: number | null;
         tyre_life?: number | null;
         fresh_tyre?: boolean | null;
+        lap_start_date?: string | null;
         tyre_compound?: { __typename?: 'tyre_compounds'; value: string } | null;
       }>;
       results: Array<{
         __typename?: 'results';
         finishing_position?: number | null;
+        q1_time?: number | null;
+        q2_time?: number | null;
+        q3_time?: number | null;
       }>;
       fastest_lap: Array<{ __typename?: 'laps'; lap_time?: number | null }>;
+    }>;
+    race_control_messages: Array<{
+      __typename?: 'race_control_messages';
+      time?: string | null;
     }>;
   }>;
 };
@@ -21538,6 +21546,10 @@ export const GetSessionStintsDocument = {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'fresh_tyre' },
                             },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_start_date' },
+                            },
                           ],
                         },
                       },
@@ -21553,6 +21565,18 @@ export const GetSessionStintsDocument = {
                                 kind: 'Name',
                                 value: 'finishing_position',
                               },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'q1_time' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'q2_time' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'q3_time' },
                             },
                           ],
                         },
@@ -21592,6 +21616,60 @@ export const GetSessionStintsDocument = {
                           ],
                         },
                       },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'race_control_messages' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'where' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'scope' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: { kind: 'EnumValue', value: 'Track' },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'flag' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_in' },
+                                  value: {
+                                    kind: 'ListValue',
+                                    values: [
+                                      { kind: 'EnumValue', value: 'CHEQUERED' },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'time' } },
                     ],
                   },
                 },
