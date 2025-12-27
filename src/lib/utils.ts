@@ -3,12 +3,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { SPRINT_EVENT_FORMATS } from '@/lib/constants';
 
-import {
-  Event_Format_Choices_Enum,
-  EventCompetitionResultsFragment,
-  EventPracticeResultsFragment,
-  EventQualifyingResultsFragment,
-} from '@/types/graphql';
+import { Event_Format_Choices_Enum } from '@/types/graphql';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -191,17 +186,13 @@ export const formatLapTime = (time?: string | number | bigint | null) => {
   return `${hours}:${pad(minutes)}:${pad(seconds)}${millis}`;
 };
 
-export const sortFastestLaps = (
-  sessions:
-    | EventCompetitionResultsFragment['competition_sessions']
-    | EventPracticeResultsFragment['practice_sessions'],
+export const sortFastestLaps = <
+  T extends { fastest_lap: { [key: string]: unknown }[] },
+>(
+  sessions: T[],
 ) => {
   return sessions
-    ?.filter((driver) => {
-      return (
-        driver?.fastest_lap?.length !== 0 && !!driver.fastest_lap?.[0].lap_time
-      );
-    })
+    ?.filter((driver) => !!driver.fastest_lap?.[0].lap_time)
     .sort((a, b) => {
       return (
         Number(a.fastest_lap[0]?.lap_time || 0) -
@@ -210,15 +201,18 @@ export const sortFastestLaps = (
     });
 };
 
-export const sortQuali = (
-  sessions: EventQualifyingResultsFragment['qualifying_session'],
+export const sortResults = <
+  T extends { results: { [key: string]: unknown }[] },
+>(
+  sessions: T[],
+  key: keyof T['results'][number] = 'finishing_position',
 ) => {
   return sessions
-    .filter((driver) => !!driver.results[0]?.finishing_position)
+    .filter((driver) => !!driver.results[0][key as string])
     .sort((a, b) => {
       return (
-        Number(a.results[0]?.finishing_position || 0) -
-        Number(b.results[0]?.finishing_position || 0)
+        Number(a.results[0][key as string] || 0) -
+        Number(b.results[0]?.[key as string] || 0)
       );
     });
 };
