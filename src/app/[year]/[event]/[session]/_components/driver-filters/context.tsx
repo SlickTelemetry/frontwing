@@ -119,11 +119,6 @@ export function SessionItemProvider({
     };
   }, [sessions]);
 
-  // Reset the init flag whenever sessions change so a new session may be initialized
-  useEffect(() => {
-    initAppliedRef.current = false;
-  }, [sessions]);
-
   const setHidden = useCallback((ids: string[], value: boolean) => {
     dispatch({ type: 'SET_HIDDEN', payload: { ids, value } });
   }, []);
@@ -194,7 +189,6 @@ export function SessionItemProvider({
 
     // Don't apply if we don't have any drivers yet or there is nothing to apply
     if (!initialHiddenDrivers || initialHiddenDrivers.length === 0) return;
-    if (!memoizedDrivers || memoizedDrivers.length === 0) return;
 
     // Apply initial hidden drivers (idempotent SET_HIDDEN)
     dispatch({
@@ -202,7 +196,7 @@ export function SessionItemProvider({
       payload: { ids: initialHiddenDrivers, value: true },
     });
     initAppliedRef.current = true;
-  }, [initialHiddenDrivers, memoizedDrivers]);
+  }, [initialHiddenDrivers]);
 
   return (
     <SessionItemContext.Provider
