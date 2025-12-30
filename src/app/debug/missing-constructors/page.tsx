@@ -120,7 +120,7 @@ export default function MissingConstructorsTestPage() {
     (driver.driver_sessions || []).forEach((ds: any) => {
       // only consider sessions that have an event/year
       const season = ds.session?.event?.year;
-      const sessionName = ds.session?.name;
+      const sessionName = ds.session?.name.replace('_', ' ');
       const eventName = ds.session?.event?.name;
       const eventRound = ds.session?.event?.round_number;
       const date = ds.session?.date;
@@ -220,6 +220,38 @@ export default function MissingConstructorsTestPage() {
   const sortedSessionTypes = Array.from(sessionTypeStats.entries())
     .sort((a, b) => b[1] - a[1])
     .map(([type, count]) => ({ type, count }));
+
+  const generateSeasonJson = (season: DriverSessionGroup) => {
+    const yearData: Record<
+      string,
+      Record<string, Record<string, Array<Record<string, string>>>>
+    > = {
+      [season.season.toString()]: {},
+    };
+
+    season.sessions.forEach((session) => {
+      const roundKey = session.eventRound.toString();
+      if (!yearData[season.season.toString()][roundKey]) {
+        yearData[season.season.toString()][roundKey] = {};
+      }
+
+      yearData[season.season.toString()][roundKey][session.sessionName] =
+        session.drivers.map((driver) => ({
+          driver_number: driver.driverNumber?.toString() || '',
+          driver_full_name: driver.driverName,
+          constructor_ergast_id: '',
+        }));
+    });
+
+    return JSON.stringify(yearData, null, 2);
+  };
+
+  const copyJsonToClipboard = (season: DriverSessionGroup) => {
+    const json = generateSeasonJson(season);
+    navigator.clipboard.writeText(json).then(() => {
+      alert(`JSON for ${season.season} copied to clipboard!`);
+    });
+  };
 
   return (
     <>
@@ -426,9 +458,19 @@ export default function MissingConstructorsTestPage() {
                                     {season.season}
                                   </span>
                                 </button>
-                                <span className='font-semibold'>
-                                  {seasonTotal}
-                                </span>
+                                <div className='flex items-center gap-2'>
+                                  <span className='font-semibold'>
+                                    {seasonTotal}
+                                  </span>
+                                  <button
+                                    type='button'
+                                    onClick={() => copyJsonToClipboard(season)}
+                                    className='hover:bg-secondary rounded px-2 py-1 text-xs font-medium text-white'
+                                    title='Copy JSON for this season'
+                                  >
+                                    JSON
+                                  </button>
+                                </div>
                               </div>
 
                               {expandedSeasons[season.season] &&
