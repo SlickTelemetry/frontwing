@@ -198,7 +198,7 @@ export const ChartViewController = ({
             <Stints sessionType={sessionType} />,
           </Activity>
           <Activity mode={activeChart === 'sectors' ? 'visible' : 'hidden'}>
-            <SectorTimes />,
+            <SectorTimes />
           </Activity>
         </div>
       </div>

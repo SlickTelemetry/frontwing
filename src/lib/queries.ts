@@ -260,7 +260,7 @@ export const GET_SESSION_RESULTS = gql`
   }
 `;
 
-export const GET_SESSION_FASTEST_TIMES = gql`
+export const GET_SESSION_FASTEST_TIMES = graphql(`
   query GetSessionFastestTimes(
     $year: Int!
     $event: String!
@@ -311,7 +311,7 @@ export const GET_SESSION_FASTEST_TIMES = gql`
       }
     }
   }
-`;
+`);
 
 export const GET_SESSION_STINTS = graphql(`
   query GetSessionStints(
