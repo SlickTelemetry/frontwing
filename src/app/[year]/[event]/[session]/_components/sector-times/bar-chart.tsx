@@ -1,11 +1,10 @@
-import { EChartsOption } from 'echarts';
-import * as echarts from 'echarts/core';
 import { useEffect, useRef } from 'react';
 
+import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
+import { baseOptions } from '@/app/[year]/[event]/[session]/_components/sector-times';
 import { DriverTimes } from '@/app/[year]/[event]/[session]/_components/sectorTimes';
-import { baseOptions } from '@/app/[year]/standings/_components/chart';
 
 interface EChartsCallbackParams {
   dataIndex: number;
@@ -42,124 +41,71 @@ export const SectorChart = ({
   // Initialize base options once (tooltip uses item color, not external maps)
   useEffect(() => {
     if (!chartInstance.current) return;
+    chartInstance.current.setOption(baseOptions);
+  }, [chartInstance]);
+
+  useEffect(() => {
+    if (!chartInstance.current) return;
+    const abbreviations = driverTimes.map((d) => d.abbreviation);
+    const sectorTimes = driverTimes.map((d) => d.sectors[sectorKey].time);
+    const lapNumbers = driverTimes.map((d) => d.sectors[sectorKey].lap);
+    const colors = driverTimes.map((d) => `#${d.color}`);
 
     const formatter = (params: EChartsCallbackParams[]) => {
       if (!Array.isArray(params) || !params.length) return '';
 
-      let tableHtml = `
-              <div style="border: 2px solid #c23531; border-radius: 4px; background-color: #282c34; padding: 10px; box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);">
-                <table style="width: 100%; border-collapse: collapse; color: #fff; font-family: 'Arial', sans-serif;">
-                  <thead>
-                    <tr>
-                      <th style="text-align: left; padding: 5px; font-weight: normal;"></th>
-                      <th style="text-align: left; padding: 5px; font-weight: normal;">Time</th>
-                      <th style="text-align: left; padding: 5px; font-weight: normal;">Lap</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-            `;
+      let tableHtml = `<div class="grid grid-cols-[auto_1fr_1fr] items-center">`;
 
       driverTimes.forEach((driver, index) => {
         const isHovered = index === params[0].dataIndex;
-        const style = isHovered
-          ? 'background-color: rgba(255, 255, 255, 0.2);'
-          : '';
-        const time = driver.sectors[sectorKey].time;
+        const time = formatLapTime(driver.sectors[sectorKey].time);
         const lap = driver.sectors[sectorKey].lap;
-
+        const color = colors[index];
         tableHtml += `
-                <tr style="${style}">
-                  <td style="font-weight: bold; text-align: left; padding: 5px;">${driver.abbreviation}</td>
-                  <td style="text-align: left; padding: 5px;">${
-                    time ? `${time.toFixed(3)}s` : 'N/A'
-                  }</td>
-                  <td style="text-align: left; padding: 5px;">${lap || 'N/A'}</td>
-                </tr>
-              `;
+          <div class="flex gap-1 items-center w-fit mr-1">
+            <div class="rounded-full size-3" style="background-color:${color};"></div>
+            <p style="color:${color}">${driver.abbreviation}:</p>
+          </div>
+          <p>${time || 'N/A'}</p>
+          <p class="text-right">${lap ? `L${lap}` : 'N/A'}</p>
+          <hr class="col-span-full" style="border-color:${isHovered ? color : 'inherit'}"/>
+        `;
       });
 
-      tableHtml += `
-                  </tbody>
-                </table>
-              </div>
-            `;
-
+      tableHtml += `</div>`;
       return tableHtml;
     };
 
-    chartInstance.current.setOption(
-      {
-        ...baseOptions,
-
-        title: {
-          text:
-            sectorKey === 'sector1'
-              ? 'Sector 1'
-              : sectorKey === 'sector2'
-                ? 'Sector 2'
-                : 'Sector 3',
-        },
-        tooltip: { ...baseOptions.tooltip, formatter },
+    chartInstance.current.setOption({
+      tooltip: { formatter },
+      xAxis: {
+        data: abbreviations,
       },
-      true,
-    );
-  }, [chartInstance, driverTimes, sectorKey]);
-
-  useEffect(() => {
-    let chartInstance: echarts.ECharts | undefined;
-    if (chartRef.current && driverTimes.length > 0) {
-      chartInstance = echarts.init(chartRef.current, 'dark');
-
-      const abbreviations = driverTimes.map((d) => d.abbreviation);
-      const sectorTimes = driverTimes.map((d) => d.sectors[sectorKey].time);
-      const lapNumbers = driverTimes.map((d) => d.sectors[sectorKey].lap);
-      const colors = driverTimes.map((d) => `#${d.color}`);
-
-      const option: EChartsOption = {
-        xAxis: {
-          data: abbreviations,
-        },
-        series: [
-          {
-            name: `Sector ${sectorKey.slice(-1)}`,
-            type: 'bar',
-            data: sectorTimes.map((value, index) => ({
-              value: value,
-              itemStyle: {
-                color: colors[index],
-              },
-            })),
-            label: {
-              show: true,
-              position: 'top',
-              formatter: (params: unknown) => {
-                const param = params as { dataIndex: number; value: number };
-                const driverIndex = param.dataIndex;
-                const lap = lapNumbers[driverIndex];
-                return `Lap ${lap}\n${Number(param.value).toFixed(3)}s`;
-              },
-              color: '#fff',
-              fontSize: 10,
+      series: [
+        {
+          name: `Sector ${sectorKey.slice(-1)}`,
+          type: 'bar',
+          data: sectorTimes.map((value, index) => ({
+            value: value,
+            itemStyle: {
+              color: colors[index],
+              borderRadius: [12, 12, 0, 0],
             },
-            barWidth: '60%',
+          })),
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: { dataIndex: number; value: number }) => {
+              const driverIndex = params.dataIndex;
+              const lap = lapNumbers[driverIndex];
+              return `Lap ${lap}\n${(params.value / 1000).toFixed(3)}s`;
+            },
           },
-        ],
-      };
-
-      chartInstance.setOption({ ...baseOptions, ...option });
-
-      const handleResize = () => {
-        chartInstance?.resize();
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        chartInstance?.dispose();
-      };
-    }
-  }, [driverTimes, sectorKey]);
+          barWidth: '60%',
+        },
+      ],
+    });
+  }, [chartInstance, driverTimes, sectorKey]);
 
   if (driverTimes.length === 0) {
     return (
@@ -171,9 +117,5 @@ export const SectorChart = ({
     );
   }
 
-  return (
-    <div className='rounded border p-2'>
-      <div ref={chartRef} style={{ width: '100%', height: '500px' }} />
-    </div>
-  );
+  return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };

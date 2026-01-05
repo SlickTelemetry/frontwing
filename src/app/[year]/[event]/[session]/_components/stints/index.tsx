@@ -11,7 +11,7 @@ import {
   sortResults,
 } from '@/lib/utils';
 
-import { Loader } from '@/components/Loader';
+import { ChartContainer } from '@/components/chart-container';
 import { ServerPageError } from '@/components/ServerError';
 
 import { StintsChart } from '@/app/[year]/[event]/[session]/_components/stints/chart';
@@ -106,28 +106,6 @@ const Stints = ({
           </ChartContainer>
         </>
       )}
-    </div>
-  );
-};
-
-const ChartContainer = ({
-  title,
-  children,
-  loading,
-}: {
-  title: string;
-  children: React.ReactNode;
-  loading: boolean;
-}) => {
-  return (
-    <div className='border-foreground flex h-125 flex-col rounded border p-4 lg:h-[80dvh]'>
-      <div className='z-10 flex w-full flex-wrap items-center gap-4 pb-4'>
-        <h2 className='mr-auto flex-1 scroll-m-20 text-2xl font-semibold tracking-tight'>
-          {title}
-        </h2>
-      </div>
-      {loading && <Loader />}
-      {!loading && children}
     </div>
   );
 };

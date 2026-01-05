@@ -13324,7 +13324,6 @@ export type GetSessionFastestTimesQuery = {
       fastest_lap: Array<{
         __typename?: 'laps';
         lap_number?: number | null;
-        stint?: number | null;
         lap_time?: number | null;
         sector1?: number | null;
         sector2?: number | null;
@@ -13333,19 +13332,16 @@ export type GetSessionFastestTimesQuery = {
       fastest_sector1: Array<{
         __typename?: 'laps';
         lap_number?: number | null;
-        stint?: number | null;
         sector1?: number | null;
       }>;
       fastest_sector2: Array<{
         __typename?: 'laps';
         lap_number?: number | null;
-        stint?: number | null;
         sector2?: number | null;
       }>;
       fastest_sector3: Array<{
         __typename?: 'laps';
         lap_number?: number | null;
-        stint?: number | null;
         sector3?: number | null;
       }>;
     }>;
@@ -21171,10 +21167,6 @@ export const GetSessionFastestTimesDocument = {
                             },
                             {
                               kind: 'Field',
-                              name: { kind: 'Name', value: 'stint' },
-                            },
-                            {
-                              kind: 'Field',
                               name: { kind: 'Name', value: 'lap_time' },
                             },
                             {
@@ -21226,10 +21218,6 @@ export const GetSessionFastestTimesDocument = {
                             },
                             {
                               kind: 'Field',
-                              name: { kind: 'Name', value: 'stint' },
-                            },
-                            {
-                              kind: 'Field',
                               name: { kind: 'Name', value: 'sector1' },
                             },
                           ],
@@ -21269,10 +21257,6 @@ export const GetSessionFastestTimesDocument = {
                             },
                             {
                               kind: 'Field',
-                              name: { kind: 'Name', value: 'stint' },
-                            },
-                            {
-                              kind: 'Field',
                               name: { kind: 'Name', value: 'sector2' },
                             },
                           ],
@@ -21309,10 +21293,6 @@ export const GetSessionFastestTimesDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'lap_number' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'stint' },
                             },
                             {
                               kind: 'Field',

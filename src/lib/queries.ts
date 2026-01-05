@@ -287,7 +287,6 @@ export const GET_SESSION_FASTEST_TIMES = graphql(`
         }
         fastest_lap: laps(order_by: { lap_time: asc }, limit: 1) {
           lap_number
-          stint
           lap_time
           sector1
           sector2
@@ -295,17 +294,14 @@ export const GET_SESSION_FASTEST_TIMES = graphql(`
         }
         fastest_sector1: laps(order_by: { sector1: asc }, limit: 1) {
           lap_number
-          stint
           sector1
         }
         fastest_sector2: laps(order_by: { sector2: asc }, limit: 1) {
           lap_number
-          stint
           sector2
         }
         fastest_sector3: laps(order_by: { sector3: asc }, limit: 1) {
           lap_number
-          stint
           sector3
         }
       }

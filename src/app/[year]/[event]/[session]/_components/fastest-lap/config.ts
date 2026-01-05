@@ -1,65 +1,52 @@
 import { EChartsOption } from 'echarts';
 
+import { formatLapTime } from '@/lib/utils';
+
 export const baseOptions: EChartsOption = {
-  title: {
-    text: 'Fastest Lap Times',
-    subtext: '{diamond|} = Potential is total of best sector times',
-    subtextStyle: {
-      rich: {
-        diamond: {
-          backgroundColor: {
-            image:
-              'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,0 100,50 50,100 0,50" fill="%23FFD700"/></svg>',
-          },
-          width: 12,
-          height: 12,
-          align: 'center',
-          verticalAlign: 'middle',
+  backgroundColor: 'transparent',
+  tooltip: {
+    trigger: 'item',
+    axisPointer: {
+      type: 'cross',
+      label: {
+        formatter(param) {
+          const val = param.value as string;
+          if (param.axisDimension === 'y') {
+            return formatLapTime(val) as string;
+          }
+          return val;
         },
       },
     },
+    order: 'valueDesc',
+    confine: true,
+    backgroundColor: 'var(--background)',
+    borderWidth: 1,
   },
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'shadow',
-    },
+  grid: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
   },
   xAxis: {
     type: 'category',
-    name: 'Drivers',
-    nameLocation: 'middle',
-    nameGap: 25,
-    axisTick: {
-      alignWithLabel: true,
-    },
+    axisTick: { show: true, alignWithLabel: true },
+    axisPointer: { type: 'shadow' },
   },
   yAxis: {
     type: 'value',
-    name: 'Time (s)',
-    nameLocation: 'middle',
-    nameGap: 40,
+    axisLine: {
+      show: true,
+    },
+    // min: 0,
+    min: (value) => value.min * 0.996,
+    max: (value) => value.max * 1.004,
     axisLabel: {
-      formatter: '{value}s',
-    },
-    min: function (value: { min: number }) {
-      return Math.floor(value.min);
-    },
-    max: function (value: { max: number }) {
-      return Math.floor(value.max);
+      formatter: (value) => formatLapTime(value) as string,
     },
     splitLine: {
-      lineStyle: {
-        type: 'dashed',
-        color: 'rgba(255,255,255,0.3)',
-      },
+      show: true,
     },
   },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true,
-  },
-  backgroundColor: 'transparent',
 };

@@ -1,23 +1,6 @@
 'use client';
-import { LineChart, LineSeriesOption } from 'echarts/charts';
-import {
-  DataZoomComponent,
-  GridComponent,
-  TooltipComponent,
-} from 'echarts/components';
-import * as echarts from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
+import { LineSeriesOption } from 'echarts/charts';
 import { useEffect, useRef } from 'react';
-
-import { GetSessionLapTimesQuery } from '@/types/graphql';
-
-echarts.use([
-  LineChart,
-  DataZoomComponent,
-  TooltipComponent,
-  GridComponent,
-  CanvasRenderer,
-]);
 
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
@@ -25,6 +8,8 @@ import { useECharts } from '@/hooks/use-EChart';
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 import { baseOptions } from '@/app/[year]/[event]/[session]/_components/lapTimes/config';
 import { tyreCompoundColors } from '@/app/[year]/[event]/[session]/constants';
+
+import { GetSessionLapTimesQuery } from '@/types/graphql';
 
 export const LapTimesChart = ({
   data,

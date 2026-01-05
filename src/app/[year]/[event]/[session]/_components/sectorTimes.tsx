@@ -8,12 +8,13 @@ import {
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
+import { Circle } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 import { GET_SESSION_FASTEST_TIMES } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 
-import { Loader } from '@/components/Loader';
+import { ChartContainer } from '@/components/chart-container';
 import { ServerPageError } from '@/components/ServerError';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
@@ -22,7 +23,6 @@ import { SectorChart } from '@/app/[year]/[event]/[session]/_components/sector-t
 
 import {
   GetSessionFastestTimesQuery,
-  GetSessionFastestTimesQueryVariables,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
 
@@ -40,17 +40,16 @@ type Sector = {
   lap?: number | null;
 };
 
-interface DriverSectors {
-  sector1: Sector;
-  sector2: Sector;
-  sector3: Sector;
-}
+type SectionTitle = 'sector1' | 'sector2' | 'sector3';
 
-interface DriverFastestLap extends DriverSectors {
-  lap_number: number | null;
-  lap_time: number | null;
-  potential_best: string | 0;
-}
+type DriverSectors = {
+  [key in SectionTitle]: Sector;
+};
+
+type DriverFastestLap =
+  GetSessionFastestTimesQuery['sessions'][number]['driver_sessions'][number]['fastest_lap'][number] & {
+    potential_best: number;
+  };
 
 export interface DriverTimes {
   abbreviation: string;
@@ -62,10 +61,7 @@ export interface DriverTimes {
 const SectorTimes = () => {
   const { hiddenItems } = useSessionItems();
   const { year, event, session } = useParams();
-  const { data, loading, error } = useQuery<
-    GetSessionFastestTimesQuery,
-    GetSessionFastestTimesQueryVariables
-  >(GET_SESSION_FASTEST_TIMES, {
+  const { data, loading, error } = useQuery(GET_SESSION_FASTEST_TIMES, {
     variables: {
       year: parseInt(year as string),
       event: eventLocationDecode(event as string),
@@ -86,77 +82,29 @@ const SectorTimes = () => {
   const driverTimes: DriverTimes[] = driverSessions
     .filter((ds) => !hiddenItems.includes(ds.driver?.abbreviation ?? ''))
     .map((ds) => {
-      const sector1 =
-        ds.fastest_sector1.length > 0 && ds.fastest_sector1[0].sector1 !== null
-          ? Number(ds.fastest_sector1[0].sector1) / 1000
-          : null;
-      const sector2 =
-        ds.fastest_sector2.length > 0 && ds.fastest_sector2[0].sector2 !== null
-          ? Number(ds.fastest_sector2[0].sector2) / 1000
-          : null;
-      const sector3 =
-        ds.fastest_sector3.length > 0 && ds.fastest_sector3[0].sector3 !== null
-          ? Number(ds.fastest_sector3[0].sector3) / 1000
-          : null;
+      const sector1 = ds.fastest_sector1[0].sector1 ?? null;
+      const sector2 = ds.fastest_sector2[0].sector2 ?? null;
+      const sector3 = ds.fastest_sector3[0].sector3 ?? null;
 
       return {
         abbreviation: ds.driver?.abbreviation || 'N/A',
         fastestLap: {
-          lap_number:
-            ds.fastest_lap.length > 0 && ds.fastest_lap[0].lap_number !== null
-              ? Number(ds.fastest_lap[0].lap_number)
-              : null,
-          lap_time:
-            ds.fastest_lap.length > 0 && ds.fastest_lap[0].lap_time !== null
-              ? Number(ds.fastest_lap[0].lap_time) / 1000
-              : null,
-          sector1: {
-            time:
-              ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector1 !== null
-                ? Number(ds.fastest_lap[0].sector1) / 1000
-                : null,
-          },
-          sector2: {
-            time:
-              ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector2 !== null
-                ? Number(ds.fastest_lap[0].sector2) / 1000
-                : null,
-          },
-          sector3: {
-            time:
-              ds.fastest_lap.length > 0 && ds.fastest_lap[0].sector3 !== null
-                ? Number(ds.fastest_lap[0].sector3) / 1000
-                : null,
-          },
+          ...ds.fastest_lap[0],
           potential_best:
-            sector1 && sector2 && sector3
-              ? (sector1 + sector2 + sector3).toFixed(3)
-              : 0,
+            sector1 && sector2 && sector3 ? sector1 + sector2 + sector3 : 0,
         },
         sectors: {
           sector1: {
             time: sector1,
-            lap:
-              ds.fastest_sector1.length > 0 &&
-              ds.fastest_sector1[0].lap_number !== null
-                ? Number(ds.fastest_sector1[0].lap_number)
-                : null,
+            lap: ds.fastest_sector1[0].lap_number,
           },
           sector2: {
             time: sector2,
-            lap:
-              ds.fastest_sector2.length > 0 &&
-              ds.fastest_sector2[0].lap_number !== null
-                ? Number(ds.fastest_sector2[0].lap_number)
-                : null,
+            lap: ds.fastest_sector2[0].lap_number,
           },
           sector3: {
             time: sector3,
-            lap:
-              ds.fastest_sector3.length > 0 &&
-              ds.fastest_sector3[0].lap_number !== null
-                ? Number(ds.fastest_sector3[0].lap_number)
-                : null,
+            lap: ds.fastest_sector3[0].lap_number,
           },
         },
         color: ds.constructorByConstructorId?.color || 'cccccc',
@@ -165,18 +113,41 @@ const SectorTimes = () => {
 
   return (
     <div className='grid gap-4'>
-      {loading ? (
-        <>
-          <Loader />
-        </>
-      ) : (
-        <>
-          <FastestLapChart times={driverTimes} />
-          <SectorChart times={driverTimes} sectorKey='sector1' />
-          <SectorChart times={driverTimes} sectorKey='sector2' />
-          <SectorChart times={driverTimes} sectorKey='sector3' />
-        </>
-      )}
+      <ChartContainer
+        title='Fastest Lap'
+        subtitle={
+          <>
+            <Circle className='inline size-4 fill-[#FFD700] stroke-0' />{' '}
+            represents the potential fastest lap, this is based on all of a
+            drivers fastest individual sectors
+          </>
+        }
+        loading={loading}
+        className='lg:h-125'
+      >
+        <FastestLapChart times={driverTimes} />
+      </ChartContainer>
+      <ChartContainer
+        title='Fastest Sector 1'
+        loading={loading}
+        className='lg:h-125'
+      >
+        <SectorChart times={driverTimes} sectorKey='sector1' />
+      </ChartContainer>
+      <ChartContainer
+        title='Fastest Sector 2'
+        loading={loading}
+        className='lg:h-125'
+      >
+        <SectorChart times={driverTimes} sectorKey='sector2' />
+      </ChartContainer>
+      <ChartContainer
+        title='Fastest Sector 3'
+        loading={loading}
+        className='lg:h-125'
+      >
+        <SectorChart times={driverTimes} sectorKey='sector3' />
+      </ChartContainer>
     </div>
   );
 };
