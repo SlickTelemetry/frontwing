@@ -8,7 +8,6 @@ import {
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { Circle } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 import { GET_SESSION_FASTEST_TIMES } from '@/lib/queries';
@@ -19,7 +18,6 @@ import { ServerPageError } from '@/components/ServerError';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 import { FastestLapChart } from '@/app/[year]/[event]/[session]/_components/fastest-lap';
-import { SectorChart } from '@/app/[year]/[event]/[session]/_components/sector-times';
 
 import {
   GetSessionFastestTimesQuery,
@@ -115,38 +113,10 @@ const SectorTimes = () => {
     <div className='grid gap-4'>
       <ChartContainer
         title='Fastest Lap'
-        subtitle={
-          <>
-            <Circle className='inline size-4 fill-[#FFD700] stroke-0' />{' '}
-            represents the potential fastest lap, this is based on all of a
-            drivers fastest individual sectors
-          </>
-        }
         loading={loading}
-        className='lg:h-125'
+        // className='lg:h-125'
       >
         <FastestLapChart times={driverTimes} />
-      </ChartContainer>
-      <ChartContainer
-        title='Fastest Sector 1'
-        loading={loading}
-        className='lg:h-125'
-      >
-        <SectorChart times={driverTimes} sectorKey='sector1' />
-      </ChartContainer>
-      <ChartContainer
-        title='Fastest Sector 2'
-        loading={loading}
-        className='lg:h-125'
-      >
-        <SectorChart times={driverTimes} sectorKey='sector2' />
-      </ChartContainer>
-      <ChartContainer
-        title='Fastest Sector 3'
-        loading={loading}
-        className='lg:h-125'
-      >
-        <SectorChart times={driverTimes} sectorKey='sector3' />
       </ChartContainer>
     </div>
   );

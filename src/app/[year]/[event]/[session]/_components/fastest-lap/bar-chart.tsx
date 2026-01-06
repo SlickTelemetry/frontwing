@@ -32,8 +32,8 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
         .filter((d) => d.fastestLap.lap_time !== null)
         .sort(
           (a, b) =>
-            Number(a.fastestLap.lap_time || 0) -
-            Number(b.fastestLap.lap_time || 0),
+            Number(b.fastestLap.lap_time || 0) -
+            Number(a.fastestLap.lap_time || 0),
         ),
     [times],
   );
@@ -48,14 +48,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
   useEffect(() => {
     if (!chartInstance.current) return;
     const abbreviations = driverTimes.map((d) => d.abbreviation);
-    const lapTimes = driverTimes.map((d) => d.fastestLap.lap_time);
-    const lapNumbers = driverTimes.map((d) => d.fastestLap.lap_number);
-
-    const potentialBests = driverTimes.map((d) =>
-      d.fastestLap.potential_best !== 0
-        ? Number(d.fastestLap.potential_best)
-        : null,
-    );
     const colors = driverTimes.map((d) => `#${d.color}`);
 
     const formatter = (params: EChartsCallbackParams) => {
@@ -66,28 +58,22 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
 
       let tableHtml = `<p class="text-center font-bold">${driverData.abbreviation}</p>`;
       tableHtml += `
-        <div class="grid grid-cols-[auto_1fr_1fr] *:border-b *:border-r *:border-foreground items-center text-center">
+        <div class="grid flow- grid-cols-5 *:border-b *:border-r *:border-foreground items-center text-center">
             <div>&nbsp;</div>
-            <div class="px-1">Best Sectors</div>
-            <div class="px-1">Fastest Lap</div>
-
             <div class="px-1">S1</div>
-            <div>
-              ${
-                driverData.sectors.sector1.time !== null
-                  ? `${formatLapTime(driverData.sectors.sector1.time)}s`
-                  : 'N/A'
-              }
-            </div>
-            <div>
-              ${
-                driverData.fastestLap.sector1 !== null
-                  ? `${formatLapTime(driverData.fastestLap.sector1)}s`
-                  : 'N/A'
-              }
-            </div>
+            <div class="px-1">S2</div>
+            <div class="px-1">S3</div>
+              <div class="px-1">Lap</div>
 
-            <div  class="px-1">S2</div>
+            <div class="px-1">Best Sectors</div>
+            <div>
+            ${
+              driverData.sectors.sector1.time
+                ? `${formatLapTime(driverData.sectors.sector1.time)}s`
+                : 'N/A'
+            }
+              </div>
+              
             <div>
               ${
                 driverData.sectors.sector2.time
@@ -95,15 +81,9 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
                   : 'N/A'
               }
             </div>
-            <div>
-              ${
-                driverData.fastestLap.sector2 !== null
-                  ? `${formatLapTime(driverData.fastestLap.sector2)}s`
-                  : 'N/A'
-              }
-            </div>
 
-            <div  class="px-1">S3</div>
+            
+
             <div>
             ${
               driverData.sectors.sector3.time
@@ -111,15 +91,8 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
                 : 'N/A'
             }
               </div>
-              <div>
-                ${
-                  driverData.fastestLap.sector3
-                    ? `${formatLapTime(driverData.fastestLap.sector3)}s`
-                    : 'N/A'
-                }
-              </div>
+             
               
-              <div class="px-1">Lap</div>
               <div>
               ${
                 driverData.fastestLap.potential_best
@@ -127,10 +100,64 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
                   : 'N/A'
               }
               </div>
+             <div class="px-1">Fastest Lap</div>
+            <div>
+              ${
+                driverData.fastestLap.sector1
+                  ? `${formatLapTime(driverData.fastestLap.sector1)}s`
+                  : 'N/A'
+              }
+            </div>
+            <div>
+              ${
+                driverData.fastestLap.sector2
+                  ? `${formatLapTime(driverData.fastestLap.sector2)}s`
+                  : 'N/A'
+              }
+            </div>
+
+            <div>
+              ${
+                driverData.fastestLap.sector3
+                  ? `${formatLapTime(driverData.fastestLap.sector3)}s`
+                  : 'N/A'
+              }
+            </div>
               <div>
                 ${
-                  driverData.fastestLap.lap_time !== null
+                  driverData.fastestLap.lap_time
                     ? `${formatLapTime(driverData.fastestLap.lap_time)}s`
+                    : 'N/A'
+                }
+              </div>
+             <div class="px-1">Delta</div>
+            <div>
+              ${
+                driverData.sectors.sector1.time && driverData.fastestLap.sector1
+                  ? `${formatLapTime(driverData.fastestLap.sector1 - driverData.sectors.sector1.time)}`
+                  : 'N/A'
+              }
+            </div>
+            <div>
+              ${
+                driverData.sectors.sector2.time && driverData.fastestLap.sector2
+                  ? `${formatLapTime(driverData.fastestLap.sector2 - driverData.sectors.sector2.time)}`
+                  : 'N/A'
+              }
+            </div>
+
+            <div>
+              ${
+                driverData.sectors.sector3.time && driverData.fastestLap.sector3
+                  ? `${formatLapTime(driverData.fastestLap.sector3 - driverData.sectors.sector3.time)}`
+                  : 'N/A'
+              }
+            </div>
+              <div>
+                ${
+                  driverData.fastestLap.potential_best &&
+                  driverData.fastestLap.lap_time
+                    ? `${formatLapTime(driverData.fastestLap.lap_time - driverData.fastestLap.potential_best)}`
                     : 'N/A'
                 }
               </div>
@@ -141,131 +168,101 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
     };
 
     const option: echarts.EChartsCoreOption = {
-      xAxis: {
+      yAxis: {
         data: abbreviations,
       },
       tooltip: { formatter },
       series: [
-        // {
-        //   name: 'Sector 1 PB',
-        //   type: 'bar',
-        //   // barWidth: 16,
-        //   stack: 'Potential Best Breakdown',
-        //   data: driverTimes.map((value, index) => ({
-        //     value: value.sectors.sector1.time,
-        //     itemStyle: {
-        //       color: colors[index] + '90',
-        //       borderRadius: 4,
-        //       borderWidth: 1,
-        //       borderColor: 'transparent',
-        //     },
-        //   })),
-        // },
-        // {
-        //   name: 'Sector 2  PB',
-        //   type: 'bar',
-        //   stack: 'Potential Best Breakdown',
-        //   // barWidth: 16,
-        //   data: driverTimes.map((value, index) => ({
-        //     value: value.sectors.sector2.time,
-        //     itemStyle: {
-        //       color: colors[index] + '90',
-        //       borderRadius: 4,
-        //       borderWidth: 1,
-        //       borderColor: 'transparent',
-        //     },
-        //   })),
-        // },
-        // {
-        //   name: 'Sector 3 PB',
-        //   type: 'bar',
-        //   stack: 'Potential Best Breakdown',
-        //   // barWidth: 16,
-        //   data: driverTimes.map((value, index) => ({
-        //     value: value.sectors.sector3.time,
-        //     itemStyle: {
-        //       color: colors[index] + '90',
-        //       borderRadius: 4,
-        //       borderWidth: 1,
-        //       borderColor: 'transparent',
-        //     },
-        //   })),
-        // },
-        // {
-        //   name: 'Sector 1',
-        //   type: 'bar',
-        //   stack: 'Fastest Lap Breakdown',
-        //   // barWidth: 16,
-        //   data: driverTimes.map((value, index) => ({
-        //     value: value.fastestLap.sector1,
-        //     itemStyle: {
-        //       color: colors[index],
-        //       borderRadius: 4,
-        //       borderWidth: 1,
-        //       borderColor: 'transparent',
-        //     },
-        //   })),
-        // },
-        // {
-        //   name: 'Sector 2',
-        //   type: 'bar',
-        //   stack: 'Fastest Lap Breakdown',
-        //   // barWidth: 16,
-        //   data: driverTimes.map((value, index) => ({
-        //     value: value.fastestLap.sector2,
-        //     itemStyle: {
-        //       color: colors[index],
-        //       borderRadius: 4,
-        //       borderWidth: 1,
-        //       borderColor: 'transparent',
-        //     },
-        //   })),
-        // },
-        // {
-        //   name: 'Sector 3',
-        //   type: 'bar',
-        //   stack: 'Fastest Lap Breakdown',
-        //   // barWidth: 16,
-
-        //   data: driverTimes.map((value, index) => ({
-        //     value: value.fastestLap.sector3,
-        //     itemStyle: {
-        //       color: colors[index],
-        //       borderRadius: 4,
-        //       borderWidth: 1,
-        //       borderColor: 'transparent',
-        //     },
-        //   })),
-        // },
-
         {
-          name: 'Lap Times',
+          name: 'Sector 1 PB',
           type: 'bar',
-          data: lapTimes.map((value, index) => ({
-            value: value,
+          // barWidth: 16,
+          stack: 'Potential Best Breakdown',
+          data: driverTimes.map((value, index) => ({
+            value: value.sectors.sector1.time,
             itemStyle: {
-              color: colors[index],
-              borderRadius: [12, 12, 0, 0],
+              color: colors[index] + '90',
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'transparent',
             },
           })),
-          label: {
-            show: true,
-            position: 'top',
-            formatter: (params: { dataIndex: number; value: number }) => {
-              const driverIndex = params.dataIndex;
-              const lap = lapNumbers[driverIndex];
-              return `Lap ${lap}\n${formatLapTime(params.value)?.toString().slice(2)}`;
-            },
-          },
         },
-
         {
-          name: 'Potential Best',
-          type: 'scatter',
-          data: potentialBests,
-          itemStyle: {
-            color: '#FFD700',
-          },
+          name: 'Sector 2  PB',
+          type: 'bar',
+          stack: 'Potential Best Breakdown',
+          // barWidth: 16,
+          data: driverTimes.map((value, index) => ({
+            value: value.sectors.sector2.time,
+            itemStyle: {
+              color: colors[index] + '90',
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+          })),
+        },
+        {
+          name: 'Sector 3 PB',
+          type: 'bar',
+          stack: 'Potential Best Breakdown',
+          // barWidth: 16,
+          data: driverTimes.map((value, index) => ({
+            value: value.sectors.sector3.time,
+            itemStyle: {
+              color: colors[index] + '90',
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+          })),
+        },
+        {
+          name: 'Sector 1',
+          type: 'bar',
+          stack: 'Fastest Lap Breakdown',
+          // barWidth: 16,
+          data: driverTimes.map((value, index) => ({
+            value: value.fastestLap.sector1,
+            itemStyle: {
+              color: colors[index],
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+          })),
+        },
+        {
+          name: 'Sector 2',
+          type: 'bar',
+          stack: 'Fastest Lap Breakdown',
+          // barWidth: 16,
+          data: driverTimes.map((value, index) => ({
+            value: value.fastestLap.sector2,
+            itemStyle: {
+              color: colors[index],
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+          })),
+        },
+        {
+          name: 'Sector 3',
+          type: 'bar',
+          stack: 'Fastest Lap Breakdown',
+          // barWidth: 16,
+
+          data: driverTimes.map((value, index) => ({
+            value: value.fastestLap.sector3,
+            itemStyle: {
+              color: colors[index],
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+          })),
         },
       ],
     };
