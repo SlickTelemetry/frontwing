@@ -1,3 +1,10 @@
+const prevYear = new Date().getFullYear() - 1;
+
+const futureDate = new Date();
+futureDate.setFullYear(prevYear + 1);
+
+const futureYear = futureDate.toUTCString();
+
 describe('The Home Page', () => {
   it('successfully loads', () => {
     cy.visit('/');
@@ -38,12 +45,12 @@ describe('Next Event', () => {
             data: {
               schedule: [
                 {
-                  year: 2024,
+                  year: prevYear,
                   event_name: 'Race Event',
                   location: 'Location',
                   country: 'Country',
                   event_format: 'conventional',
-                  session5_date_utc: '2026-01-01T00:00:00Z',
+                  session5_date_utc: futureYear,
                 },
               ],
             },
@@ -87,12 +94,12 @@ describe('Next Event', () => {
             data: {
               schedule: [
                 {
-                  year: 2024,
+                  year: prevYear,
                   event_name: 'Sprint Event',
                   location: 'Location',
                   country: 'Country',
                   event_format: 'sprint',
-                  session5_date_utc: '2026-01-01T00:00:00Z',
+                  session5_date_utc: futureYear,
                 },
               ],
             },
@@ -115,12 +122,12 @@ describe('Next Event', () => {
             data: {
               schedule: [
                 {
-                  year: 2024,
+                  year: prevYear,
                   event_name: 'Sprint Qualifying Event',
                   location: 'Location',
                   country: 'Country',
                   event_format: 'sprint_qualifying',
-                  session5_date_utc: '2026-01-01T00:00:00Z',
+                  session5_date_utc: futureYear,
                 },
               ],
             },
@@ -143,12 +150,12 @@ describe('Next Event', () => {
             data: {
               schedule: [
                 {
-                  year: 2024,
+                  year: prevYear,
                   event_name: 'Sprint Qualifying Event',
                   location: 'Location',
                   country: 'Country',
                   event_format: 'sprint_shootout',
-                  session5_date_utc: '2026-01-01T00:00:00Z',
+                  session5_date_utc: futureYear,
                 },
               ],
             },
@@ -171,12 +178,12 @@ describe('Next Event', () => {
             data: {
               schedule: [
                 {
-                  year: 2024,
+                  year: prevYear,
                   event_name: 'Race or Qualifying Event',
                   location: 'Location',
                   country: 'Country',
                   event_format: 'conventional',
-                  session5_date_utc: '2026-01-01T00:00:00Z',
+                  session5_date_utc: futureYear,
                 },
               ],
             },
@@ -199,12 +206,12 @@ describe('Next Event', () => {
             data: {
               schedule: [
                 {
-                  year: 2024,
+                  year: prevYear,
                   event_name: 'Test Event',
                   location: 'Location',
                   country: 'Country',
                   event_format: 'testing',
-                  session5_date_utc: '2026-01-01T00:00:00Z',
+                  session5_date_utc: futureYear,
                 },
               ],
             },
@@ -372,15 +379,13 @@ describe('Top Navigation', () => {
   });
 
   it('navigates to Standings page', () => {
-    const currentYear = new Date().getFullYear();
     cy.get('[data-cy="nav-link-standings"]').click();
-    cy.url().should('include', `/${currentYear}/standings`);
+    cy.url().should('include', `/${prevYear}/standings`);
   });
 
   it('navigates to Map page', () => {
-    const currentYear = new Date().getFullYear();
     cy.get('[data-cy="nav-link-map"]').click();
-    cy.url().should('include', `/${currentYear}/map`);
+    cy.url().should('include', `/${prevYear}/map`);
   });
 });
 
