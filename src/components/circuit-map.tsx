@@ -9,8 +9,6 @@ export const CircuitDetails = graphql(`
     circuit_details
   }
 `);
-
-export type ArrowPlacementAlgorithm = 'shoelace' | 'point-in-polygon';
 type ShoelaceArgs = {
   dx: number;
   dy: number;
@@ -18,45 +16,7 @@ type ShoelaceArgs = {
   isClockwise: boolean;
 };
 
-type PointInPolygonArgs = ShoelaceArgs & {
-  midX: number;
-  midY: number;
-  strokeWidth: number;
-  polygon: Point[];
-};
 type Point = { X: number; Y: number };
-
-/**
- * Determines if a point is inside a polygon using the ray casting algorithm.
- *
- * The algorithm casts a horizontal ray from the point to infinity and counts
- * the number of intersections with polygon edges. If the count is odd, the
- * point is inside; if even, it's outside.
- *
- * @param pointX - The X coordinate of the point to test
- * @param pointY - The Y coordinate of the point to test
- * @param polygon - Array of points defining the polygon vertices in order
- * @returns `true` if the point is inside the polygon, `false` otherwise
- */
-const isPointInsidePolygon = (
-  pointX: number,
-  pointY: number,
-  polygon: Point[],
-): boolean => {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i].X;
-    const yi = polygon[i].Y;
-    const xj = polygon[j].X;
-    const yj = polygon[j].Y;
-
-    const intersect =
-      yi > pointY !== yj > pointY &&
-      pointX < ((xj - xi) * (pointY - yi)) / (yj - yi) + xi;
-    if (intersect) inside = !inside;
-  }
-  return inside;
-};
 
 /**
  * Calculates the perpendicular direction vector pointing outside the circuit
@@ -91,75 +51,14 @@ const getShoelacePerpendicular = ({
   return { x: perpX, y: perpY };
 };
 
-/**
- * Calculates the perpendicular direction vector pointing outside the circuit
- * by testing both possible directions using point-in-polygon checks.
- *
- * The algorithm:
- * 1. Generates two perpendicular vectors (opposite directions)
- * 2. Tests points at a distance along each direction to see if they're outside
- * 3. Selects the direction that points outside the polygon
- * 4. Falls back to shoelace method if both test points are inside (edge case)
- *
- * This method is more reliable for complex or irregular circuit shapes where
- * the shoelace formula might give incorrect results.
- *
- * @param dx - X component of the direction vector along the start/finish straight
- * @param dy - Y component of the direction vector along the start/finish straight
- * @param length - Magnitude of the direction vector (should be > 0)
- * @param midX - X coordinate of the midpoint on the start/finish straight
- * @param midY - Y coordinate of the midpoint on the start/finish straight
- * @param strokeWidth - Width of the track stroke (used to calculate test distance)
- * @param polygon - Array of points defining the circuit polygon
- * @param isClockwise - Whether the circuit winds clockwise (used for fallback)
- * @returns Normalized perpendicular vector `{x, y}` pointing outside the circuit
- */
-const getPointInPolygonPerpendicular = ({
-  dx,
-  dy,
-  length,
-  midX,
-  midY,
-  strokeWidth,
-  polygon,
-  isClockwise,
-}: PointInPolygonArgs) => {
-  const perpX1 = -dy / length;
-  const perpY1 = dx / length;
-  const perpX2 = dy / length;
-  const perpY2 = -dx / length;
-
-  const testDistance = Math.max(strokeWidth * 10, length * 0.1);
-
-  const testPoint1X = midX + perpX1 * testDistance;
-  const testPoint1Y = midY + perpY1 * testDistance;
-  const testPoint2X = midX + perpX2 * testDistance;
-  const testPoint2Y = midY + perpY2 * testDistance;
-
-  const isOutside1 = !isPointInsidePolygon(testPoint1X, testPoint1Y, polygon);
-  const isOutside2 = !isPointInsidePolygon(testPoint2X, testPoint2Y, polygon);
-
-  if (isOutside2 && !isOutside1) {
-    return { x: perpX2, y: perpY2 };
-  }
-
-  if (!isOutside1 && !isOutside2) {
-    return getShoelacePerpendicular({ dx, dy, length, isClockwise });
-  }
-
-  return { x: perpX1, y: perpY1 };
-};
-
 export const CircuitMap = ({
   circuitData,
   className,
   small = false,
-  arrowAlgorithm = 'shoelace',
 }: {
   circuitData?: FragmentType<typeof CircuitDetails>;
   small?: boolean;
   className?: string;
-  arrowAlgorithm?: ArrowPlacementAlgorithm;
 }) => {
   const data = useFragment(CircuitDetails, circuitData);
   if (!data?.circuit_details) return null;
@@ -283,19 +182,12 @@ export const CircuitMap = ({
     // Calculate perpendicular direction (90 degrees to the track direction) for offset
     const length = Math.sqrt(dx * dx + dy * dy);
     if (length > 0) {
-      const { x: perpX, y: perpY } =
-        arrowAlgorithm === 'shoelace'
-          ? getShoelacePerpendicular({ dx, dy, length, isClockwise })
-          : getPointInPolygonPerpendicular({
-              dx,
-              dy,
-              length,
-              midX,
-              midY,
-              strokeWidth,
-              polygon: transformed,
-              isClockwise,
-            });
+      const { x: perpX, y: perpY } = getShoelacePerpendicular({
+        dx,
+        dy,
+        length,
+        isClockwise,
+      });
 
       // Offset by stroke width (accounting for both outer and inner lines) plus padding
       // Outer line stroke width + inner line stroke width + generous padding + half arrow width

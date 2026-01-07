@@ -3,11 +3,7 @@
 import { useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 
-import {
-  type ArrowPlacementAlgorithm,
-  CircuitMap,
-} from '@/components/circuit-map';
-import { Button } from '@/components/ui/button';
+import { CircuitMap } from '@/components/circuit-map';
 import {
   Dialog,
   DialogContent,
@@ -38,9 +34,6 @@ export default function CircuitMapsTestPage() {
   const [selectedCircuit, setSelectedCircuit] = useState<CircuitType | null>(
     null,
   );
-  const [arrowAlgorithm, setArrowAlgorithm] =
-    useState<ArrowPlacementAlgorithm>('shoelace');
-
   const { data, loading, error } = useQuery(GET_ALL_CIRCUITS);
 
   if (loading) {
@@ -84,24 +77,6 @@ export default function CircuitMapsTestPage() {
       <div className='bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 border-b backdrop-blur'>
         <div className='container mx-auto flex items-center justify-between px-8 py-4'>
           <h1 className='text-4xl font-extrabold'>All Circuit Maps Test</h1>
-          <div className='flex gap-2'>
-            <Button
-              title='Uses polygon winding (shoelace) to pick left/right without extra checks'
-              variant={arrowAlgorithm === 'shoelace' ? 'default' : 'outline'}
-              onClick={() => setArrowAlgorithm('shoelace')}
-            >
-              Shoelace (winding)
-            </Button>
-            <Button
-              title='Tests both perpendicular directions with point-in-polygon checks; falls back to shoelace if both fail'
-              variant={
-                arrowAlgorithm === 'point-in-polygon' ? 'default' : 'outline'
-              }
-              onClick={() => setArrowAlgorithm('point-in-polygon')}
-            >
-              Point-in-polygon (tests both)
-            </Button>
-          </div>
         </div>
       </div>
       <div className='container mx-auto p-8'>
@@ -119,7 +94,6 @@ export default function CircuitMapsTestPage() {
                   <CircuitMapItem
                     key={`${year}-${circuit.location}-${idx}`}
                     circuit={circuit}
-                    arrowAlgorithm={arrowAlgorithm}
                     onClick={() => {
                       setSelectedCircuit(circuit);
                     }}
@@ -159,7 +133,6 @@ export default function CircuitMapsTestPage() {
                 <CircuitMap
                   circuitData={selectedCircuit}
                   className='max-h-150 w-full'
-                  arrowAlgorithm={arrowAlgorithm}
                 />
               </div>
             </>
@@ -172,11 +145,9 @@ export default function CircuitMapsTestPage() {
 
 function CircuitMapItem({
   circuit,
-  arrowAlgorithm,
   onClick,
 }: {
   circuit: CircuitType;
-  arrowAlgorithm: ArrowPlacementAlgorithm;
   onClick: () => void;
 }) {
   return (
@@ -192,12 +163,7 @@ function CircuitMapItem({
         )}
       </div>
       <div className='flex w-full justify-center'>
-        <CircuitMap
-          circuitData={circuit}
-          small
-          className='max-h-37.5'
-          arrowAlgorithm={arrowAlgorithm}
-        />
+        <CircuitMap circuitData={circuit} small className='max-h-37.5' />
       </div>
     </button>
   );
