@@ -1,3 +1,24 @@
+## 0.10.3 (2026-01-07)
+
+### Fix
+
+- home page test to use current year as base for next event dates
+- **FRON-229**: selected drivers change only when session changes
+- driver badges container to wrap if too many badges
+- standings page layout
+- prevent reloading when switching between session charts
+- **FRON-228**: show only a single session's result for session page
+
+### Refactor
+
+- remove sector charts and sanitize inputs for fastest lap bar chart
+- Fastest lap chart with breakdowns of sectors in a horizontal bar chart (FRON-232)
+- **FRON-229**: simplify reducer and bump out excess logic to driver filters
+- **FRON-231**: separate qualifying sessions
+- **FRON-231**: Pits & stint chart
+- FRON-231 Pit stint chart
+- breadcrumbs
+
 ## 0.10.2 (2025-12-21)
 
 ### Fix
