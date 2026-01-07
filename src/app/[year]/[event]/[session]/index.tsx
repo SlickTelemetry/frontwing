@@ -15,9 +15,9 @@ import { Button } from '@/components/ui/button';
 import { Table } from '@/components/ui/table';
 
 import { DriverFilters } from '@/app/[year]/[event]/[session]/_components/driver-filters';
+import { FastestLapContainer } from '@/app/[year]/[event]/[session]/_components/fastest-lap';
 import { LapTimeContainer } from '@/app/[year]/[event]/[session]/_components/lapTimes';
 
-import SectorTimes from './_components/sectorTimes';
 import Stints from './_components/stints';
 
 import { FragmentType, graphql, useFragment } from '@/types';
@@ -198,7 +198,7 @@ export const ChartViewController = ({
             <Stints sessionType={sessionType} />,
           </Activity>
           <Activity mode={activeChart === 'sectors' ? 'visible' : 'hidden'}>
-            <SectorTimes />
+            <FastestLapContainer />
           </Activity>
         </div>
       </div>

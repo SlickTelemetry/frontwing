@@ -5,7 +5,7 @@ import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
 import { baseOptions } from '@/app/[year]/[event]/[session]/_components/fastest-lap/config';
-import { DriverTimes } from '@/app/[year]/[event]/[session]/_components/sectorTimes';
+import { DriverTimes } from '@/app/[year]/[event]/[session]/_components/fastest-lap/container';
 
 interface FastestLapEChartsProps {
   times: DriverTimes[];
@@ -19,6 +19,14 @@ interface EChartsCallbackParams {
   data: { value: number | null; itemStyle?: { color: string } };
   color?: string;
 }
+
+const timeVal = (n?: number | null) =>
+  echarts.format.encodeHTML(n ? `${formatLapTime(n)}s` : 'N/A');
+
+const delta = (a?: number | null, b?: number | null) =>
+  echarts.format.encodeHTML(
+    a && b ? `${a - b > 0 ? '+' : ''}${formatLapTime(a - b)}` : 'N/A',
+  );
 
 export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
   times,
@@ -56,111 +64,34 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
       );
       if (!driverData) return '';
 
+      const { fastestLap, sectors } = driverData;
+
       let tableHtml = `<p class="text-center font-bold">${driverData.abbreviation}</p>`;
       tableHtml += `
         <div class="grid flow- grid-cols-5 *:border-b *:border-r *:border-foreground items-center text-center">
-            <div>&nbsp;</div>
-            <div class="px-1">S1</div>
-            <div class="px-1">S2</div>
-            <div class="px-1">S3</div>
-              <div class="px-1">Lap</div>
+          <div>&nbsp;</div>
+          <div class="px-1">S1</div>
+          <div class="px-1">S2</div>
+          <div class="px-1">S3</div>
+          <div class="px-1">Lap</div>
 
-            <div class="px-1">Best Sectors</div>
-            <div>
-            ${
-              driverData.sectors.sector1.time
-                ? `${formatLapTime(driverData.sectors.sector1.time)}s`
-                : 'N/A'
-            }
-              </div>
-              
-            <div>
-              ${
-                driverData.sectors.sector2.time
-                  ? `${formatLapTime(driverData.sectors.sector2.time)}s`
-                  : 'N/A'
-              }
-            </div>
+          <div class="px-1">Best Sectors</div>
+          <div>${timeVal(sectors.sector1.time)}</div>
+          <div>${timeVal(sectors.sector2.time)}</div>
+          <div>${timeVal(sectors.sector3.time)}</div>
+          <div>${timeVal(fastestLap.potential_best)}</div>
 
+          <div class="px-1">Fastest Lap</div>
+          <div>${timeVal(fastestLap.sector1)}</div>
+          <div>${timeVal(fastestLap.sector2)}</div>
+          <div>${timeVal(fastestLap.sector3)}</div>
+          <div>${timeVal(fastestLap.lap_time)}</div>
             
-
-            <div>
-            ${
-              driverData.sectors.sector3.time
-                ? `${formatLapTime(driverData.sectors.sector3.time)}s`
-                : 'N/A'
-            }
-              </div>
-             
-              
-              <div>
-              ${
-                driverData.fastestLap.potential_best
-                  ? `${formatLapTime(driverData.fastestLap.potential_best)}s`
-                  : 'N/A'
-              }
-              </div>
-             <div class="px-1">Fastest Lap</div>
-            <div>
-              ${
-                driverData.fastestLap.sector1
-                  ? `${formatLapTime(driverData.fastestLap.sector1)}s`
-                  : 'N/A'
-              }
-            </div>
-            <div>
-              ${
-                driverData.fastestLap.sector2
-                  ? `${formatLapTime(driverData.fastestLap.sector2)}s`
-                  : 'N/A'
-              }
-            </div>
-
-            <div>
-              ${
-                driverData.fastestLap.sector3
-                  ? `${formatLapTime(driverData.fastestLap.sector3)}s`
-                  : 'N/A'
-              }
-            </div>
-              <div>
-                ${
-                  driverData.fastestLap.lap_time
-                    ? `${formatLapTime(driverData.fastestLap.lap_time)}s`
-                    : 'N/A'
-                }
-              </div>
-             <div class="px-1">Delta</div>
-            <div>
-              ${
-                driverData.sectors.sector1.time && driverData.fastestLap.sector1
-                  ? `${formatLapTime(driverData.fastestLap.sector1 - driverData.sectors.sector1.time)}`
-                  : 'N/A'
-              }
-            </div>
-            <div>
-              ${
-                driverData.sectors.sector2.time && driverData.fastestLap.sector2
-                  ? `${formatLapTime(driverData.fastestLap.sector2 - driverData.sectors.sector2.time)}`
-                  : 'N/A'
-              }
-            </div>
-
-            <div>
-              ${
-                driverData.sectors.sector3.time && driverData.fastestLap.sector3
-                  ? `${formatLapTime(driverData.fastestLap.sector3 - driverData.sectors.sector3.time)}`
-                  : 'N/A'
-              }
-            </div>
-              <div>
-                ${
-                  driverData.fastestLap.potential_best &&
-                  driverData.fastestLap.lap_time
-                    ? `${formatLapTime(driverData.fastestLap.lap_time - driverData.fastestLap.potential_best)}`
-                    : 'N/A'
-                }
-              </div>
+          <div class="px-1">Delta</div>
+          <div>${delta(fastestLap.sector1, sectors.sector1.time)}</div>
+          <div>${delta(fastestLap.sector2, sectors.sector2.time)}</div>
+          <div>${delta(fastestLap.sector3, sectors.sector3.time)}</div>
+          <div>${delta(fastestLap.lap_time, fastestLap.potential_best)}</div>
         </div>
         `;
 

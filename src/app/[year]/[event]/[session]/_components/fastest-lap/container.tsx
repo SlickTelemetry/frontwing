@@ -56,7 +56,7 @@ export interface DriverTimes {
   color: string;
 }
 
-const SectorTimes = () => {
+export const FastestLapContainer = () => {
   const { hiddenItems } = useSessionItems();
   const { year, event, session } = useParams();
   const { data, loading, error } = useQuery(GET_SESSION_FASTEST_TIMES, {
@@ -111,15 +111,9 @@ const SectorTimes = () => {
 
   return (
     <div className='grid gap-4'>
-      <ChartContainer
-        title='Fastest Lap'
-        loading={loading}
-        // className='lg:h-125'
-      >
+      <ChartContainer title='Fastest Lap' loading={loading}>
         <FastestLapChart times={driverTimes} />
       </ChartContainer>
     </div>
   );
 };
-
-export default SectorTimes;
