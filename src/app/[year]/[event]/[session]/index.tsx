@@ -192,10 +192,10 @@ export const ChartViewController = ({
             </Table>
           </Activity>
           <Activity mode={activeChart === 'laps' ? 'visible' : 'hidden'}>
-            <LapTimeContainer />,
+            <LapTimeContainer />
           </Activity>
           <Activity mode={activeChart === 'stints' ? 'visible' : 'hidden'}>
-            <Stints sessionType={sessionType} />,
+            <Stints sessionType={sessionType} />
           </Activity>
           <Activity mode={activeChart === 'sectors' ? 'visible' : 'hidden'}>
             <FastestLapContainer />
