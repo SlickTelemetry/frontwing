@@ -48,6 +48,7 @@
     "lucide-react": "latest",
     "mapbox-gl": "latest",
     "next": "latest",
+    "next-themes": "latest",
     "posthog-js": "latest",
     "posthog-node": "latest",
     "react": "latest",

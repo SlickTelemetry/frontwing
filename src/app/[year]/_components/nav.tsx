@@ -8,6 +8,7 @@ import {
   ServerStatus,
   SessionSelector,
 } from '@/components/navigation';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
@@ -67,6 +68,7 @@ export function Nav() {
 
       <div className='absolute right-4'>
         <ServerStatus />
+        <ThemeToggle />
       </div>
     </header>
   );

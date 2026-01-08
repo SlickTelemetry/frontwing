@@ -24,7 +24,7 @@ export function useECharts(ref: React.RefObject<HTMLDivElement | null>) {
 
   useEffect(() => {
     if (!ref.current || chartInstance.current) return;
-    chartInstance.current = echarts.init(ref.current, 'dark');
+    chartInstance.current = echarts.init(ref.current);
     return () => {
       chartInstance.current?.dispose();
       chartInstance.current = null;

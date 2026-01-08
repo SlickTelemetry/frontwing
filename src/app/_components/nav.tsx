@@ -6,6 +6,7 @@ import React from 'react';
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 
 import { ServerStatus } from '@/components/navigation';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -23,6 +24,7 @@ export const LandingNav = () => {
 
       <div className='absolute right-4'>
         <ServerStatus />
+        <ThemeToggle />
       </div>
     </div>
   );
