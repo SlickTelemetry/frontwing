@@ -16,7 +16,7 @@ import {
 } from '@/lib/utils';
 
 import { EventDetails } from '@/components/event-details';
-import Breadcrumbs from '@/components/navigation/breadcrumbs';
+import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 
 import {
   ChartViewController,

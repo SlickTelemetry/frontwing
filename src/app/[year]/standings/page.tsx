@@ -6,7 +6,7 @@ import { notFound, useParams, useSearchParams } from 'next/navigation';
 import { GET_STANDINGS } from '@/lib/queries';
 import { isAllEmptyArrays } from '@/lib/utils';
 
-import Breadcrumbs from '@/components/navigation/breadcrumbs';
+import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import { Button } from '@/components/ui/button';
 
 import { StandingsChart } from '@/app/[year]/standings/_components/chart';

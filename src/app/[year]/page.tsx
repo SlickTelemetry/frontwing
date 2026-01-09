@@ -6,7 +6,7 @@ import { use } from 'react';
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 import { isAllEmptyArrays } from '@/lib/utils';
 
-import Breadcrumbs from '@/components/navigation/breadcrumbs';
+import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import NextEvent from '@/components/next-event';
 import { ServerPageError } from '@/components/ServerError';
 

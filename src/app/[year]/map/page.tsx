@@ -6,7 +6,7 @@ import { use } from 'react';
 import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
 
 import { EventDetails } from '@/components/event-details';
-import Breadcrumbs from '@/components/navigation/breadcrumbs';
+import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import { ResultsMarquee } from '@/components/results-marquee';
 import { ServerPageError } from '@/components/ServerError';
 

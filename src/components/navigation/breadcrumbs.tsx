@@ -13,17 +13,12 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-function Breadcrumbs() {
+export function Breadcrumbs() {
   const { year, ...params } = useParams<{
     year: string;
     event?: string;
     session?: string;
   }>();
-
-  // const activePage = <></>;
-  // if (!params.event || !params.session) {
-  //   activePage =
-  // }
 
   return (
     <Breadcrumb>
@@ -71,5 +66,3 @@ function Breadcrumbs() {
     </Breadcrumb>
   );
 }
-
-export default Breadcrumbs;
