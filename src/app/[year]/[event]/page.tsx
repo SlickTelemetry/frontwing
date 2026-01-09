@@ -103,7 +103,10 @@ const EventPage = ({
           {loading && (
             <div className='bg-muted/50 h-43.75 w-full animate-pulse rounded'></div>
           )}
-          <CircuitMap circuitData={data?.circuits[0]} className='w-full py-0' />
+          <CircuitMap
+            circuitData={data?.circuits[0]}
+            className='aspect-auto max-h-100 w-full p-4'
+          />
 
           <EventWinners
             drivers={data?.drivers}
