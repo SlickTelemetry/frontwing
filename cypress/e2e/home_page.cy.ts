@@ -409,12 +409,12 @@ describe('Footer', () => {
   });
 
   it('has correct GitHub link', () => {
-    cy.get('a[href*="https://github.com/Slick-Telemetry"]').should(
+    cy.get('a[href*="https://github.com/SlickTelemetry"]').should(
       'have.attr',
       'target',
       '_blank',
     );
-    cy.get('a[href*="https://github.com/Slick-Telemetry"]').should(
+    cy.get('a[href*="https://github.com/SlickTelemetry"]').should(
       'have.attr',
       'rel',
       'noreferrer',

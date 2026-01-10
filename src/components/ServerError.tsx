@@ -20,7 +20,7 @@ export const ServerPageError = ({ msg }: { msg?: string }) => {
             Feeling confident? Create an issue on{' '}
             <a
               className='underline'
-              href='https://github.com/Slick-Telemetry/frontwing/issues/new/choose'
+              href='https://github.com/SlickTelemetry/frontwing/issues/new/choose'
             >
               Github
             </a>

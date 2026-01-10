@@ -40,7 +40,7 @@ function Footer() {
           <Mail />
         </a>
         <a
-          href='https://github.com/Slick-Telemetry'
+          href='https://github.com/SlickTelemetry'
           target='_blank'
           rel='noreferrer'
         >
