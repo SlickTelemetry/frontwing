@@ -116,7 +116,7 @@ function FIADocButton(doc: FIADocsFragmentType) {
     <Button
       variant='outline'
       disabled={!doc.url}
-      className='group h-fit w-full text-left xl:gap-4'
+      className='group h-fit w-full cursor-pointer text-left xl:gap-4'
       aria-label={doc.title}
       onClick={() =>
         doc.url &&
