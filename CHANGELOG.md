@@ -1,3 +1,9 @@
+## 0.10.4 (2026-01-10)
+
+### Refactor
+
+- conditionally render link based on ingestion status
+
 ## 0.10.3 (2026-01-07)
 
 ### Fix
