@@ -11,6 +11,7 @@ import {
   isAllEmptyArrays,
 } from '@/lib/utils';
 
+import { SprintBadge } from '@/components/badges/sprint-badge';
 import { CircuitMap } from '@/components/circuit-map';
 import { EventDetails } from '@/components/event-details';
 import Breadcrumbs from '@/components/navigation/breadcrumbs';
@@ -157,6 +158,10 @@ const PrevNextEventButtons = ({ eventName }: { eventName?: string | null }) => {
             .at(currEvtIdx - 1)
             ?.event_name?.replace('Grand Prix', 'GP')}
           {/* </p> */}
+          <SprintBadge
+            format={data.schedule.at(currEvtIdx - 1)?.event_format}
+            style='short'
+          />
         </Button>
       )}
       {data.schedule.at(currEvtIdx + 1) && (
@@ -168,12 +173,18 @@ const PrevNextEventButtons = ({ eventName }: { eventName?: string | null }) => {
             )
           }
         >
-          <p className='max-w-40 truncate'>
-            {currEvtIdx + 2} |{' '}
-            {data.schedule
-              .at(currEvtIdx + 1)
-              ?.event_name?.replace('Grand Prix', 'GP')}
-          </p>
+          <div className='flex items-center gap-2'>
+            <p className='max-w-40 truncate'>
+              {currEvtIdx + 2} |{' '}
+              {data.schedule
+                .at(currEvtIdx + 1)
+                ?.event_name?.replace('Grand Prix', 'GP')}
+            </p>
+            <SprintBadge
+              format={data.schedule.at(currEvtIdx + 1)?.event_format}
+              style='short'
+            />
+          </div>
           <ChevronRight />
         </Button>
       )}
