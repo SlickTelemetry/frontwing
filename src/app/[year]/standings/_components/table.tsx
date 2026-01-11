@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ConstructorBadge } from '@/components/badges/constructor-badge';
 import { DriverBadges } from '@/components/badges/driver-badge';
-import { PositionsBadge } from '@/components/badges/positions-badge';
+import { PositionBadge } from '@/components/badges/positions-badge';
 import {
   Table as TableComponent,
   TableBody,
@@ -163,6 +163,7 @@ export function Table({
           const currentPoints = item.totalPoints;
           const previousPoints = allItems[idx - 1]?.totalPoints;
           const gap = calculateGap(currentPoints, previousPoints);
+          const [wins = 0, p2s = 0, p3s = 0] = item.positionCounts;
 
           // Check if this item is in the drag selection range
           const isInDragRange =
@@ -178,7 +179,7 @@ export function Table({
               onMouseDown={() => handleMouseDown(idx)}
               onMouseEnter={() => handleMouseEnter(idx)}
               onMouseUp={handleMouseUp}
-              className={clsx('cursor-pointer select-none', {
+              className={clsx('cursor-pointer', {
                 'opacity-50': item.isHidden,
                 'dark:bg-accent/50 bg-blue-100': isInDragRange,
               })}
@@ -202,7 +203,7 @@ export function Table({
                 )}
                 {/* Driver badges for constructor view - hide first when space is limited */}
                 {constructorDriversMap.has(item.name) && (
-                  <div className='hidden shrink-0 overflow-visible @[600px]:flex'>
+                  <div className='hidden shrink-0 gap-1 overflow-visible @[600px]:flex'>
                     <DriverBadges
                       drivers={constructorDriversMap.get(item.name) || []}
                       color={item.color}
@@ -211,8 +212,10 @@ export function Table({
                   </div>
                 )}
               </TableCell>
-              <TableCell>
-                <PositionsBadge positionCounts={item.positionCounts} />
+              <TableCell className='hidden shrink-0 items-center gap-1 @[500px]:flex'>
+                <PositionBadge count={wins} type='win' />
+                <PositionBadge count={p2s} type='p2' />
+                <PositionBadge count={p3s} type='p3' />
               </TableCell>
               <TableCell className='min-w-14 shrink-0 text-center'>
                 {item.totalPoints}

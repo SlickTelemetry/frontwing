@@ -27,8 +27,12 @@ export const Legend = () => {
 
 export const DriverFilters = () => {
   const showDrivers = useSearchParams().get('chart') !== 'constructors';
-
   const { data, toggleVisibility, constructorDriversMap } = useHiddenItems();
+
+  const handleDriverClick = (driver: string) => {
+    toggleVisibility('drivers', [driver]);
+  };
+
   return constructorDriversMap
     .keys()
     .toArray()
@@ -71,19 +75,17 @@ export const DriverFilters = () => {
             <Circle fill={color} stroke='none' className='size-3' />
             <p className='truncate'>{team}</p>
           </div>
-
-          <DriverBadges
-            drivers={drivers}
-            color={color}
-            onDriverClick={(driver, e) => {
-              e.stopPropagation();
-              toggleVisibility('drivers', [driver]);
-            }}
-            hiddenItems={data.drivers
-              .filter((d) => (showDrivers ? d.isHidden : true))
-              .map((d) => d.abbreviation ?? '')}
-            fullWidth
-          />
+          <div className='flex w-full flex-wrap gap-2'>
+            <DriverBadges
+              className='min-w-12'
+              drivers={drivers}
+              color={color}
+              onClick={showDrivers ? handleDriverClick : null}
+              hiddenItems={data.drivers
+                .filter((d) => (showDrivers ? d.isHidden : true))
+                .map((d) => d.abbreviation ?? '')}
+            />
+          </div>
         </div>
       );
     });

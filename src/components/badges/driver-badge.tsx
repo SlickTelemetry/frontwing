@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { MouseEvent } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 
@@ -13,49 +14,42 @@ const getBorderStyle = (idx: number) => {
   return borderStyles[idx % 4];
 };
 
-export function DriverBadges({
-  drivers,
-  color,
-  onDriverClick,
-  hiddenItems,
-  fullWidth,
-  ...props
-}: React.ComponentProps<'span'> & {
+interface DriverBadgesProps {
   drivers: string[];
   color: string;
-  onDriverClick?: (driver: string, e: React.MouseEvent) => void;
+  onClick?: ((d: string) => void) | null;
+  className?: string;
   hiddenItems?: string[];
-  fullWidth?: boolean;
-}) {
-  if (!drivers || drivers.length === 0) return null;
+}
 
-  return (
-    <div
+export function DriverBadges({
+  className,
+  drivers,
+  color,
+  hiddenItems,
+  onClick,
+}: DriverBadgesProps) {
+  const handleClick = (e: MouseEvent<HTMLSpanElement>, driver: string) => {
+    if (!onClick) return;
+
+    e.stopPropagation();
+    onClick(driver);
+  };
+
+  return drivers.map((driver, idx) => (
+    <Badge
+      key={driver}
+      variant='outline'
+      data-driver={driver}
+      onClick={(e) => handleClick(e, driver)}
       className={clsx(
-        props.className,
-        'flex flex-wrap gap-2',
-        fullWidth && 'w-full',
+        className,
+        getBorderStyle(idx),
+        hiddenItems?.includes(driver) && 'opacity-50',
       )}
+      style={{ borderColor: color }}
     >
-      {drivers.map((driver, idx) => (
-        <Badge
-          key={driver}
-          variant='outline'
-          onClick={onDriverClick ? (e) => onDriverClick(driver, e) : undefined}
-          className={[
-            'min-w-12',
-            getBorderStyle(idx),
-            fullWidth && 'flex-1',
-            onDriverClick && 'cursor-pointer select-none',
-            hiddenItems?.includes(driver) ? 'opacity-50' : 'opacity-100',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          style={{ borderColor: color }}
-        >
-          {driver}
-        </Badge>
-      ))}
-    </div>
-  );
+      {driver}
+    </Badge>
+  ));
 }

@@ -78,18 +78,16 @@ export const DriverFilters = ({
             <p className='truncate'>{constructor.name}</p>
           </div>
 
-          <DriverBadges
-            drivers={constructor.drivers.map(
-              (driver) => driver?.abbreviation ?? '',
-            )}
-            color={constructor.color as string}
-            onDriverClick={(driver, e) => {
-              e.stopPropagation();
-              toggleDrivers([driver]);
-            }}
-            hiddenItems={hiddenItems}
-            fullWidth
-          />
+          <div className='flex w-full flex-wrap gap-2'>
+            <DriverBadges
+              drivers={constructor.drivers.map(
+                (driver) => driver?.abbreviation ?? '',
+              )}
+              color={constructor.color as string}
+              onClick={(driver) => toggleDrivers([driver])}
+              hiddenItems={hiddenItems}
+            />
+          </div>
         </div>
       ))}
     </>
