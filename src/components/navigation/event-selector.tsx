@@ -41,12 +41,12 @@ export function EventSelector() {
   const items =
     data.schedule.map(({ round_number, event_name, event_format }) => ({
       label: (
-        <span className='flex items-center gap-1'>
-          <span>
+        <>
+          <p className='w-full'>
             {round_number} | {event_name}
-          </span>
+          </p>
           <SprintBadge format={event_format} style='short' />
-        </span>
+        </>
       ),
       value: event_name!,
     })) || [];
