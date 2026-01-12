@@ -58,6 +58,7 @@ export const baseOptions: EChartsOption = {
     },
   },
   yAxis: {
+    inverse: true,
     type: 'time',
     name: 'Lap Times',
     nameTextStyle: {
