@@ -1,3 +1,9 @@
+## 0.11.0 (2026-01-12)
+
+### Feat
+
+- configured light mode with theme toggler
+
 ## 0.10.4 (2026-01-10)
 
 ### Refactor
