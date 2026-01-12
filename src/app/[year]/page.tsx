@@ -35,7 +35,7 @@ const GET_SEASON_PAGE = graphql(`
     ) {
       ...ConstructorStandings
     }
-    schedule(where: { year: { _eq: $year } }) {
+    schedule(where: { year: { _eq: $year } }, order_by: { round_number: asc }) {
       ...SeasonSchedule
     }
     circuits(where: { year: { _eq: $year } }) {

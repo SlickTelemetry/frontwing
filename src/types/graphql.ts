@@ -16427,6 +16427,20 @@ export const GetSeasonPageDocument = {
                   ],
                 },
               },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'round_number' },
+                      value: { kind: 'EnumValue', value: 'asc' },
+                    },
+                  ],
+                },
+              },
             ],
             selectionSet: {
               kind: 'SelectionSet',
