@@ -1,4 +1,3 @@
-import debounce from 'lodash.debounce';
 import { RefObject, useEffect, useRef } from 'react';
 
 export function useResizeObserver(
@@ -15,20 +14,15 @@ export function useResizeObserver(
   useEffect(() => {
     if (!ref?.current) return;
 
-    const debouncedCallback = debounce(() => {
-      callbackRef.current();
-    }, 0);
-
     // Event-driven resize: observe container size changes (e.g., sidebar animation)
     const observer = new ResizeObserver(() => {
-      debouncedCallback();
+      callbackRef.current();
     });
 
-    observer.observe(ref.current);
+    observer.observe(document.documentElement);
 
     return () => {
       observer.disconnect();
-      debouncedCallback.cancel();
     };
   }, [ref]);
 }
