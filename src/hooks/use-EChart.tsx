@@ -1,4 +1,4 @@
-import { LineChart, ScatterChart } from 'echarts/charts';
+import { BarChart, LineChart, ScatterChart } from 'echarts/charts';
 import {
   DataZoomComponent,
   GridComponent,
@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react';
 import { useResizeObserver } from './use-resize-observer';
 
 echarts.use([
+  BarChart,
   ScatterChart,
   LineChart,
   DataZoomComponent,

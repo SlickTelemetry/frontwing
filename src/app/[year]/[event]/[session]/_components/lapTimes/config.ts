@@ -1,4 +1,4 @@
-import { EChartsOption } from 'echarts';
+import { EChartsOption, format } from 'echarts';
 
 import { formatLapTime } from '@/lib/utils';
 
@@ -74,9 +74,11 @@ export const baseOptions: EChartsOption = {
     nameGap: 40,
     axisLabel: {
       formatter: (value) =>
-        `${Math.floor(value / 60000)}:${Math.floor((value % 60000) / 1000)
-          .toString()
-          .padStart(2, '0')}`,
+        format.encodeHTML(
+          `${Math.floor(value / 60000)}:${Math.floor((value % 60000) / 1000)
+            .toString()
+            .padStart(2, '0')}`,
+        ),
     },
   },
 };

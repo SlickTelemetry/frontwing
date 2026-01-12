@@ -1,4 +1,4 @@
-import { EChartsOption } from 'echarts';
+import { EChartsOption, format } from 'echarts';
 
 import { formatLapTime } from '@/lib/utils';
 
@@ -42,7 +42,7 @@ export const baseOptions: EChartsOption = {
     min: 0,
     max: (value) => value.max * 1.004,
     axisLabel: {
-      formatter: (value) => formatLapTime(value) as string,
+      formatter: (value) => format.encodeHTML(formatLapTime(value) as string),
     },
     splitLine: {
       show: true,

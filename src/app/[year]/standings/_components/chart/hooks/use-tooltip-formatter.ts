@@ -1,3 +1,4 @@
+import { format } from 'echarts';
 import { CallbackDataParams } from 'echarts/types/dist/shared';
 import { useCallback } from 'react';
 
@@ -87,11 +88,11 @@ export function useTooltipFormatter({
 
       // Wrap header + body in a fixed-width container so tooltip width doesn't
       // change between events. Width is based on the longest header text.
-      return `
+      return format.encodeHTML(`
         <div class="whitespace-normal wrap-break-word" style="width:${FIXED_STANDINGS_CHART_TOOLTIP_WIDTH_CH}ch;">
           ${header}${body}
         </div>
-      `;
+      `);
     },
     [events, positionCountsTimeline],
   );

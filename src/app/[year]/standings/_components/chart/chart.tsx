@@ -1,15 +1,5 @@
 'use client';
 
-import { LineChart } from 'echarts/charts';
-import {
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  TooltipComponent,
-} from 'echarts/components';
-import * as echarts from 'echarts/core';
-import { UniversalTransition } from 'echarts/features';
-import { CanvasRenderer } from 'echarts/renderers';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -34,17 +24,6 @@ import {
   Event_Format_Choices_Enum,
   type GetStandingsQuery,
 } from '@/types/graphql';
-
-// Register ECharts pieces globally once
-echarts.use([
-  DatasetComponent,
-  GridComponent,
-  LegendComponent,
-  TooltipComponent,
-  LineChart,
-  CanvasRenderer,
-  UniversalTransition,
-]);
 
 interface Props {
   events: GetStandingsQuery['events'];
@@ -150,7 +129,7 @@ export function StandingsChart({ events, type }: Props) {
       />
       <div
         ref={chartRef}
-        className='h-[300px] w-full pr-4 pb-2 pl-2 lg:h-[400px] 2xl:h-[500px]'
+        className='h-75 w-full pr-4 pb-2 pl-2 lg:h-100 2xl:h-125'
       />
     </>
   );

@@ -1,4 +1,4 @@
-import * as echarts from 'echarts/core';
+import { format } from 'echarts/core';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { formatLapTime } from '@/lib/utils';
@@ -21,10 +21,10 @@ interface EChartsCallbackParams {
 }
 
 const timeVal = (n?: number | null) =>
-  echarts.format.encodeHTML(n ? `${formatLapTime(n)}s` : 'N/A');
+  format.encodeHTML(n ? `${formatLapTime(n)}s` : 'N/A');
 
 const delta = (a?: number | null, b?: number | null) =>
-  echarts.format.encodeHTML(
+  format.encodeHTML(
     a && b ? `${a - b > 0 ? '+' : ''}${formatLapTime(a - b)}` : 'N/A',
   );
 

@@ -1,5 +1,5 @@
 'use client';
-import * as echarts from 'echarts';
+import { format, SeriesOption } from 'echarts';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useECharts } from '@/hooks/use-EChart';
@@ -112,7 +112,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
       return;
     }
 
-    const series: echarts.SeriesOption[] = [];
+    const series: SeriesOption[] = [];
     const driversSet = new Set<string>(); // To collect unique driver names
     let maxStintNumber = 0;
 
@@ -200,7 +200,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
               if (val[0] > 2) {
                 label += `\n${val[0]} Lap${val[0] > 1 ? 's' : ''}`;
               }
-              return label;
+              return format.encodeHTML(label);
             },
 
             position: 'inside', // Position label inside the bar
