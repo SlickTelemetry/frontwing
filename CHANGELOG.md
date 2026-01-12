@@ -1,3 +1,9 @@
+## 0.11.1 (2026-01-12)
+
+### Refactor
+
+- breadcrumb component and import
+
 ## 0.11.0 (2026-01-12)
 
 ### Feat
