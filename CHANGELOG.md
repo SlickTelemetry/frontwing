@@ -1,3 +1,9 @@
+## 0.11.6 (2026-01-12)
+
+### Fix
+
+- sanitize all echart formatters FRON-304
+
 ## 0.11.5 (2026-01-12)
 
 ### Fix
