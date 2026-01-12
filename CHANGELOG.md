@@ -1,3 +1,10 @@
+## 0.11.5 (2026-01-12)
+
+### Fix
+
+- resize observer hook to listen to document resizing and remove debounce
+- handle missing data, 2024 japanese fp2
+
 ## 0.11.4 (2026-01-12)
 
 ### Refactor
