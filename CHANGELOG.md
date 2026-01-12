@@ -1,3 +1,9 @@
+## 0.11.4 (2026-01-12)
+
+### Refactor
+
+- make circuit map bigger for event page
+
 ## 0.11.3 (2026-01-12)
 
 ### Refactor
