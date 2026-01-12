@@ -1,3 +1,9 @@
+## 0.11.7 (2026-01-12)
+
+### Fix
+
+- sort season schedule by round number
+
 ## 0.11.6 (2026-01-12)
 
 ### Fix
