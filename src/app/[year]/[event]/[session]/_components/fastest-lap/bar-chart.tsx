@@ -37,7 +37,10 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
   const driverTimes = useMemo(
     () =>
       [...times]
-        .filter((d) => d.fastestLap.lap_time !== null)
+        .filter(
+          (d) =>
+            d.fastestLap.lap_time !== null && d.fastestLap.potential_best !== 0,
+        )
         .sort(
           (a, b) =>
             Number(b.fastestLap.lap_time || 0) -

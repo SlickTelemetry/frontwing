@@ -192,7 +192,7 @@ export const sortFastestLaps = <
   sessions: T[],
 ) => {
   return sessions
-    ?.filter((driver) => !!driver.fastest_lap?.[0].lap_time)
+    ?.filter((driver) => !!driver.fastest_lap?.[0]?.lap_time)
     .sort((a, b) => {
       return (
         Number(a.fastest_lap[0]?.lap_time || 0) -

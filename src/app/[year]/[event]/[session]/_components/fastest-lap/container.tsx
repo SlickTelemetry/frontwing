@@ -80,9 +80,9 @@ export const FastestLapContainer = () => {
   const driverTimes: DriverTimes[] = driverSessions
     .filter((ds) => !hiddenItems.includes(ds.driver?.abbreviation ?? ''))
     .map((ds) => {
-      const sector1 = ds.fastest_sector1[0].sector1 ?? null;
-      const sector2 = ds.fastest_sector2[0].sector2 ?? null;
-      const sector3 = ds.fastest_sector3[0].sector3 ?? null;
+      const sector1 = ds.fastest_sector1[0]?.sector1 ?? null;
+      const sector2 = ds.fastest_sector2[0]?.sector2 ?? null;
+      const sector3 = ds.fastest_sector3[0]?.sector3 ?? null;
 
       return {
         abbreviation: ds.driver?.abbreviation || 'N/A',
@@ -94,15 +94,15 @@ export const FastestLapContainer = () => {
         sectors: {
           sector1: {
             time: sector1,
-            lap: ds.fastest_sector1[0].lap_number,
+            lap: ds.fastest_sector1[0]?.lap_number,
           },
           sector2: {
             time: sector2,
-            lap: ds.fastest_sector2[0].lap_number,
+            lap: ds.fastest_sector2[0]?.lap_number,
           },
           sector3: {
             time: sector3,
-            lap: ds.fastest_sector3[0].lap_number,
+            lap: ds.fastest_sector3[0]?.lap_number,
           },
         },
         color: ds.constructorByConstructorId?.color || 'cccccc',
