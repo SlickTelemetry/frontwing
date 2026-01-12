@@ -54,7 +54,7 @@ export const LapTimesChart = ({
         params
           .filter((item) => item.value[1] !== null)
           .sort((a, b) => {
-            return (b.value[1] ?? 0) - (a.value[1] ?? 0);
+            return (a.value[1] ?? 0) - (b.value[1] ?? 0);
           })
           .forEach((item) => {
             const [_lapNum, lapTime, tyre] = item.value as [
