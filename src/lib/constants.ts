@@ -6,7 +6,7 @@ import {
 export const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 export const SUPPORTED_SEASONS = [
-  2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
+  2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
 ];
 
 export const SESSION_KEYS = [
@@ -53,6 +53,10 @@ export const FINISHING_CLASSIFICATIONS: Record<
 };
 
 export const AVAILABLE_POINTS_BY_YEAR: Record<number, AvailablePointsConfig> = {
+  2026: {
+    drivers: { sprint: 33, normal: 25 },
+    constructors: { sprint: 58, normal: 43 },
+  },
   2025: {
     drivers: { sprint: 33, normal: 25 },
     constructors: { sprint: 58, normal: 43 },

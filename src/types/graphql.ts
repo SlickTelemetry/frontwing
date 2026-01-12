@@ -13112,7 +13112,7 @@ export type GetEventDetailsQuery = {
     }
   >;
   circuits: Array<
-    { __typename?: 'circuits' } & {
+    { __typename?: 'circuits'; country?: string | null } & {
       ' $fragmentRefs'?: { CircuitDetailsFragment: CircuitDetailsFragment };
     }
   >;
@@ -17863,6 +17863,7 @@ export const GetEventDetailsDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'country' } },
                 {
                   kind: 'FragmentSpread',
                   name: { kind: 'Name', value: 'CircuitDetails' },
