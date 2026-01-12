@@ -3,7 +3,7 @@
   "description": "Slick Telemetry frontend written in typescript with nextjs and vercel",
   "author": "Slick Telemetry",
   "license": "GPL-3.0-only",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "private": true,
   "scripts": {
     "dev": "next dev",

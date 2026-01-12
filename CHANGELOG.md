@@ -1,3 +1,10 @@
+## 0.11.3 (2026-01-12)
+
+### Refactor
+
+- event-selector
+- badges and badge implementations
+
 ## 0.11.2 (2026-01-12)
 
 ### Refactor
