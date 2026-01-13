@@ -12,6 +12,7 @@ import {
 } from '@/components/results/results-tables';
 import { ServerPageError } from '@/components/ServerError';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { Table } from '@/components/ui/table';
 
 import { DriverFilters } from '@/app/[year]/[event]/[session]/_components/driver-filters';
@@ -58,35 +59,46 @@ export const SessionHeader = ({
   if (!loading && !session) return <ServerPageError />;
 
   return (
-    <div className='-col-end-1 w-full rounded border xl:col-span-2'>
-      <h1 className='scroll-m-20 px-4 py-3 text-center text-4xl font-extrabold tracking-tight text-balance'>
-        {name?.replace(/_/g, ' ')}
-      </h1>
-      <div className='bg-secondary text-secondary-foreground flex flex-col gap-1 px-4 py-2'>
-        {/* <p>
-          Track Time:{' '}
+    <div className='-col-end-1 w-full rounded border p-4 xl:col-span-2'>
+      <div className='flex w-full items-end justify-between'>
+        <h1 className='scroll-m-20 text-4xl font-extrabold tracking-tight text-balance'>
+          {name?.replace(/_/g, ' ')}
+        </h1>
+        {name && COMPETITION_SESSIONS.includes(name) && (
+          <p className='text-xl font-medium'>{session?.total_laps} Laps</p>
+        )}
+      </div>
+      <Separator className='my-2 xl:my-4' />
+      <div className='grid-cols-2 xl:grid'>
+        <p>
+          Track:{' '}
+          {new Date(
+            session?.scheduled_start_time?.slice(0, -6) ?? '',
+          ).toLocaleTimeString(undefined, {
+            hour: 'numeric',
+            minute: 'numeric',
+          })}{' '}
           {new Date(
             session?.scheduled_start_time?.slice(0, -6) ?? '',
           ).toLocaleDateString(undefined, {
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true,
             month: 'short',
             day: 'numeric',
             year: 'numeric',
           })}
-        </p> */}
-        {name && COMPETITION_SESSIONS.includes(name) && (
-          <p>Laps: {session?.total_laps}</p>
-        )}
+        </p>
+
         <p>
           Local:{' '}
-          {new Date(session?.scheduled_start_time_utc ?? '').toLocaleDateString(
+          {new Date(session?.scheduled_start_time_utc ?? '').toLocaleTimeString(
             undefined,
             {
               hour: 'numeric',
               minute: 'numeric',
-              hour12: true,
+            },
+          )}{' '}
+          {new Date(session?.scheduled_start_time_utc ?? '').toLocaleDateString(
+            undefined,
+            {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
