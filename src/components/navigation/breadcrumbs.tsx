@@ -1,8 +1,8 @@
 'use client';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
+import useUrlUpdater from '@/hooks/use-url-updater';
 
 import {
   Breadcrumb,
@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/breadcrumb';
 
 export function Breadcrumbs() {
+  const updateUrl = useUrlUpdater();
+
   const { year, ...params } = useParams<{
     year: string;
     event?: string;
@@ -27,8 +29,11 @@ export function Breadcrumbs() {
           {!params.event ? (
             <BreadcrumbPage>{year}</BreadcrumbPage>
           ) : (
-            <BreadcrumbLink asChild>
-              <Link href={`/${year}`}>{year}</Link>
+            <BreadcrumbLink
+              className='cursor-pointer'
+              onClick={() => updateUrl('year', year)}
+            >
+              {year}
             </BreadcrumbLink>
           )}
         </BreadcrumbItem>
@@ -43,10 +48,11 @@ export function Breadcrumbs() {
                   {eventLocationDecode(params.event)}
                 </BreadcrumbPage>
               ) : (
-                <BreadcrumbLink asChild>
-                  <Link href={`/${year}/${params.event}`}>
-                    {eventLocationDecode(params.event)}
-                  </Link>
+                <BreadcrumbLink
+                  className='cursor-pointer'
+                  onClick={() => updateUrl('event', params.event ?? '')}
+                >
+                  {eventLocationDecode(params.event)}
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>
