@@ -1,3 +1,9 @@
+## 0.11.8 (2026-01-15)
+
+### Refactor
+
+- url updater to no longer maintain pathname beyond selected level FRON-283
+
 ## 0.11.7 (2026-01-12)
 
 ### Fix
