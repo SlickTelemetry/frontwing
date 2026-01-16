@@ -1,3 +1,9 @@
+## 0.11.9 (2026-01-16)
+
+### Fix
+
+- **laptimes-chart**: adjust right margin to show zoom's max value
+
 ## 0.11.8 (2026-01-15)
 
 ### Refactor
