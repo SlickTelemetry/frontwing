@@ -193,7 +193,7 @@ export function Table({
               <TableCell>
                 {/* Constructor badge for driver view - hide first when space is limited */}
                 {!isConstructorView && (
-                  <div className='hidden min-w-[120px] shrink-0 @[600px]:flex'>
+                  <div className='flex min-w-30 shrink-0'>
                     <ConstructorBadge
                       className='2xl:text-sm'
                       color={item.color.slice(1)} //remove #
@@ -203,7 +203,7 @@ export function Table({
                 )}
                 {/* Driver badges for constructor view - hide first when space is limited */}
                 {constructorDriversMap.has(item.name) && (
-                  <div className='hidden shrink-0 gap-1 overflow-visible @[600px]:flex'>
+                  <div className='flex shrink-0 gap-1'>
                     <DriverBadges
                       drivers={constructorDriversMap.get(item.name) || []}
                       color={item.color}
@@ -212,10 +212,12 @@ export function Table({
                   </div>
                 )}
               </TableCell>
-              <TableCell className='hidden shrink-0 items-center gap-1 @[500px]:flex'>
-                <PositionBadge count={wins} type='win' />
-                <PositionBadge count={p2s} type='p2' />
-                <PositionBadge count={p3s} type='p3' />
+              <TableCell>
+                <div className='flex shrink-0 gap-1'>
+                  <PositionBadge count={wins} type='win' />
+                  <PositionBadge count={p2s} type='p2' />
+                  <PositionBadge count={p3s} type='p3' />
+                </div>
               </TableCell>
               <TableCell className='min-w-14 shrink-0 text-center'>
                 {item.totalPoints}
