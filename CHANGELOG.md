@@ -1,3 +1,9 @@
+## 0.11.15 (2026-01-19)
+
+### Fix
+
+- FRON-310 latest constructors per driver in standings updated to be last constructor w points
+
 ## 0.11.14 (2026-01-19)
 
 ### Fix
