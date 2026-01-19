@@ -19322,7 +19322,7 @@ export const GetStandingsDocument = {
                     },
                     {
                       kind: 'Argument',
-                      name: { kind: 'Name', value: 'order_by' },
+                      name: { kind: 'Name', value: 'where' },
                       value: {
                         kind: 'ObjectValue',
                         fields: [
@@ -19334,21 +19334,56 @@ export const GetStandingsDocument = {
                               fields: [
                                 {
                                   kind: 'ObjectField',
-                                  name: { kind: 'Name', value: 'date' },
-                                  value: { kind: 'EnumValue', value: 'desc' },
+                                  name: { kind: 'Name', value: 'event' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: { kind: 'Name', value: 'year' },
+                                        value: {
+                                          kind: 'ObjectValue',
+                                          fields: [
+                                            {
+                                              kind: 'ObjectField',
+                                              name: {
+                                                kind: 'Name',
+                                                value: '_eq',
+                                              },
+                                              value: {
+                                                kind: 'Variable',
+                                                name: {
+                                                  kind: 'Name',
+                                                  value: 'season',
+                                                },
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'name' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: { kind: 'Name', value: '_eq' },
+                                        value: {
+                                          kind: 'EnumValue',
+                                          value: 'Race',
+                                        },
+                                      },
+                                    ],
+                                  },
                                 },
                               ],
                             },
                           },
-                        ],
-                      },
-                    },
-                    {
-                      kind: 'Argument',
-                      name: { kind: 'Name', value: 'where' },
-                      value: {
-                        kind: 'ObjectValue',
-                        fields: [
                           {
                             kind: 'ObjectField',
                             name: {
@@ -19373,6 +19408,44 @@ export const GetStandingsDocument = {
                                         value: {
                                           kind: 'BooleanValue',
                                           value: false,
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'order_by' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'session' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'event' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: {
+                                          kind: 'Name',
+                                          value: 'round_number',
+                                        },
+                                        value: {
+                                          kind: 'EnumValue',
+                                          value: 'desc',
                                         },
                                       },
                                     ],

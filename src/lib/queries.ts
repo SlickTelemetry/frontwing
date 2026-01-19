@@ -117,8 +117,11 @@ export const GET_STANDINGS = graphql(`
       full_name
       latest_constructor: driver_sessions(
         limit: 1
-        order_by: { session: { date: desc } }
-        where: { constructorByConstructorId: { name: { _is_null: false } } }
+        where: {
+          session: { event: { year: { _eq: $season } }, name: { _eq: Race } }
+          constructorByConstructorId: { name: { _is_null: false } }
+        }
+        order_by: { session: { event: { round_number: desc } } }
       ) {
         constructor: constructorByConstructorId {
           name
