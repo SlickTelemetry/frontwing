@@ -10,7 +10,7 @@ export default function NotFound() {
     <div className='mx-auto flex w-full max-w-[500px] flex-col gap-2 p-4 lg:px-6'>
       <div className='rounded border border-dotted p-4'>
         <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-4xl font-semibold tracking-tight text-balance'>
-          No Season Found
+          No standings found
         </h1>
         <p>We currently only support data from these seasons:</p>
         <ul className='flex flex-wrap gap-x-4 gap-y-2 py-2'>

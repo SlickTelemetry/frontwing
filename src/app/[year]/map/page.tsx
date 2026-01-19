@@ -73,7 +73,7 @@ export default function MapPage({
       </MapPageLoader>
     );
 
-  if (!data || data?.events?.length === 0) {
+  if (!data || data?.schedule?.length === 0) {
     notFound();
   }
 
