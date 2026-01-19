@@ -115,10 +115,12 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     const series: SeriesOption[] = [];
     const driversSet = new Set<string>(); // To collect unique driver names
     let maxStintNumber = 0;
+    let maxLaps = 0;
 
     // Dynamically determine the maximum stint number
     driverSessions.forEach((ds) => {
       maxStintNumber = Math.max(maxStintNumber, ds.laps.at(-1)?.stint ?? 0);
+      maxLaps = Math.max(maxLaps, ds.laps.length);
     });
 
     // Extract driver names in sorted order
@@ -234,6 +236,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     // Update chart options
     chartInstance.current.setOption(
       {
+        xAxis: { max: maxLaps },
         yAxis: { data: sortedDriverNames },
         series: series,
         title: { text: '' },
