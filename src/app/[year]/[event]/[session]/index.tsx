@@ -17,7 +17,7 @@ import { Table } from '@/components/ui/table';
 
 import { DriverFilters } from '@/app/[year]/[event]/[session]/_components/driver-filters';
 import { FastestLapContainer } from '@/app/[year]/[event]/[session]/_components/fastest-lap';
-import { LapTimeContainer } from '@/app/[year]/[event]/[session]/_components/lapTimes';
+import { LapTimeContainer } from '@/app/[year]/[event]/[session]/_components/lap-times';
 
 import Stints from './_components/stints';
 

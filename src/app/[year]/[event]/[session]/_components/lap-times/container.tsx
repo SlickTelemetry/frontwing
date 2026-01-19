@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 
-import { LapTimesChart } from '@/app/[year]/[event]/[session]/_components/lapTimes/chart';
+import { LapTimesChart } from '@/app/[year]/[event]/[session]/_components/lap-times';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
 import { Session_Name_Choices_Enum } from '@/types/graphql';

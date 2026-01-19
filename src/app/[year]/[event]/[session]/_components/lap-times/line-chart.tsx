@@ -6,7 +6,7 @@ import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
-import { baseOptions } from '@/app/[year]/[event]/[session]/_components/lapTimes/config';
+import { baseOptions } from '@/app/[year]/[event]/[session]/_components/lap-times/config';
 import { tyreCompoundColors } from '@/app/[year]/[event]/[session]/constants';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
