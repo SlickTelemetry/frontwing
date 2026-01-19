@@ -94,6 +94,7 @@ const LapTimeChartContainer = ({
             <SelectContent>
               <SelectGroup>
                 <SelectItem value='all'>Show All</SelectItem>
+                <SelectItem value='100'>Average</SelectItem>
                 <SelectItem value='110'>110%</SelectItem>
                 <SelectItem value='125'>125%</SelectItem>
                 <SelectItem value='150'>150%</SelectItem>
