@@ -1,3 +1,9 @@
+## 0.11.10 (2026-01-19)
+
+### Fix
+
+- align standing legend items to start
+
 ## 0.11.9 (2026-01-16)
 
 ### Fix
