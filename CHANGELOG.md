@@ -1,3 +1,9 @@
+## 0.11.11 (2026-01-19)
+
+### Fix
+
+- sanitize standings chart FRON-304
+
 ## 0.11.10 (2026-01-19)
 
 ### Fix
