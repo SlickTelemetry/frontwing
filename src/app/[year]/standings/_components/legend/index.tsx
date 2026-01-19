@@ -48,7 +48,7 @@ export const DriverFilters = () => {
           key={team}
           role='button'
           tabIndex={0}
-          className='focus-visible:border-ring focus-visible:ring-ring/50 flex cursor-pointer flex-col justify-between gap-1 rounded border p-2 py-1 outline-none focus-visible:ring-[3px]'
+          className='focus-visible:border-ring focus-visible:ring-ring/50 flex cursor-pointer flex-col justify-start gap-1 rounded border p-2 py-1 outline-none focus-visible:ring-[3px]'
           style={{ borderColor: color }}
           onClick={() => toggleVisibility('constructors', [team])}
           onKeyDown={(e) => {
