@@ -1,3 +1,9 @@
+## 0.11.16 (2026-01-19)
+
+### Fix
+
+- lap-time min value causing chart to shrink
+
 ## 0.11.15 (2026-01-19)
 
 ### Fix
