@@ -54,6 +54,7 @@ export const GET_EVENT_DETAILS = graphql(`
       }
       limit: 1
     ) {
+      country
       ...CircuitDetails
     }
 

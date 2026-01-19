@@ -10394,9 +10394,10 @@ export type Telemetry = {
   drs?: Maybe<Scalars['Int']['output']>;
   gear?: Maybe<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
+  lap_id?: Maybe<Scalars['String']['output']>;
   relative_distance?: Maybe<Scalars['numeric']['output']>;
   rpm?: Maybe<Scalars['Int']['output']>;
-  session_time?: Maybe<Scalars['bigint']['output']>;
+  session_time?: Maybe<Scalars['numeric']['output']>;
   source?: Maybe<Telemetry_Sources_Enum>;
   speed?: Maybe<Scalars['numeric']['output']>;
   status?: Maybe<Telemetry_Car_Status_Enum>;
@@ -10405,7 +10406,7 @@ export type Telemetry = {
   /** An object relationship */
   telemetry_source?: Maybe<Telemetry_Sources>;
   throttle?: Maybe<Scalars['numeric']['output']>;
-  time?: Maybe<Scalars['bigint']['output']>;
+  time?: Maybe<Scalars['numeric']['output']>;
   x?: Maybe<Scalars['numeric']['output']>;
   y?: Maybe<Scalars['numeric']['output']>;
   z?: Maybe<Scalars['numeric']['output']>;
@@ -10539,16 +10540,17 @@ export type Telemetry_Bool_Exp = {
   drs?: InputMaybe<Int_Comparison_Exp>;
   gear?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
+  lap_id?: InputMaybe<String_Comparison_Exp>;
   relative_distance?: InputMaybe<Numeric_Comparison_Exp>;
   rpm?: InputMaybe<Int_Comparison_Exp>;
-  session_time?: InputMaybe<Bigint_Comparison_Exp>;
+  session_time?: InputMaybe<Numeric_Comparison_Exp>;
   source?: InputMaybe<Telemetry_Sources_Enum_Comparison_Exp>;
   speed?: InputMaybe<Numeric_Comparison_Exp>;
   status?: InputMaybe<Telemetry_Car_Status_Enum_Comparison_Exp>;
   telemetry_car_status?: InputMaybe<Telemetry_Car_Status_Bool_Exp>;
   telemetry_source?: InputMaybe<Telemetry_Sources_Bool_Exp>;
   throttle?: InputMaybe<Numeric_Comparison_Exp>;
-  time?: InputMaybe<Bigint_Comparison_Exp>;
+  time?: InputMaybe<Numeric_Comparison_Exp>;
   x?: InputMaybe<Numeric_Comparison_Exp>;
   y?: InputMaybe<Numeric_Comparison_Exp>;
   z?: InputMaybe<Numeric_Comparison_Exp>;
@@ -10750,10 +10752,10 @@ export type Telemetry_Inc_Input = {
   gear?: InputMaybe<Scalars['Int']['input']>;
   relative_distance?: InputMaybe<Scalars['numeric']['input']>;
   rpm?: InputMaybe<Scalars['Int']['input']>;
-  session_time?: InputMaybe<Scalars['bigint']['input']>;
+  session_time?: InputMaybe<Scalars['numeric']['input']>;
   speed?: InputMaybe<Scalars['numeric']['input']>;
   throttle?: InputMaybe<Scalars['numeric']['input']>;
-  time?: InputMaybe<Scalars['bigint']['input']>;
+  time?: InputMaybe<Scalars['numeric']['input']>;
   x?: InputMaybe<Scalars['numeric']['input']>;
   y?: InputMaybe<Scalars['numeric']['input']>;
   z?: InputMaybe<Scalars['numeric']['input']>;
@@ -10771,16 +10773,17 @@ export type Telemetry_Insert_Input = {
   drs?: InputMaybe<Scalars['Int']['input']>;
   gear?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lap_id?: InputMaybe<Scalars['String']['input']>;
   relative_distance?: InputMaybe<Scalars['numeric']['input']>;
   rpm?: InputMaybe<Scalars['Int']['input']>;
-  session_time?: InputMaybe<Scalars['bigint']['input']>;
+  session_time?: InputMaybe<Scalars['numeric']['input']>;
   source?: InputMaybe<Telemetry_Sources_Enum>;
   speed?: InputMaybe<Scalars['numeric']['input']>;
   status?: InputMaybe<Telemetry_Car_Status_Enum>;
   telemetry_car_status?: InputMaybe<Telemetry_Car_Status_Obj_Rel_Insert_Input>;
   telemetry_source?: InputMaybe<Telemetry_Sources_Obj_Rel_Insert_Input>;
   throttle?: InputMaybe<Scalars['numeric']['input']>;
-  time?: InputMaybe<Scalars['bigint']['input']>;
+  time?: InputMaybe<Scalars['numeric']['input']>;
   x?: InputMaybe<Scalars['numeric']['input']>;
   y?: InputMaybe<Scalars['numeric']['input']>;
   z?: InputMaybe<Scalars['numeric']['input']>;
@@ -10797,12 +10800,13 @@ export type Telemetry_Max_Fields = {
   drs?: Maybe<Scalars['Int']['output']>;
   gear?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['String']['output']>;
+  lap_id?: Maybe<Scalars['String']['output']>;
   relative_distance?: Maybe<Scalars['numeric']['output']>;
   rpm?: Maybe<Scalars['Int']['output']>;
-  session_time?: Maybe<Scalars['bigint']['output']>;
+  session_time?: Maybe<Scalars['numeric']['output']>;
   speed?: Maybe<Scalars['numeric']['output']>;
   throttle?: Maybe<Scalars['numeric']['output']>;
-  time?: Maybe<Scalars['bigint']['output']>;
+  time?: Maybe<Scalars['numeric']['output']>;
   x?: Maybe<Scalars['numeric']['output']>;
   y?: Maybe<Scalars['numeric']['output']>;
   z?: Maybe<Scalars['numeric']['output']>;
@@ -10818,6 +10822,7 @@ export type Telemetry_Max_Order_By = {
   drs?: InputMaybe<Order_By>;
   gear?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lap_id?: InputMaybe<Order_By>;
   relative_distance?: InputMaybe<Order_By>;
   rpm?: InputMaybe<Order_By>;
   session_time?: InputMaybe<Order_By>;
@@ -10840,12 +10845,13 @@ export type Telemetry_Min_Fields = {
   drs?: Maybe<Scalars['Int']['output']>;
   gear?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['String']['output']>;
+  lap_id?: Maybe<Scalars['String']['output']>;
   relative_distance?: Maybe<Scalars['numeric']['output']>;
   rpm?: Maybe<Scalars['Int']['output']>;
-  session_time?: Maybe<Scalars['bigint']['output']>;
+  session_time?: Maybe<Scalars['numeric']['output']>;
   speed?: Maybe<Scalars['numeric']['output']>;
   throttle?: Maybe<Scalars['numeric']['output']>;
-  time?: Maybe<Scalars['bigint']['output']>;
+  time?: Maybe<Scalars['numeric']['output']>;
   x?: Maybe<Scalars['numeric']['output']>;
   y?: Maybe<Scalars['numeric']['output']>;
   z?: Maybe<Scalars['numeric']['output']>;
@@ -10861,6 +10867,7 @@ export type Telemetry_Min_Order_By = {
   drs?: InputMaybe<Order_By>;
   gear?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lap_id?: InputMaybe<Order_By>;
   relative_distance?: InputMaybe<Order_By>;
   rpm?: InputMaybe<Order_By>;
   session_time?: InputMaybe<Order_By>;
@@ -10900,6 +10907,7 @@ export type Telemetry_Order_By = {
   drs?: InputMaybe<Order_By>;
   gear?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lap_id?: InputMaybe<Order_By>;
   relative_distance?: InputMaybe<Order_By>;
   rpm?: InputMaybe<Order_By>;
   session_time?: InputMaybe<Order_By>;
@@ -10940,6 +10948,8 @@ export enum Telemetry_Select_Column {
   Gear = 'gear',
   /** column name */
   Id = 'id',
+  /** column name */
+  LapId = 'lap_id',
   /** column name */
   RelativeDistance = 'relative_distance',
   /** column name */
@@ -10987,14 +10997,15 @@ export type Telemetry_Set_Input = {
   drs?: InputMaybe<Scalars['Int']['input']>;
   gear?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lap_id?: InputMaybe<Scalars['String']['input']>;
   relative_distance?: InputMaybe<Scalars['numeric']['input']>;
   rpm?: InputMaybe<Scalars['Int']['input']>;
-  session_time?: InputMaybe<Scalars['bigint']['input']>;
+  session_time?: InputMaybe<Scalars['numeric']['input']>;
   source?: InputMaybe<Telemetry_Sources_Enum>;
   speed?: InputMaybe<Scalars['numeric']['input']>;
   status?: InputMaybe<Telemetry_Car_Status_Enum>;
   throttle?: InputMaybe<Scalars['numeric']['input']>;
-  time?: InputMaybe<Scalars['bigint']['input']>;
+  time?: InputMaybe<Scalars['numeric']['input']>;
   x?: InputMaybe<Scalars['numeric']['input']>;
   y?: InputMaybe<Scalars['numeric']['input']>;
   z?: InputMaybe<Scalars['numeric']['input']>;
@@ -11308,14 +11319,15 @@ export type Telemetry_Stream_Cursor_Value_Input = {
   drs?: InputMaybe<Scalars['Int']['input']>;
   gear?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lap_id?: InputMaybe<Scalars['String']['input']>;
   relative_distance?: InputMaybe<Scalars['numeric']['input']>;
   rpm?: InputMaybe<Scalars['Int']['input']>;
-  session_time?: InputMaybe<Scalars['bigint']['input']>;
+  session_time?: InputMaybe<Scalars['numeric']['input']>;
   source?: InputMaybe<Telemetry_Sources_Enum>;
   speed?: InputMaybe<Scalars['numeric']['input']>;
   status?: InputMaybe<Telemetry_Car_Status_Enum>;
   throttle?: InputMaybe<Scalars['numeric']['input']>;
-  time?: InputMaybe<Scalars['bigint']['input']>;
+  time?: InputMaybe<Scalars['numeric']['input']>;
   x?: InputMaybe<Scalars['numeric']['input']>;
   y?: InputMaybe<Scalars['numeric']['input']>;
   z?: InputMaybe<Scalars['numeric']['input']>;
@@ -11330,10 +11342,10 @@ export type Telemetry_Sum_Fields = {
   gear?: Maybe<Scalars['Int']['output']>;
   relative_distance?: Maybe<Scalars['numeric']['output']>;
   rpm?: Maybe<Scalars['Int']['output']>;
-  session_time?: Maybe<Scalars['bigint']['output']>;
+  session_time?: Maybe<Scalars['numeric']['output']>;
   speed?: Maybe<Scalars['numeric']['output']>;
   throttle?: Maybe<Scalars['numeric']['output']>;
-  time?: Maybe<Scalars['bigint']['output']>;
+  time?: Maybe<Scalars['numeric']['output']>;
   x?: Maybe<Scalars['numeric']['output']>;
   y?: Maybe<Scalars['numeric']['output']>;
   z?: Maybe<Scalars['numeric']['output']>;
@@ -11376,6 +11388,8 @@ export enum Telemetry_Update_Column {
   Gear = 'gear',
   /** column name */
   Id = 'id',
+  /** column name */
+  LapId = 'lap_id',
   /** column name */
   RelativeDistance = 'relative_distance',
   /** column name */
@@ -13112,7 +13126,7 @@ export type GetEventDetailsQuery = {
     }
   >;
   circuits: Array<
-    { __typename?: 'circuits' } & {
+    { __typename?: 'circuits'; country?: string | null } & {
       ' $fragmentRefs'?: { CircuitDetailsFragment: CircuitDetailsFragment };
     }
   >;
@@ -17877,6 +17891,7 @@ export const GetEventDetailsDocument = {
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'country' } },
                 {
                   kind: 'FragmentSpread',
                   name: { kind: 'Name', value: 'CircuitDetails' },

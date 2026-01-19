@@ -380,12 +380,12 @@ describe('Top Navigation', () => {
 
   it('navigates to Standings page', () => {
     cy.get('[data-cy="nav-link-standings"]').click();
-    cy.url().should('include', `/${prevYear}/standings`);
+    cy.url().should('include', `/${futureDate.getFullYear()}/standings`);
   });
 
   it('navigates to Map page', () => {
     cy.get('[data-cy="nav-link-map"]').click();
-    cy.url().should('include', `/${prevYear}/map`);
+    cy.url().should('include', `/${futureDate.getFullYear()}/map`);
   });
 });
 
