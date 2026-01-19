@@ -41,10 +41,9 @@ export function useTooltipFormatter({
       const sprintBadge = sprint ? getSprintBadgeHtml('ml-1') : '';
 
       // Header with round and event name
-      const headerText = `R${round} - ${event?.name?.replace(
-        'Grand Prix',
-        'GP',
-      )}`;
+      const headerText = format.encodeHTML(
+        `R${round} - ${event?.name?.replace('Grand Prix', 'GP')}`,
+      );
       const header = `<div class='font-bold text-white mb-1 flex items-center'>${headerText}${sprintBadge}</div>`;
 
       const getCountsThroughRound = (seriesName: string) => {
@@ -73,26 +72,30 @@ export function useTooltipFormatter({
 
           return compareCountback(aCounts, bCounts);
         })
-        .map(
-          (p, index) => `
+        .map((p, index) => {
+          return format.formatTpl(
+            `
           <div class='flex items-center justify-between gap-2 border-t'>
             <div class='flex items-center gap-2'>
               <span class='w-4 text-right text-xs text-muted-foreground'>${index + 1}</span>
               <span class="inline-block rounded-full w-2 h-2" style="background-color:${p.color};"></span>
-              <span style="color:${p.color}">${p.seriesName}</span>
+              <span style="color:${p.color}">{a}</span>
             </div>
-            ${p.value}
+            {c}
           </div>`,
-        )
+            p,
+            true,
+          );
+        })
         .join('');
 
       // Wrap header + body in a fixed-width container so tooltip width doesn't
       // change between events. Width is based on the longest header text.
-      return format.encodeHTML(`
+      return `
         <div class="whitespace-normal wrap-break-word" style="width:${FIXED_STANDINGS_CHART_TOOLTIP_WIDTH_CH}ch;">
-          ${header}${body}
+          ${header + body}
         </div>
-      `);
+      `;
     },
     [events, positionCountsTimeline],
   );

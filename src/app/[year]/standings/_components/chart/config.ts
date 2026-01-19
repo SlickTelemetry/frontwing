@@ -14,6 +14,7 @@ export const chartConfig = {
     order: 'valueDesc',
     confine: true,
     className: 'max-w-md !text-sm',
+    backgroundColor: 'var(--background)',
   },
   xAxis: {
     type: 'category',
