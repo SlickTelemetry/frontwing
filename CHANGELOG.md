@@ -1,3 +1,15 @@
+## 0.11.13 (2026-01-19)
+
+### Fix
+
+- lap-time chart tooltip styling
+- include average time for lap-times filter options
+
+### Refactor
+
+- rename laptimes to lap-times
+- inverted laptime chart y-axis
+
 ## 0.11.12 (2026-01-19)
 
 ### Fix
