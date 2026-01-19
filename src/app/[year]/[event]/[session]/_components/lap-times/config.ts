@@ -29,14 +29,11 @@ export const baseOptions: EChartsOption = {
         },
       },
     },
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'var(--background)',
     order: 'valueDesc',
     confine: true,
     borderColor: '#333',
     borderWidth: 1,
-    textStyle: {
-      color: '#fff',
-    },
   },
   grid: {
     bottom: 100,

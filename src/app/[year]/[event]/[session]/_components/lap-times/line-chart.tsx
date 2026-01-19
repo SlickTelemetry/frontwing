@@ -50,7 +50,7 @@ export const LapTimesChart = ({
         // value[0] is a zero-based index, display as 1-based lap number
         const lapIdx = Number(params[0].value[0] ?? 0);
         tooltipContent = `<div class='font-bold text-foreground'>Lap: ${lapIdx + 1}</div>`;
-        tooltipContent += `<div class="grid grid-cols-[auto_1fr_1fr] items-center">`;
+        tooltipContent += `<div class="grid grid-cols-[auto_1fr_1fr] items-center text-foreground">`;
         params
           .filter((item) => item.value[1] !== null)
           .sort((a, b) => {
@@ -74,7 +74,7 @@ export const LapTimesChart = ({
                 <p>${formattedTime}</p>
                 <div class="flex gap-1 items-center justify-end">
                   <p>${tyre}</p>
-                  <div class="rounded-full size-3" style="background-color:${tyreCompoundColors[tyre + '_NEW']};"></div>
+                  <div class="rounded-full size-3 border border-foreground" style="background-color:${tyreCompoundColors[tyre + '_NEW']};"></div>
                 </div>
                 <hr class="col-span-full"/>
               `;
