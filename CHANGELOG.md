@@ -1,3 +1,9 @@
+## 0.11.14 (2026-01-19)
+
+### Fix
+
+- badge spacing for small standings tables
+
 ## 0.11.13 (2026-01-19)
 
 ### Fix
