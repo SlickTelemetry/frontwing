@@ -1,3 +1,9 @@
+## 0.11.12 (2026-01-19)
+
+### Fix
+
+- FRON-309 Set max length for stints/strategy bar chart
+
 ## 0.11.11 (2026-01-19)
 
 ### Fix
