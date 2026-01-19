@@ -65,7 +65,7 @@ export const baseOptions: EChartsOption = {
       show: true,
     },
     splitLine: { show: true, lineStyle: { opacity: 0.75 } },
-    min: (value) => value.min - 500,
+    min: (value) => value.min * 0.999,
     max: (value) => value.max * 1.001,
     axisTick: { show: true },
     nameLocation: 'middle',
