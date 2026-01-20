@@ -42,6 +42,7 @@
     "class-variance-authority": "latest",
     "clsx": "latest",
     "echarts": "latest",
+    "framer-motion": "latest",
     "graphql": "latest",
     "lucide-react": "latest",
     "mapbox-gl": "latest",
@@ -86,6 +87,7 @@
     "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
     "tailwindcss": "latest",
+    "tailwind-scrollbar": "latest",
     "typescript": "latest"
   },
   "lint-staged": {
