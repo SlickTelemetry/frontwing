@@ -73,7 +73,7 @@ importers:
         version: 6.0.0
       framer-motion:
         specifier: latest
-        version: 12.27.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 12.27.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       graphql:
         specifier: latest
         version: 16.12.0
@@ -7150,7 +7150,9 @@ snapshots:
 
   '@types/pbf@3.0.5': {}
 
-  '@types/react-dom@19.2.3(@types/react@19.2.7)':
+  '@types/prismjs@1.26.5': {}
+
+  '@types/react-dom@19.2.3(@types/react@19.2.10)':
     dependencies:
       '@types/react': 19.2.10
 
@@ -8580,14 +8582,14 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
-  framer-motion@12.27.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  framer-motion@12.27.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       motion-dom: 12.27.0
       motion-utils: 12.24.10
       tslib: 2.8.1
     optionalDependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   fs-extra@9.1.0:
     dependencies:
@@ -9635,6 +9637,12 @@ snapshots:
 
   pretty-bytes@5.6.0: {}
 
+  prism-react-renderer@2.4.1(react@19.2.4):
+    dependencies:
+      '@types/prismjs': 1.26.5
+      clsx: 2.1.1
+      react: 19.2.4
+
   process@0.11.10: {}
 
   promise@7.3.1:
@@ -10158,6 +10166,13 @@ snapshots:
   systeminformation@5.30.2: {}
 
   tailwind-merge@3.4.0: {}
+
+  tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.1.18):
+    dependencies:
+      prism-react-renderer: 2.4.1(react@19.2.4)
+      tailwindcss: 4.1.18
+    transitivePeerDependencies:
+      - react
 
   tailwindcss-animate@1.0.7(tailwindcss@4.1.18):
     dependencies:

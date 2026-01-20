@@ -27,6 +27,15 @@ export default function DebugIndexPage() {
             Missing Constructors Test
           </Link>
         </Button>
+
+        <Button asChild variant='outline'>
+          <Link
+            href='/debug/telemetry'
+            className='inline-block w-full text-center'
+          >
+            Telemetry Test
+          </Link>
+        </Button>
       </div>
     </div>
   );

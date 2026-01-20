@@ -2,6 +2,93 @@ import { gql } from '@apollo/client';
 
 import { graphql } from '@/types';
 
+export const GET_DEBUG_SESSION_DRIVERS = gql`
+  query GetDebugSessionDrivers(
+    $year: Int!
+    $round: Int!
+    $session: session_name_choices_enum!
+  ) @cached {
+    sessions(
+      limit: 1
+      where: {
+        event: { year: { _eq: $year }, round_number: { _eq: $round } }
+        name: { _eq: $session }
+      }
+    ) {
+      name
+      event {
+        name
+        round_number
+        year
+      }
+      driver_sessions(order_by: { driver: { full_name: asc } }) {
+        driver_id
+        session_id
+        driver {
+          abbreviation
+          full_name
+          number
+        }
+      }
+    }
+  }
+`;
+
+export const GET_DEBUG_DRIVER_LAPS = gql`
+  query GetDebugDriverLaps($driverId: String!, $sessionId: String!) @cached {
+    driver_sessions(
+      where: { driver_id: { _eq: $driverId }, session_id: { _eq: $sessionId } }
+      limit: 1
+    ) {
+      driver {
+        abbreviation
+        full_name
+        number
+      }
+      laps(order_by: { lap_number: asc }) {
+        lap_number
+        lap_time
+        sector1
+        sector2
+        sector3
+      }
+    }
+  }
+`;
+
+export const GET_DEBUG_LAP_TELEMETRY = gql`
+  query GetDebugLapTelemetry(
+    $driverId: String!
+    $sessionId: String!
+    $lapNumber: Int!
+  ) @cached {
+    laps(
+      limit: 1
+      where: {
+        lap_number: { _eq: $lapNumber }
+        driver_session: {
+          driver_id: { _eq: $driverId }
+          session_id: { _eq: $sessionId }
+        }
+      }
+    ) {
+      lap_number
+      telemetries(order_by: { session_time: asc }) {
+        time
+        session_time
+        speed
+        throttle
+        brake
+        gear
+        rpm
+        x
+        y
+        z
+      }
+    }
+  }
+`;
+
 export const GET_CONSTRUCTOR = gql`
   query GetConstructor($_id: String!) @cached {
     constructors(where: { ergast_id: { _eq: $_id } }) {
