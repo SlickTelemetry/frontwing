@@ -86,6 +86,7 @@
     "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
     "tailwindcss": "latest",
+    "tailwind-scrollbar": "latest",
     "typescript": "latest"
   },
   "lint-staged": {
