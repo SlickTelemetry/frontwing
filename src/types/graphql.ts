@@ -13062,6 +13062,27 @@ export type EventQualifyingResultsFragment = {
   }>;
 } & { ' $fragmentName'?: 'EventQualifyingResultsFragment' };
 
+export type GetTelemetryQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetTelemetryQuery = {
+  __typename?: 'query_root';
+  driver_sessions: Array<{
+    __typename?: 'driver_sessions';
+    driver?: { __typename?: 'drivers'; full_name?: string | null } | null;
+    telemetries: Array<{
+      __typename?: 'telemetry';
+      drs?: number | null;
+      gear?: number | null;
+      rpm?: number | null;
+      speed?: number | null;
+      throttle?: number | null;
+      brake?: boolean | null;
+      session_time?: number | null;
+      time?: number | null;
+    }>;
+  }>;
+};
+
 export type GetConstructorQueryVariables = Exact<{
   _id: Scalars['String']['input'];
 }>;
@@ -17434,6 +17455,234 @@ export const GetNextEventCircuitDocument = {
   GetNextEventCircuitQuery,
   GetNextEventCircuitQueryVariables
 >;
+export const GetTelemetryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetTelemetry' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'driver_sessions' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'driver' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'abbreviation' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: {
+                                    kind: 'StringValue',
+                                    value: 'RUS',
+                                    block: false,
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'session' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'date' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_regex' },
+                                  value: {
+                                    kind: 'StringValue',
+                                    value: '2025',
+                                    block: false,
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'event' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'name' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: { kind: 'Name', value: '_eq' },
+                                        value: {
+                                          kind: 'StringValue',
+                                          value: 'Las Vegas Grand Prix',
+                                          block: false,
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'name' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: { kind: 'EnumValue', value: 'Race' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'driver' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'full_name' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'telemetries' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'where' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'driver_session' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'laps' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: {
+                                          kind: 'Name',
+                                          value: 'lap_number',
+                                        },
+                                        value: {
+                                          kind: 'ObjectValue',
+                                          fields: [
+                                            {
+                                              kind: 'ObjectField',
+                                              name: {
+                                                kind: 'Name',
+                                                value: '_eq',
+                                              },
+                                              value: {
+                                                kind: 'IntValue',
+                                                value: '1',
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'limit' },
+                      value: { kind: 'IntValue', value: '750' },
+                    },
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'offset' },
+                      value: { kind: 'IntValue', value: '4000' },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'drs' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'gear' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rpm' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'speed' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'throttle' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'brake' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'session_time' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'time' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetTelemetryQuery, GetTelemetryQueryVariables>;
 export const GetConstructorDocument = {
   kind: 'Document',
   definitions: [
