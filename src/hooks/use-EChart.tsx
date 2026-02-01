@@ -2,6 +2,8 @@ import { BarChart, LineChart, ScatterChart } from 'echarts/charts';
 import {
   DataZoomComponent,
   GridComponent,
+  MarkAreaComponent,
+  TitleComponent,
   TooltipComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
@@ -14,7 +16,9 @@ echarts.use([
   BarChart,
   ScatterChart,
   LineChart,
+  MarkAreaComponent,
   DataZoomComponent,
+  TitleComponent,
   TooltipComponent,
   GridComponent,
   CanvasRenderer,
