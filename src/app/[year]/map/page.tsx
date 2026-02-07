@@ -1,6 +1,7 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
 import { use } from 'react';
 
 import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
@@ -8,7 +9,6 @@ import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
 import { EventDetails } from '@/components/event-details';
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import { ResultsMarquee } from '@/components/results-marquee';
-import { ServerPageError } from '@/components/ServerError';
 
 import { MapLoader } from '@/app/[year]/map/_components/map/loader';
 import { MapContent } from '@/app/[year]/map/_components/map/map';
@@ -64,16 +64,11 @@ export default function MapPage({
       </MapPageLoader>
     );
 
-  if (error)
-    return (
-      <MapPageLoader year={year}>
-        <div className='flex h-full items-center justify-center'>
-          <ServerPageError />
-        </div>
-      </MapPageLoader>
-    );
+  if (error) {
+    posthog.capture('graphql_error', error);
+  }
 
-  if (!data || data?.schedule?.length === 0) {
+  if (error || !data || data?.schedule?.length === 0) {
     notFound();
   }
 

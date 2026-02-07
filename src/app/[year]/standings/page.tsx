@@ -2,6 +2,7 @@
 import { useQuery } from '@apollo/client/react';
 import Link from 'next/link';
 import { notFound, useParams, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
 
 import { GET_STANDINGS } from '@/lib/queries';
 import { isAllEmptyArrays } from '@/lib/utils';
@@ -21,9 +22,13 @@ const StandingsContent = () => {
     | 'drivers'
     | 'constructors';
 
-  const { data: standings } = useQuery(GET_STANDINGS, {
+  const { data: standings, error } = useQuery(GET_STANDINGS, {
     variables: { season: parseInt(season) },
   });
+
+  if (error) {
+    posthog.capture('graphql_error', error);
+  }
 
   if (!standings) return null;
 

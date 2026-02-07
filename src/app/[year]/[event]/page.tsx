@@ -2,6 +2,7 @@
 import { useQuery } from '@apollo/client/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { notFound, useParams, useRouter } from 'next/navigation';
+import posthog from 'posthog-js';
 import { use, useEffect } from 'react';
 
 import { GET_EVENT_DETAILS } from '@/lib/queries';
@@ -17,7 +18,6 @@ import { EventDetails } from '@/components/event-details';
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import { GET_NAV_EVENTS } from '@/components/navigation/event-selector';
 import EventResultsContainer from '@/components/results/event-results-container';
-import { ServerPageError } from '@/components/ServerError';
 import { ToggleLocalStorage } from '@/components/toggle';
 import { Button } from '@/components/ui/button';
 
@@ -55,9 +55,11 @@ const EventPage = ({
 
   const eventName = data?.schedule[0]?.event_name;
 
-  if (error) return <ServerPageError msg='Failed to load event details.' />;
+  if (error) {
+    posthog.capture('graphql_error', error);
+  }
 
-  if (!loading && data && isAllEmptyArrays(data)) {
+  if (error || (!loading && data && isAllEmptyArrays(data))) {
     notFound();
   }
 

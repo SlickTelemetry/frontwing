@@ -133,13 +133,13 @@ export function PossibleEvents() {
 
   if (!supportedYear || !data || data.schedule.length <= 0) return null;
   return (
-    <>
-      <p>Did you mean...</p>
+    <div className='mt-2 border-t pt-2'>
+      <p className='text-xl font-bold'>Did you mean...</p>
       <ul className='list-inside list-disc py-2'>
         {data.schedule.map(({ event_name }) => (
           <li key={event_name}>
             <Link
-              className='font-semibold hover:underline'
+              className='hover:underline'
               href={`/${year || '2025'}/${eventLocationEncode(event_name)}`}
             >
               {event_name}
@@ -147,6 +147,6 @@ export function PossibleEvents() {
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 }

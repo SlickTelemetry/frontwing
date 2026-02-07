@@ -30,12 +30,3 @@ export const ServerPageError = ({ msg }: { msg?: string }) => {
     </div>
   );
 };
-
-export const ServerComponentError = () => {
-  return (
-    <div data-cy='season-selector-error'>
-      <p className='text-xl'>Server Error</p>
-      <p className='text-sm'>Try again later</p>
-    </div>
-  );
-};

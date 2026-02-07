@@ -4,13 +4,13 @@ import { Activity } from 'react';
 
 import { COMPETITION_SESSIONS } from '@/lib/constants';
 
+import { ServerPageError } from '@/components/errors/ServerError';
 import { Loader } from '@/components/Loader';
 import {
   CompetitionResults,
   PracticeResults,
   QualifyingResults,
 } from '@/components/results/results-tables';
-import { ServerPageError } from '@/components/ServerError';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Table } from '@/components/ui/table';

@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation';
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 
 import NotFoundError from '@/components/errors/not-found-error';
-import { PossibleEvents } from '@/components/event-details';
 
 export default function NotFound() {
   const { year } = useParams<{ year: string }>();
@@ -14,9 +13,5 @@ export default function NotFound() {
     href: `/${linkYear}`,
     title: `Back to ${linkYear} Season`,
   };
-  return (
-    <NotFoundError title='No Event Found' link={link}>
-      <PossibleEvents />
-    </NotFoundError>
-  );
+  return <NotFoundError title='No Session Found' link={link} />;
 }

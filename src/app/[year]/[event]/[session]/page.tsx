@@ -1,5 +1,7 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
+import { notFound } from 'next/navigation';
+import posthog from 'posthog-js';
 import { use } from 'react';
 
 import {
@@ -41,7 +43,7 @@ export default function SessionPage({
   const isQualifying = QUALIFYING_SESSIONS.includes(sessionName);
   const isPractice = PRACTICE_SESSIONS.includes(sessionName);
 
-  const { loading, data } = useQuery(GET_SESSION_DETAILS, {
+  const { loading, data, error } = useQuery(GET_SESSION_DETAILS, {
     variables: {
       year: parseInt(year),
       event: eventLocationDecode(eventLoc),
@@ -52,6 +54,13 @@ export default function SessionPage({
     },
     notifyOnNetworkStatusChange: false,
   });
+
+  if (error) {
+    posthog.capture('graphql_error', error);
+  }
+
+  if (error || (!loading && !data)) return notFound();
+
   const driverSessions = data?.sessions[0]?.driver_sessions || [];
 
   // Sorting logic

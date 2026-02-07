@@ -1,6 +1,7 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
 import { notFound } from 'next/navigation';
+import posthog from 'posthog-js';
 import { use } from 'react';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
@@ -8,7 +9,6 @@ import { isAllEmptyArrays } from '@/lib/utils';
 
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import NextEvent from '@/components/next-event';
-import { ServerPageError } from '@/components/ServerError';
 
 import {
   SeasonQuickLinks,
@@ -54,9 +54,11 @@ export default function SeasonPage({
     variables: { year: parseInt(year) },
   });
 
-  if (error) return <ServerPageError msg='Failed to load season data.' />;
+  if (error) {
+    posthog.capture('graphql_error', error);
+  }
 
-  if (!loading && data && isAllEmptyArrays(data)) {
+  if (error || (!loading && data && isAllEmptyArrays(data))) {
     notFound();
   }
 
@@ -74,7 +76,7 @@ export default function SeasonPage({
               <div
                 className='flex flex-1 bg-cover bg-center bg-no-repeat'
                 style={{ backgroundImage: `url(/mclaren-mp4.jpg)` }}
-              ></div>
+              />
             )}
           </div>
           {loading ? <SeasonQuickLinksSkeleton /> : <SeasonQuickLinks />}
