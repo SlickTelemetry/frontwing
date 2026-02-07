@@ -28,6 +28,7 @@
     "class-variance-authority": "latest",
     "clsx": "latest",
     "echarts": "latest",
+    "framer-motion": "latest",
     "graphql": "latest",
     "lucide-react": "latest",
     "mapbox-gl": "latest",
@@ -70,6 +71,7 @@
     "postcss": "latest",
     "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
+    "tailwind-scrollbar": "latest",
     "tailwindcss": "latest",
     "typescript": "latest"
   },
@@ -86,5 +88,5 @@
     "node": "24.13.x",
     "pnpm": "10.x"
   },
-  "packageManager": "pnpm@10.30.3"
+  "packageManager": "pnpm@10.32.1"
 }
