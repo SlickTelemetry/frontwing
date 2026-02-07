@@ -1,12 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { getNextEvent } from '@/features/telemetry/api/get-telemetry';
-import { BrakeChart } from '@/features/telemetry/components/brake-chart';
-import { DRSChart } from '@/features/telemetry/components/drs-chart';
-import { GearChart } from '@/features/telemetry/components/gear-chart';
-import { RPMChart } from '@/features/telemetry/components/rpm-chart';
-import { SpeedChart } from '@/features/telemetry/components/speed-chart';
-import { ThrottleChart } from '@/features/telemetry/components/throttle-chart';
+import { TelemetryChart } from '@/features/telemetry/components/telemetry-charts';
 
 async function TelemetryExample() {
   const { data, error } = await getNextEvent();
@@ -36,7 +31,10 @@ async function TelemetryExample() {
       </div>
 
       <div>
-        <div className='h-80'>
+        <div className='h-300'>
+          <TelemetryChart driverSessions={data.driver_sessions} />
+        </div>
+        {/* <div className='h-80'>
           <SpeedChart driverSessions={data.driver_sessions} />
         </div>
         <div className='h-80'>
@@ -53,7 +51,7 @@ async function TelemetryExample() {
         </div>
         <div className='h-80'>
           <DRSChart driverSessions={data.driver_sessions} />
-        </div>
+        </div> */}
       </div>
     </div>
   );
