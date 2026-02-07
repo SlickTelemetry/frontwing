@@ -6,6 +6,7 @@ import NextEvent from '@/components/next-event';
 import { Button } from '@/components/ui/button';
 
 import { LandingNav } from '@/app/_components/nav';
+import ScheduleComponent from '@/feature/scrolling-schedule';
 
 export default function Home() {
   return (
@@ -36,6 +37,9 @@ export default function Home() {
           </div>
 
           <NextEvent />
+          <Footer />
+        </div>
+        <div className='bg-background sticky bottom-0 w-full'>
           <Footer />
         </div>
       </main>
