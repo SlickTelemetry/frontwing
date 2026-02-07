@@ -39,10 +39,8 @@ export const GET_CONSTRUCTOR = gql`
 export const GET_EVENT_DETAILS = graphql(`
   query GetEventDetails($year: Int!, $event: String!) @cached {
     events(where: { name: { _eq: $event }, year: { _eq: $year } }, limit: 1) {
-      sessions_aggregate {
-        aggregate {
-          count
-        }
+      scheduleSessions: sessions {
+        name
       }
       ...EventSessionResults
     }

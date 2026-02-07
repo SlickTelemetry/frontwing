@@ -13112,13 +13112,10 @@ export type GetEventDetailsQuery = {
   events: Array<
     {
       __typename?: 'events';
-      sessions_aggregate: {
-        __typename?: 'sessions_aggregate';
-        aggregate?: {
-          __typename?: 'sessions_aggregate_fields';
-          count: number;
-        } | null;
-      };
+      scheduleSessions: Array<{
+        __typename?: 'sessions';
+        name?: Session_Name_Choices_Enum | null;
+      }>;
     } & {
       ' $fragmentRefs'?: {
         EventSessionResultsFragment: EventSessionResultsFragment;
@@ -17773,23 +17770,12 @@ export const GetEventDetailsDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'sessions_aggregate' },
+                  alias: { kind: 'Name', value: 'scheduleSessions' },
+                  name: { kind: 'Name', value: 'sessions' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'aggregate' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'count' },
-                            },
-                          ],
-                        },
-                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     ],
                   },
                 },

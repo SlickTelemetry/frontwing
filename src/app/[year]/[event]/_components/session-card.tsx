@@ -25,56 +25,58 @@ const EventSessionCards = graphql(`
 `);
 
 export function SessionCards({
-  availableSessionCount,
+  availableSessions,
   ...props
 }: {
-  availableSessionCount: number;
+  availableSessions: string[];
   schedule?: FragmentType<typeof EventSessionCards>;
 }) {
   const { event } = useParams<{ event: string }>();
   const schedule = useFragment(EventSessionCards, props?.schedule);
   const trackTime = useReadLocalStorage('track-time');
 
-  return SESSION_KEYS.map((sessId, idx) => {
-    const name = schedule?.[sessId];
+  return SESSION_KEYS.map((sessId) => {
+    const name = schedule?.[sessId] ?? '';
     const date = schedule?.[`${sessId}_date`] ?? '';
 
     // Resolve if button should be clickable or not
-    const ingested = idx + 1 <= availableSessionCount;
-    const href =
-      ingested && name ? `${event}/${eventLocationEncode(name)}` : undefined;
+    const availableData = availableSessions.includes(name);
+    const href = availableData
+      ? `${event}/${eventLocationEncode(name)}`
+      : undefined;
 
     const children = (
       <>
         <div className='text-left'>
           <p className='text-sm lg:text-base'>
-            {trackTime
-              ? new Date(date.slice(0, -6)).toLocaleString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
-              : new Date(date).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+            {date &&
+              (trackTime
+                ? new Date(date.slice(0, -6)).toLocaleString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : new Date(date).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }))}
           </p>
           <h3 className='truncate text-3xl tracking-tight group-hover:underline'>
-            {name?.replace('_', ' ')}
+            {name ? name.replace('_', ' ') : 'Session cancelled'}
           </h3>
         </div>
-        {ingested && <ArrowUpRight className='size-6' />}
+        {availableData && <ArrowUpRight className='size-6' />}
       </>
     );
 
     const commonProps = {
       id: `${name}-session`,
       className: clsx(
-        'group hover:bg-muted flex h-fit w-full items-start justify-between gap-1 rounded border px-4 py-2 transition-shadow last:col-span-full hover:shadow',
-        ingested && 'cursor-pointer',
+        ' flex h-full w-full items-start justify-between gap-1 rounded border px-4 py-2 transition-shadow last:col-span-full',
+        availableData && 'group cursor-pointer hover:shadow hover:bg-muted/50',
       ),
       'aria-label': name?.replace('_', ' '),
       tabIndex: 0,
