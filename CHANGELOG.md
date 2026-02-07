@@ -1,3 +1,9 @@
+## 0.12.0 (2026-02-07)
+
+### Feat
+
+- FRON-312 2026 Introduction with working map
+
 ## 0.11.16 (2026-01-19)
 
 ### Fix
