@@ -1,3 +1,9 @@
+## 0.12.1 (2026-02-07)
+
+### Fix
+
+- FRON-315 use same logic as session selector to determine if session data is available
+
 ## 0.12.0 (2026-02-07)
 
 ### Feat
