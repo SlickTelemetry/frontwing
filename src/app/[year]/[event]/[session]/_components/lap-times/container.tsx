@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { GET_SESSION_LAP_TIMES } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 
+import { ServerPageError } from '@/components/errors/ServerError';
 import { Loader } from '@/components/Loader';
-import { ServerPageError } from '@/components/ServerError';
 import { Toggle } from '@/components/toggle';
 import { Label } from '@/components/ui/label';
 import {

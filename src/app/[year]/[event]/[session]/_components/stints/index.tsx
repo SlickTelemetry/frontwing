@@ -12,7 +12,7 @@ import {
 } from '@/lib/utils';
 
 import { ChartContainer } from '@/components/chart-container';
-import { ServerPageError } from '@/components/ServerError';
+import { ServerPageError } from '@/components/errors/ServerError';
 
 import { StintsChart } from '@/app/[year]/[event]/[session]/_components/stints/chart';
 

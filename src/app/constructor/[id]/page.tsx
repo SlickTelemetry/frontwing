@@ -6,8 +6,8 @@ import React from 'react';
 import { GET_CONSTRUCTOR } from '@/lib/queries';
 import { bgGradient } from '@/lib/utils';
 
+import { ServerPageError } from '@/components/errors/ServerError';
 import { FullHeightLoader } from '@/components/Loader';
-import { ServerPageError } from '@/components/ServerError';
 import {
   Select,
   SelectContent,

@@ -1,5 +1,6 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
+import { notFound } from 'next/navigation';
 import { use } from 'react';
 
 import {
@@ -52,6 +53,9 @@ export default function SessionPage({
     },
     notifyOnNetworkStatusChange: false,
   });
+
+  if (!loading && !data) return notFound();
+
   const driverSessions = data?.sessions[0]?.driver_sessions || [];
 
   // Sorting logic

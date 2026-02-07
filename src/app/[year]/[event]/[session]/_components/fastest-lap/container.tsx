@@ -6,7 +6,7 @@ import { GET_SESSION_FASTEST_TIMES } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 
 import { ChartContainer } from '@/components/chart-container';
-import { ServerPageError } from '@/components/ServerError';
+import { ServerPageError } from '@/components/errors/ServerError';
 
 import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
 import { FastestLapChart } from '@/app/[year]/[event]/[session]/_components/fastest-lap';
