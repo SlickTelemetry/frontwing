@@ -36,6 +36,15 @@ export default function DebugIndexPage() {
             Telemetry Test
           </Link>
         </Button>
+
+        <Button asChild variant='outline'>
+          <Link
+            href='/debug/events-laps'
+            className='inline-block w-full text-center'
+          >
+            Events &amp; race laps
+          </Link>
+        </Button>
       </div>
     </div>
   );

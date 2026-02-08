@@ -2,6 +2,20 @@ import { gql } from '@apollo/client';
 
 import { graphql } from '@/types';
 
+export const GET_DEBUG_ALL_EVENTS_RACE_LAPS = gql`
+  query GetDebugAllEventsRaceLaps @cached {
+    events(order_by: [{ year: desc }, { round_number: asc }]) {
+      year
+      name
+      round_number
+      race_sessions: sessions(where: { name: { _eq: Race } }) {
+        name
+        total_laps
+      }
+    }
+  }
+`;
+
 export const GET_DEBUG_SESSION_DRIVERS = gql`
   query GetDebugSessionDrivers(
     $year: Int!
