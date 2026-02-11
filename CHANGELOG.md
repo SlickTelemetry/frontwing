@@ -1,3 +1,9 @@
+## 0.12.3 (2026-02-11)
+
+### Fix
+
+- FRON-312 ordering of event winners
+
 ## 0.12.2 (2026-02-11)
 
 ### Fix
