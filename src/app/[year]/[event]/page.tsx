@@ -113,10 +113,8 @@ const EventPage = ({
           />
 
           <EventWinners
-            drivers={data?.drivers}
-            loading={loading}
-            name={eventLoc}
             location={data?.schedule[0]?.location}
+            country={data?.schedule[0]?.country}
           />
         </div>
         <div className='flex flex-1 flex-col gap-2 overflow-hidden'>
