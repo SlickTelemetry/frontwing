@@ -19,6 +19,7 @@ const EventWinnersQuery = graphql(`
           }
         }
       }
+      order_by: { driver_session: { driver: { year: desc } } }
     ) {
       driver_session {
         driver {
@@ -53,7 +54,7 @@ export function EventWinners({ location, country }: EventWinnersProps) {
   return (
     <div>
       <h2 className='scroll-m-20 border-b py-2 text-3xl font-semibold tracking-tight'>
-        {location?.replace('-', '\u2011')} Winners
+        Winners in {location?.replace('-', '\u2011')}
       </h2>
       <ul className='grid divide-y'>
         {loading && <EventWinnerSkeleton />}
