@@ -1,3 +1,9 @@
+## 0.12.2 (2026-02-11)
+
+### Fix
+
+- FRON-312 Event Winners per location, no longer event name based
+
 ## 0.12.1 (2026-02-07)
 
 ### Fix
