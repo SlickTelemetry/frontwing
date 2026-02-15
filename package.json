@@ -23,20 +23,6 @@
   "dependencies": {
     "@apollo/client": "latest",
     "@graphql-typed-document-node/core": "latest",
-    "@radix-ui/react-accordion": "latest",
-    "@radix-ui/react-avatar": "latest",
-    "@radix-ui/react-collapsible": "latest",
-    "@radix-ui/react-dialog": "latest",
-    "@radix-ui/react-dropdown-menu": "latest",
-    "@radix-ui/react-label": "latest",
-    "@radix-ui/react-navigation-menu": "latest",
-    "@radix-ui/react-popover": "latest",
-    "@radix-ui/react-select": "latest",
-    "@radix-ui/react-separator": "latest",
-    "@radix-ui/react-slot": "latest",
-    "@radix-ui/react-switch": "latest",
-    "@radix-ui/react-tabs": "latest",
-    "@radix-ui/react-tooltip": "latest",
     "@tailwindcss/postcss": "latest",
     "@turf/great-circle": "latest",
     "class-variance-authority": "latest",
@@ -55,7 +41,8 @@
     "react-map-gl": "latest",
     "rxjs": "latest",
     "tailwind-merge": "latest",
-    "tailwindcss-animate": "latest"
+    "tailwindcss-animate": "latest",
+    "radix-ui": "latest"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
