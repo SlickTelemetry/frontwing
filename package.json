@@ -35,14 +35,14 @@
     "next-themes": "latest",
     "posthog-js": "latest",
     "posthog-node": "latest",
+    "radix-ui": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-fast-marquee": "latest",
     "react-map-gl": "latest",
     "rxjs": "latest",
     "tailwind-merge": "latest",
-    "tailwindcss-animate": "latest",
-    "radix-ui": "latest"
+    "tailwindcss-animate": "latest"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
@@ -88,5 +88,5 @@
     "node": "24.11.x",
     "pnpm": "10.x"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.29.3"
 }
