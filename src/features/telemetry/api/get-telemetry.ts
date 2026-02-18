@@ -1,16 +1,22 @@
 import { client } from '@/lib/client';
 
 import { graphql } from '@/types';
+import { Session_Name_Choices_Enum } from '@/types/graphql';
 
 const GetTelemetry = graphql(`
-  query GetTelemetry {
+  query GetTelemetry(
+    $year: String!
+    $event: String!
+    $session: session_name_choices_enum!
+    $lap: Int!
+  ) {
     driver_sessions(
       where: {
         driver: { abbreviation: { _eq: "RUS" } }
         session: {
-          date: { _regex: "2025" }
-          event: { name: { _eq: "Las Vegas Grand Prix" } }
-          name: { _eq: Race }
+          date: { _regex: $year }
+          event: { name: { _eq: $event } }
+          name: { _eq: $session }
         }
       }
     ) {
@@ -18,9 +24,8 @@ const GetTelemetry = graphql(`
         full_name
       }
       telemetries(
-        where: { driver_session: { laps: { lap_number: { _eq: 1 } } } }
-        limit: 750
-        offset: 4000
+        where: { lap: { lap_number: { _eq: $lap } } }
+        order_by: { session_time: asc }
       ) {
         drs
         gear
@@ -35,8 +40,26 @@ const GetTelemetry = graphql(`
   }
 `);
 
-export async function getNextEvent() {
+export async function getTelemetry({
+  year,
+  event,
+  session,
+  lap,
+}: {
+  year: string;
+  event: string;
+  session: Session_Name_Choices_Enum;
+  lap: number;
+}) {
+  if (!year || !event || !session || !lap) return { data: null, error: null };
+
   return await client.query({
     query: GetTelemetry,
+    variables: {
+      year,
+      event,
+      session,
+      lap,
+    },
   });
 }
