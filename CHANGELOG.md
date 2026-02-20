@@ -1,3 +1,9 @@
+## 0.12.4 (2026-02-20)
+
+### Fix
+
+- Handling sessions that do not have any data for results table
+
 ## 0.12.3 (2026-02-11)
 
 ### Fix
