@@ -43,7 +43,7 @@ export function PracticeResults(props: {
         <TableHead className='w-12 text-center'>Laps</TableHead>
       </HeaderRow>
       <TableBody>
-        {session.practice_sessions.map((s, idx) => {
+        {session?.practice_sessions.map((s, idx) => {
           return (
             <DriverRow key={s.driver?.full_name} s={s} idx={idx}>
               <FastestLapCell fastest_lap={s.fastest_lap} />

@@ -43,7 +43,7 @@ export function QualifyingResults(props: {
         <TableHead>Q3</TableHead>
       </HeaderRow>
       <TableBody>
-        {session.qualifying_session.map((s, idx) => {
+        {session?.qualifying_session.map((s, idx) => {
           return (
             <DriverRow key={s.driver?.full_name} s={s} idx={idx}>
               <TableCell>

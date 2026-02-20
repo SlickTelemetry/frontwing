@@ -44,7 +44,8 @@ export function CompetitionResults({
   session: FragmentType<typeof EventCompetitionResultsFragment>[];
 }) {
   const [session] = useFragment(EventCompetitionResultsFragment, props.session);
-  const totalLaps = session.competition_sessions[0]?.results[0].laps;
+
+  const totalLaps = session?.competition_sessions?.[0]?.results[0].laps;
   return (
     <>
       <HeaderRow>
@@ -53,7 +54,7 @@ export function CompetitionResults({
         <TableHead className='w-12 text-center'>Points</TableHead>
       </HeaderRow>
       <TableBody>
-        {session.competition_sessions.map((s, idx) => {
+        {session?.competition_sessions.map((s, idx) => {
           const classifiedPos = s.results[0]?.classified_position ?? '';
           const raceTime = s.results[0]?.total_race_time;
           return (
