@@ -34,12 +34,10 @@
     "next": "latest",
     "next-themes": "latest",
     "posthog-js": "latest",
-    "posthog-node": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-fast-marquee": "latest",
     "react-map-gl": "latest",
-    "rxjs": "latest",
     "tailwind-merge": "latest",
     "tailwindcss-animate": "latest",
     "radix-ui": "latest"
@@ -47,10 +45,8 @@
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
-    "@eslint/eslintrc": "latest",
     "@eslint/js": "latest",
     "@graphql-codegen/cli": "latest",
-    "@parcel/watcher": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
