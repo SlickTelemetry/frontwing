@@ -8,10 +8,10 @@ const config: CodegenConfig = {
   hooks: { afterAllFileWrite: ['prettier --write'] },
   schema: [
     {
-      [process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL as string]: {
+      [import.meta.env.VITE_HASURA_GRAPHQL_URL as string]: {
         headers: {
-          'x-hasura-role': process.env.HASURA_GRAPHQL_ADMIN_ROLE as string,
-          'x-hasura-admin-secret': process.env
+          'x-hasura-role': import.meta.env.HASURA_GRAPHQL_ADMIN_ROLE as string,
+          'x-hasura-admin-secret': import.meta.env
             .HASURA_GRAPHQL_ADMIN_SECRET as string,
         },
       },

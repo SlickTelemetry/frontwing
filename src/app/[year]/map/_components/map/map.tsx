@@ -17,7 +17,7 @@ import MapNavigation from '@/app/[year]/map/_components/map/navigation';
 import { FragmentType, graphql, useFragment } from '@/types';
 
 const optimalZoom = 14; // optimal zoom for circuit visibility
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 export const MapScheduleLocation = graphql(`
   fragment MapScheduleLocation on schedule {
     round_number

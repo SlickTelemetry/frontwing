@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import React, { useState } from 'react';
 
 const checkServerHealth = async () => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_HASURA_URL}/healthz`);
+  const response = await fetch(`${import.meta.env.VITE_HASURA_URL}/healthz`);
   if (!response.ok) {
     throw new Error('Server not healthy');
   }
