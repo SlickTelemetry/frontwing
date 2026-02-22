@@ -1,7 +1,7 @@
 'use client';
 
+import { useParams } from '@tanstack/react-router';
 import { useQuery } from '@apollo/client/react';
-import { useParams } from 'next/navigation';
 
 import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
 import useUrlUpdater from '@/hooks/use-url-updater';
@@ -28,7 +28,7 @@ export const GET_NAV_EVENTS = graphql(`
 export function EventSelector() {
   const updateUrl = useUrlUpdater();
 
-  const { year, event } = useParams<{ year: string; event?: string }>();
+  const { year, event } = useParams({ strict: false });
   const { data, loading, error } = useQuery(GET_NAV_EVENTS, {
     variables: { year: parseInt(year) },
     skip: !year,

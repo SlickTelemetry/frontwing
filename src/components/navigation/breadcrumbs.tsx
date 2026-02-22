@@ -1,5 +1,4 @@
-'use client';
-import { useParams } from 'next/navigation';
+import { useParams } from '@tanstack/react-router';
 
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 import useUrlUpdater from '@/hooks/use-url-updater';
@@ -16,11 +15,7 @@ import {
 export function Breadcrumbs() {
   const updateUrl = useUrlUpdater();
 
-  const { year, ...params } = useParams<{
-    year: string;
-    event?: string;
-    session?: string;
-  }>();
+  const { year, ...params } = useParams({ strict: false });
 
   return (
     <Breadcrumb>

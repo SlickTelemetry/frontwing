@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 
@@ -26,7 +26,7 @@ export default function NotFoundError({
         <div className='col-span-full grid gap-2'>
           {link && (
             <Button asChild className='w-full'>
-              <Link href={link.href}>{link.title}</Link>
+              <Link to={link.href}>{link.title}</Link>
             </Button>
           )}
           {children}

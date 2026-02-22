@@ -1,7 +1,7 @@
 import NotFoundError from '@/components/errors/not-found-error';
 import { Footer } from '@/components/Footer';
 
-import { LandingNav } from '@/app/_components/nav';
+import { LandingNav } from '@/app/-components/nav';
 
 const link = {
   href: '/',

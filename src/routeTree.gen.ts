@@ -9,27 +9,179 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './app/__root'
+import { Route as YearRouteImport } from './app/$year'
+import { Route as IndexRouteImport } from './app/index'
+import { Route as YearStandingsRouteRouteImport } from './app/$year/standings/route'
+import { Route as YearMapRouteRouteImport } from './app/$year/map/route'
+import { Route as YearStandingsIndexRouteImport } from './app/$year/standings/index'
+import { Route as YearMapIndexRouteImport } from './app/$year/map/index'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const YearRoute = YearRouteImport.update({
+  id: '/$year',
+  path: '/$year',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const YearStandingsRouteRoute = YearStandingsRouteRouteImport.update({
+  id: '/standings',
+  path: '/standings',
+  getParentRoute: () => YearRoute,
+} as any)
+const YearMapRouteRoute = YearMapRouteRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => YearRoute,
+} as any)
+const YearStandingsIndexRoute = YearStandingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => YearStandingsRouteRoute,
+} as any)
+const YearMapIndexRoute = YearMapIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => YearMapRouteRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/$year': typeof YearRouteWithChildren
+  '/$year/map': typeof YearMapRouteRouteWithChildren
+  '/$year/standings': typeof YearStandingsRouteRouteWithChildren
+  '/$year/map/': typeof YearMapIndexRoute
+  '/$year/standings/': typeof YearStandingsIndexRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/$year': typeof YearRouteWithChildren
+  '/$year/map': typeof YearMapIndexRoute
+  '/$year/standings': typeof YearStandingsIndexRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/$year': typeof YearRouteWithChildren
+  '/$year/map': typeof YearMapRouteRouteWithChildren
+  '/$year/standings': typeof YearStandingsRouteRouteWithChildren
+  '/$year/map/': typeof YearMapIndexRoute
+  '/$year/standings/': typeof YearStandingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths:
+    | '/'
+    | '/$year'
+    | '/$year/map'
+    | '/$year/standings'
+    | '/$year/map/'
+    | '/$year/standings/'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to: '/' | '/$year' | '/$year/map' | '/$year/standings'
+  id:
+    | '__root__'
+    | '/'
+    | '/$year'
+    | '/$year/map'
+    | '/$year/standings'
+    | '/$year/map/'
+    | '/$year/standings/'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  YearRoute: typeof YearRouteWithChildren
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/$year': {
+      id: '/$year'
+      path: '/$year'
+      fullPath: '/$year'
+      preLoaderRoute: typeof YearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$year/standings': {
+      id: '/$year/standings'
+      path: '/standings'
+      fullPath: '/$year/standings'
+      preLoaderRoute: typeof YearStandingsRouteRouteImport
+      parentRoute: typeof YearRoute
+    }
+    '/$year/map': {
+      id: '/$year/map'
+      path: '/map'
+      fullPath: '/$year/map'
+      preLoaderRoute: typeof YearMapRouteRouteImport
+      parentRoute: typeof YearRoute
+    }
+    '/$year/standings/': {
+      id: '/$year/standings/'
+      path: '/'
+      fullPath: '/$year/standings/'
+      preLoaderRoute: typeof YearStandingsIndexRouteImport
+      parentRoute: typeof YearStandingsRouteRoute
+    }
+    '/$year/map/': {
+      id: '/$year/map/'
+      path: '/'
+      fullPath: '/$year/map/'
+      preLoaderRoute: typeof YearMapIndexRouteImport
+      parentRoute: typeof YearMapRouteRoute
+    }
+  }
+}
+
+interface YearMapRouteRouteChildren {
+  YearMapIndexRoute: typeof YearMapIndexRoute
+}
+
+const YearMapRouteRouteChildren: YearMapRouteRouteChildren = {
+  YearMapIndexRoute: YearMapIndexRoute,
+}
+
+const YearMapRouteRouteWithChildren = YearMapRouteRoute._addFileChildren(
+  YearMapRouteRouteChildren,
+)
+
+interface YearStandingsRouteRouteChildren {
+  YearStandingsIndexRoute: typeof YearStandingsIndexRoute
+}
+
+const YearStandingsRouteRouteChildren: YearStandingsRouteRouteChildren = {
+  YearStandingsIndexRoute: YearStandingsIndexRoute,
+}
+
+const YearStandingsRouteRouteWithChildren =
+  YearStandingsRouteRoute._addFileChildren(YearStandingsRouteRouteChildren)
+
+interface YearRouteChildren {
+  YearMapRouteRoute: typeof YearMapRouteRouteWithChildren
+  YearStandingsRouteRoute: typeof YearStandingsRouteRouteWithChildren
+}
+
+const YearRouteChildren: YearRouteChildren = {
+  YearMapRouteRoute: YearMapRouteRouteWithChildren,
+  YearStandingsRouteRoute: YearStandingsRouteRouteWithChildren,
+}
+
+const YearRouteWithChildren = YearRoute._addFileChildren(YearRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  YearRoute: YearRouteWithChildren,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()

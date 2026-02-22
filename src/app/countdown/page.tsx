@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { LandingNav } from '@/app/_components/nav';
+import { LandingNav } from '@/app/-components/nav';
 
 const date = '2026-03-06T12:00:00';
 const gapToDate = (targetDate: Date) => {

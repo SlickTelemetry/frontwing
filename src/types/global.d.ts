@@ -29,9 +29,9 @@ declare global {
   type ViewType = 'drivers' | 'constructors';
 
   type DashParams = {
-    year: string;
-    event: string | undefined;
-    session: string | undefined;
+    year?: string | number;
+    event?: string | number;
+    session?: string | number;
   };
   type SessionKey =
     | 'session1'

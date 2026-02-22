@@ -1,5 +1,3 @@
-[![CodeQL](https://github.com/SlickTelemetry/frontend/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/SlickTelemetry/frontend/actions/workflows/codeql.yml)
-
 # Frontwing (Frontend) <!-- omit from toc -->
 
 Table of Contents:

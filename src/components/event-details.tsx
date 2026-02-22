@@ -1,6 +1,5 @@
 import { useQuery } from '@apollo/client/react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { Link, useParams } from '@tanstack/react-router';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
@@ -49,7 +48,7 @@ export function EventDetails({
         <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-5xl leading-[1.1] font-medium tracking-tight text-balance'>
           <Link
             className='hover:underline focus:underline'
-            href={`/${evt.year}/${eventLocationEncode(evt.event_name)}`}
+            to={`/${evt.year}/${eventLocationEncode(evt.event_name) ?? ''}` as '/'}
           >
             {evt.event_name}
           </Link>
@@ -103,8 +102,11 @@ function EventDetailsSkeleton() {
 }
 
 export function PossibleEvents() {
-  const { year, event } = useParams<{ year: string; event?: string }>();
-  const supportedYear = SUPPORTED_SEASONS.includes(parseInt(year));
+  const params = useParams({ strict: false }) as { year?: string | number; event?: string | number };
+  const year = params.year != null ? String(params.year) : undefined;
+  const event = params.event != null ? String(params.event) : undefined;
+  const supportedYear =
+    year != null && SUPPORTED_SEASONS.includes(parseInt(year, 10));
   const { data } = useQuery(
     graphql(`
       query GetSeasonEventNames($year: Int!, $event: String!) @cached {
@@ -124,8 +126,8 @@ export function PossibleEvents() {
     `),
     {
       variables: {
-        year: parseInt(year),
-        event: eventLocationDecode(event as string),
+        year: parseInt(year ?? '0', 10) || 2025,
+        event: eventLocationDecode(event ?? ''),
       },
       skip: !supportedYear || !event,
     },
@@ -140,7 +142,7 @@ export function PossibleEvents() {
           <li key={event_name}>
             <Link
               className='hover:underline'
-              href={`/${year || '2025'}/${eventLocationEncode(event_name)}`}
+              to={`/${year ?? '2025'}/${eventLocationEncode(event_name) ?? ''}` as '/'}
             >
               {event_name}
             </Link>

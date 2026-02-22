@@ -1,8 +1,9 @@
-import { usePathname, useRouter } from 'next/navigation';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 
 export default function useUrlUpdater() {
-  const router = useRouter();
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const navigate = useNavigate()
 
   return (level: 'year' | 'event' | 'session', value: string) => {
     const segments = pathname.split('/').filter(Boolean);
@@ -19,6 +20,6 @@ export default function useUrlUpdater() {
 
     const nextPath = '/' + nextSegments.join('/');
 
-    router.push(nextPath);
+    navigate({ to: nextPath });
   };
 }

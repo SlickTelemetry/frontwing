@@ -1,6 +1,6 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
-import Link from 'next/link';
+import { Link } from '@tanstack/react-router';
 
 import { eventLocationEncode, getTodayMidnightUTC } from '@/lib/utils';
 
@@ -110,8 +110,9 @@ export default function NextEvent() {
         {/* Title */}
         <h2 className='text-2xl'>
           <Link
+            to='/$year'
+            params={{ year: nextEvent.year ?? new Date().getFullYear() }}
             className='line-clamp-1 text-inherit hover:underline'
-            href={`/${nextEvent.year}/${eventLocationEncode(nextEvent?.event_name)}`}
             data-cy='next-event-name'
           >
             {[nextEvent.round_number, nextEvent.event_name]

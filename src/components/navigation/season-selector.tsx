@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams } from '@tanstack/react-router';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 import useUrlUpdater from '@/hooks/use-url-updater';
@@ -9,7 +9,7 @@ import { BaseSelector } from '@/components/navigation/selector';
 
 export function SeasonSelector() {
   const updateUrl = useUrlUpdater();
-  const { year } = useParams<{ year: string }>();
+  const { year } = useParams({ strict: false });
 
   const value = SUPPORTED_SEASONS.find(
     (y) => y.toString() === year,
