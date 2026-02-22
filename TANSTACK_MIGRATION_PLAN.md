@@ -121,6 +121,7 @@ Adjust `rewrite` if your exact paths differ. TanStack/Vite may also support trai
 - Vite exposes **client** env via `import.meta.env.VITE_*`, not `process.env.NEXT_PUBLIC_*`.
 - Your `codegen.ts` and `src/lib/client.ts` use `NEXT_PUBLIC_HASURA_GRAPHQL_URL`, `NEXT_PUBLIC_HASURA_ROLE`; codegen also uses `HASURA_GRAPHQL_ADMIN_*` (server-only for schema fetch).
 - **Options**: (A) Add `VITE_HASURA_GRAPHQL_URL` and `VITE_HASURA_ROLE` in `.env`, and in `vite.config.ts` pass them through if codegen runs in Node with `dotenv`; or (B) Keep `NEXT_PUBLIC_*` and in Vite define `define: { 'process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL': JSON.stringify(process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL) }` (and same for role) so existing code keeps working. For codegen, keep using `dotenv.config()` so schema fetch still sees admin secret; for browser, switch to `import.meta.env.VITE_*` when you’re ready and update `client.ts` and any component that reads those vars.
+- **Production**: When you deploy, replicate these env vars on the host and keep names consistent (see **Phase 9: Deploy**).
 
 ---
 
@@ -276,6 +277,74 @@ You already use **GraphQL Code Generator** (client preset, `./src/types/`) and `
 
 ---
 
+## Phase 9: Deploy
+
+**Current**: Site is hosted on **Vercel**. TanStack Start is [designed to work with any hosting provider](https://tanstack.com/start/latest/docs/framework/react/guide/hosting). Official hosting partners are **Cloudflare**, **Netlify**, and **Railway**. Use the [TanStack Start Hosting guide](https://tanstack.com/start/latest/docs/framework/react/guide/hosting) as the source of truth; below is a condensed checklist plus env/deploy notes for this project.
+
+### 9.1 Deployment options (from Hosting guide)
+
+| Target | Approach | Notes |
+|--------|----------|--------|
+| **Vercel** | [Nitro](https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro) then Vercel one-click | Follow Nitro deployment instructions first. |
+| **Node.js / Docker** | Nitro | `pnpm build` → `pnpm start` → `node .output/server/index.mjs`. Scripts: `"build": "vite build"`, `"start": "node .output/server/index.mjs"`. |
+| **Railway** ⭐ | Nitro then connect repo | Auto-detects build; follow Nitro then connect GitHub. |
+| **Netlify** ⭐ | `@netlify/vite-plugin-tanstack-start` | Add plugin to `vite.config.ts`; deploy with `npx netlify deploy`. Manual: `publish = "dist/client"`, build = `vite build`. |
+| **Cloudflare Workers** ⭐ | `@cloudflare/vite-plugin` + Wrangler | Different pipeline: no `start`; use `pnpm run deploy` (build + wrangler deploy). Requires `wrangler.jsonc` and plugin order as per docs. |
+| **Bun** | Nitro with `preset: 'bun'` or custom Bun server | React 19 required for Bun-specific path. |
+
+**Nitro (shared for Vercel / Node / Railway / Bun):** Install nightly and add to `vite.config.ts`:
+
+```json
+"nitro": "npm:nitro-nightly@latest"
+```
+
+```ts
+import { nitro } from 'nitro/vite'
+// plugins: [tanstackStart(), nitro(), viteReact()]
+```
+
+Build output with Nitro is under **`.output/`** (not `dist/`). For Appwrite with Nitro v2/v3, output dir is `./.output`; some hosts use `./dist` for client-only.
+
+### 9.2 Build and start commands
+
+- **Build**: `pnpm build` (Vite + Nitro if using Nitro). Output: `.output/` when using Nitro.
+- **Start** (Node/Nitro): `pnpm start` → `node .output/server/index.mjs`. Set this as the start command on Vercel/Node/Railway when using the Node/Nitro path.
+- **Cloudflare**: No `start`; use `pnpm run deploy` (build + `wrangler deploy`). See Hosting guide for script changes.
+
+### 9.3 Environment variables (deploy checklist)
+
+| Variable | Used by | Notes |
+|----------|---------|--------|
+| **Client (browser)** | | |
+| `NEXT_PUBLIC_HASURA_GRAPHQL_URL` | Apollo `client.ts` | If you switch to Vite env (Phase 2.5), rename to `VITE_HASURA_GRAPHQL_URL` in app code and in **every** host’s dashboard. |
+| `NEXT_PUBLIC_HASURA_ROLE` | Apollo `client.ts` | Same: optional rename to `VITE_HASURA_ROLE`. |
+| PostHog / analytics | PostHog script | Keep existing keys; no change unless you rename. |
+| **Server / build only** | | |
+| `HASURA_GRAPHQL_ADMIN_ROLE` | `codegen.ts` (schema fetch) | Only needed at **build time** if you run `pnpm run generate` on the host (e.g. in build step). If codegen runs locally only, not needed in deploy env. |
+| `HASURA_GRAPHQL_ADMIN_SECRET` | `codegen.ts` | Same as above. |
+| **Optional** | | |
+| Any other `NEXT_PUBLIC_*` | App or libs | When moving off Next, decide: keep names and use Vite `define`, or migrate to `VITE_*` and update host env names everywhere. |
+
+- **Vercel**: Env vars are in Project → Settings → Environment Variables. If you rename to `VITE_*`, update them there and ensure “Expose to Browser” (or equivalent) is set for client vars.
+- **Other hosts**: Same idea—set the same names you use in code (either `NEXT_PUBLIC_*` with Vite `define`, or `VITE_*`). For Node-style deploy, server-only vars are usually not exposed to the client.
+
+### 9.4 Platform-specific notes
+
+- **Vercel**: Use Nitro deployment (9.1), then Vercel one-click. Set build command (`pnpm build`), output dir (per Vercel + Nitro docs), and start command if using Node server. Env vars: Project → Settings → Environment Variables.
+- **Node / Railway**: `pnpm build` then `pnpm start`; set env in the host UI. Node version should match `engines` (24.x).
+- **Netlify**: Add `@netlify/vite-plugin-tanstack-start`; `publish` can be `dist/client` with build command `vite build` (see Hosting guide for manual config).
+- **Cloudflare**: Different flow (Wrangler, no `start`); follow [Hosting guide – Cloudflare Workers](https://tanstack.com/start/latest/docs/framework/react/guide/hosting#cloudflare-workers-) for plugin order, `wrangler.jsonc`, and script changes.
+
+### 9.5 Things to confirm at deploy time
+
+- [ ] Build command and output dir match host config.
+- [ ] Start command (if applicable) is set correctly.
+- [ ] All client env vars are set on the host (and use the same names as in code / Vite `define`).
+- [ ] Codegen: if you run `pnpm run generate` in CI or on the host, build-time env (Hasura admin role/secret) is available there.
+- [ ] PostHog proxy (Phase 2.3) works in production or PostHog is configured for your production domain.
+
+---
+
 ## File-by-File Checklist (high level)
 
 | Area | Action |
@@ -304,6 +373,7 @@ You already use **GraphQL Code Generator** (client preset, `./src/types/`) and `
 ## References
 
 - [Migrate from Next.js | TanStack Start](https://tanstack.com/start/latest/docs/framework/react/migrate-from-next-js)
+- [Hosting | TanStack Start](https://tanstack.com/start/latest/docs/framework/react/guide/hosting) — Nitro, Vercel, Node, Cloudflare, Netlify, Railway, Bun
 - TanStack Start: Routing, Server Functions, Error Boundaries, Head/Meta
 - Your existing codebase: `src/app`, `src/components`, `src/hooks`, `src/lib`
 

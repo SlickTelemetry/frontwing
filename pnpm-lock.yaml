@@ -38,12 +38,15 @@ importers:
       mapbox-gl:
         specifier: latest
         version: 3.18.1
+<<<<<<< HEAD
       next:
         specifier: latest
         version: 16.1.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-themes:
         specifier: latest
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+=======
+>>>>>>> 934e74e (chore: phase 3)
       posthog-js:
         specifier: latest
         version: 1.358.1
@@ -77,7 +80,14 @@ importers:
         version: 20.4.3
       '@eslint/js':
         specifier: latest
+<<<<<<< HEAD
         version: 10.0.1(eslint@10.0.2(jiti@2.6.1))
+=======
+        version: 10.0.1(eslint@10.0.1(jiti@2.6.1))
+      '@fontsource/rubik-one':
+        specifier: ^5.2.5
+        version: 5.2.5
+>>>>>>> 934e74e (chore: phase 3)
       '@graphql-codegen/cli':
         specifier: latest
         version: 6.1.1(@parcel/watcher@2.5.6)(@types/node@25.3.0)(graphql-sock@1.0.1(graphql@16.12.0))(graphql@16.12.0)(typescript@5.9.3)
@@ -592,6 +602,9 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@fontsource/rubik-one@5.2.5':
+    resolution: {integrity: sha512-NGnSpWvOzMZ3ahj77b9dAA6FieSVkefaeqSSKrlaMWSiiKw17qK7eWR6LUBJKA4whxMEn5DCqCYhCQ/aXvjViQ==}
 
   '@graphql-codegen/add@6.0.0':
     resolution: {integrity: sha512-biFdaURX0KTwEJPQ1wkT6BRgNasqgQ5KbCI1a3zwtLtO7XTo7/vKITPylmiU27K5DSOWYnY/1jfSqUAEBuhZrQ==}
@@ -4327,12 +4340,6 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  next-themes@0.4.6:
-    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
-    peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
 
@@ -5918,7 +5925,13 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
+<<<<<<< HEAD
   '@graphql-codegen/add@6.0.0(graphql@16.13.1)':
+=======
+  '@fontsource/rubik-one@5.2.5': {}
+
+  '@graphql-codegen/add@6.0.0(graphql@16.12.0)':
+>>>>>>> 934e74e (chore: phase 3)
     dependencies:
       '@graphql-codegen/plugin-helpers': 6.1.0(graphql@16.13.1)
       graphql: 16.13.1
@@ -10023,6 +10036,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
+<<<<<<< HEAD
   next-sitemap@4.2.3(next@16.1.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)):
     dependencies:
       '@corex/deepmerge': 4.0.43
@@ -10061,6 +10075,8 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+=======
+>>>>>>> 934e74e (chore: phase 3)
   no-case@3.0.4:
     dependencies:
       lower-case: 2.0.2

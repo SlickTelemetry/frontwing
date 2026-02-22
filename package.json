@@ -1,10 +1,11 @@
 {
   "name": "frontwing",
-  "description": "Slick Telemetry frontend written in typescript with nextjs and vercel",
+  "description": "Slick Telemetry frontend written in typescript with tanstack and vercel",
   "author": "Slick Telemetry",
   "license": "GPL-3.0-only",
   "version": "0.12.4",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -31,7 +32,6 @@
     "graphql": "latest",
     "lucide-react": "latest",
     "mapbox-gl": "latest",
-    "next-themes": "latest",
     "posthog-js": "latest",
     "radix-ui": "latest",
     "react": "latest",
@@ -45,6 +45,7 @@
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@eslint/js": "latest",
+    "@fontsource/rubik-one": "^5.2.5",
     "@graphql-codegen/cli": "latest",
     "@tailwindcss/vite": "^4.2.0",
     "@types/node": "latest",
