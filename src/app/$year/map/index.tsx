@@ -1,5 +1,3 @@
-'use client';
-
 import { useQuery } from '@apollo/client/react';
 import { createFileRoute, notFound, useRouter } from '@tanstack/react-router';
 import posthog from 'posthog-js';
@@ -76,7 +74,7 @@ function MapPage() {
   }
 
   if (error || !data || data?.schedule?.length === 0) {
-    throw notFound();
+    throw notFound({ routeId: '/$year' });
   }
 
   const activeScheduleEvent = data.schedule.find(

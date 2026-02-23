@@ -57,7 +57,9 @@ function SessionPage() {
     posthog.capture('graphql_error', error);
   }
 
-  if (error || (!loading && !data)) throw notFound();
+  if (error || (!loading && !data)) {
+    throw notFound({ routeId: '/$year/$event/$session' });
+  }
 
   const driverSessions = data?.sessions[0]?.driver_sessions || [];
 

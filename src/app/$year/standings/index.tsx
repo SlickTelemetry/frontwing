@@ -38,9 +38,9 @@ function StandingsPage() {
 
   if (!standings) return null;
 
-  // Year not supported → 404
+  // Year not supported → 404 (use $year's notFound to keep layout/theme)
   if (!SUPPORTED_SEASONS.includes(parseInt(year, 10))) {
-    throw notFound();
+    throw notFound({ routeId: '/$year' });
   }
 
   // Supported year but no data yet (e.g. 2026) → empty state
@@ -53,11 +53,24 @@ function StandingsPage() {
             No standings data for {year} yet. Check back later when the season
             gets underway.
           </p>
-          <Button variant='outline' asChild>
-            <Link to='/$year' params={{ year: parseInt(year, 10) }}>
-              Back to {year} season
-            </Link>
-          </Button>
+          <div className='flex flex-wrap justify-center gap-2'>
+            <Button variant='outline' asChild>
+              <Link to='/$year' params={{ year: parseInt(year, 10) }}>
+                Back to {year} season
+              </Link>
+            </Button>
+            {SUPPORTED_SEASONS.includes(parseInt(year, 10) - 1) && (
+              <Button variant='outline' asChild>
+                <Link
+                  to='/$year/standings'
+                  params={{ year: String(parseInt(year, 10) - 1) }}
+                  search={{ chart: chartType }}
+                >
+                  {parseInt(year, 10) - 1} standings
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );

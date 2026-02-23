@@ -1,5 +1,3 @@
-'use client';
-
 import { useParams } from '@tanstack/react-router';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';

@@ -1,5 +1,3 @@
-'use client';
-
 import { Image } from '@unpic/react';
 import { Link, Route, useLocation } from '@tanstack/react-router';
 import { useParams } from '@tanstack/react-router';

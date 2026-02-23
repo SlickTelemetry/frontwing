@@ -58,11 +58,11 @@ function SeasonPage() {
   }
 
   if (error || (!loading && data && isAllEmptyArrays(data))) {
-    notFound();
+    throw notFound({ routeId: '/$year' });
   }
 
   if (!SUPPORTED_SEASONS.includes(yearNum)) {
-    notFound();
+    throw notFound({ routeId: '/$year' });
   }
 
   const latestYear = yearNum === SUPPORTED_SEASONS[0];

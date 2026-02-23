@@ -1,4 +1,3 @@
-'use client';
 import { Link } from '@tanstack/react-router';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
@@ -17,8 +16,10 @@ export default function NotFound() {
           {SUPPORTED_SEASONS.map((year) => (
             <li key={year}>
               <Button variant='outline' asChild className='min-w-20'>
-                  <Link to='/$year' params={{ year }}>{year}</Link>
-                </Button>
+                <Link to='/$year' params={{ year }}>
+                  {year}
+                </Link>
+              </Button>
             </li>
           ))}
         </ul>

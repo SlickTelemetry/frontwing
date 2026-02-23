@@ -1,6 +1,3 @@
-'use client';
-// ^ this file needs the "use client" pragma
-
 import { ApolloProvider as ApolloProviderBase } from '@apollo/client/react';
 
 import { client } from '@/lib/client';

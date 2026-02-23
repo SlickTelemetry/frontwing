@@ -1,5 +1,3 @@
-'use client';
-
 import { PanelLeftIcon } from 'lucide-react';
 import {
   createContext,

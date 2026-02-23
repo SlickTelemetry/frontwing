@@ -65,11 +65,11 @@ function EventPage() {
   }
 
   if (!SUPPORTED_SEASONS.includes(parseInt(year, 10))) {
-    throw notFound();
+    throw notFound({ routeId: '/$year' });
   }
 
   if (error || (!loading && data && isAllEmptyArrays(data))) {
-    throw notFound();
+    throw notFound({ routeId: '/$year/$event' });
   }
 
   if (!data) return null;

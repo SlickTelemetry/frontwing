@@ -1,8 +1,6 @@
-'use client';
-
 import { ServerOffIcon } from 'lucide-react';
 import { useLocation } from '@tanstack/react-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const checkServerHealth = async () => {
   const response = await fetch(`${import.meta.env.VITE_HASURA_URL}/healthz`);

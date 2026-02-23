@@ -1,5 +1,3 @@
-'use client';
-
 import { useParams } from '@tanstack/react-router';
 import { useQuery } from '@apollo/client/react';
 
