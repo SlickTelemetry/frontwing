@@ -79,7 +79,7 @@ The site is deployed at https://slicktelemetry.com using Vercel.
 
 We are...
 
-- Using NextJs [App Router](https://nextjs.org/docs/app)
+- Using TanStack [TanStack](https://tanstack.com/)
 - Hosting on [Vercel](https://vercel.com/)
 - Monitoring with [Posthog](https://posthog.com/)
 - Designing in [Figma](https://www.figma.com/design/4OauoAtraVKgcJaeYB6Qjq/Dashboard-Trial?node-id=0-1&t=WlqH6kA06RgqCWcy-1)
@@ -117,4 +117,4 @@ src/
 
 ## Resources
 
-Key tools in use: `shadcn`, `tailwindcss`, `react`, `nextjs`, `pnpm`, `cypress`
+Key tools in use: `shadcn`, `tailwindcss`, `react`, `tanstack`, `pnpm`, `cypress`

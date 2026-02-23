@@ -15,8 +15,8 @@ export const AboutUs = () => (
 
     <p>
       Built with{' '}
-      <a href='https://nextjs.org' target='_blank' rel='noreferrer'>
-        Next.js
+      <a href='https://tanstack.com/' target='_blank' rel='noreferrer'>
+        TanStack
       </a>
       . Powered by{' '}
       <a
