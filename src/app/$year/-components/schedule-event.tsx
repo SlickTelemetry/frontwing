@@ -87,8 +87,8 @@ export function ScheduleEventItem({
       <Link
         to='/$year/$event'
         params={{
-          year: event.year,
-          event: eventLocationEncode(event.event_name),
+          year: String(event.year ?? ''),
+          event: eventLocationEncode(event.event_name) ?? '',
         }}
         className='group hover:bg-muted flex flex-1 items-center gap-2 pr-4'
         aria-label={`Round ${event.round_number}: ${event.event_name} in ${event.location}, ${event.country} from ${formatDate(event.session1_date!)} to ${formatDate(event.event_date!)}`}

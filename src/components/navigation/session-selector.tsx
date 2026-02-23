@@ -34,7 +34,7 @@ export function SessionSelector() {
 
   const { data, loading, error } = useQuery(GET_NAV_SESSIONS, {
     variables: {
-      year: parseInt(year),
+      year: parseInt(String(year ?? ''), 10),
       event: eventLocationDecode(eventLoc)!,
     },
     skip: !year || !eventLoc,

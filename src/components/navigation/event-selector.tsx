@@ -30,7 +30,7 @@ export function EventSelector() {
 
   const { year, event } = useParams({ strict: false });
   const { data, loading, error } = useQuery(GET_NAV_EVENTS, {
-    variables: { year: parseInt(year) },
+    variables: { year: parseInt(String(year ?? ''), 10) },
     skip: !year,
   });
 

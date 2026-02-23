@@ -43,7 +43,7 @@ function Nav() {
           <NavigationMenuContent>
             {SUPPORTED_SEASONS.map((year) => (
               <NavigationMenuLink asChild key={year}>
-                <Link to='/$year' params={{ year: year }} className='hover:underline'>
+                <Link to='/$year' params={{ year }} className='hover:underline'>
                   <p>{year}</p>
                 </Link>
               </NavigationMenuLink>
@@ -53,14 +53,14 @@ function Nav() {
 
         <NavigationMenuItem>
           <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-            <Link to='/$year/standings' params={{ year: year }} data-cy='nav-link-standings'>
+            <Link to='/$year/standings' params={{ year: String(year) }} search={{ chart: 'drivers' }} data-cy='nav-link-standings'>
               Standings
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-            <Link to='/$year/map' params={{ year: year }} data-cy='nav-link-map'>
+            <Link to='/$year/map' params={{ year: String(year) }} search={{ event: undefined }} data-cy='nav-link-map'>
               Map
             </Link>
           </NavigationMenuLink>

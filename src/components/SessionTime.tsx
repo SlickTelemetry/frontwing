@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { CalendarPlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
 import { eventLocationEncode } from '@/lib/utils';
@@ -29,7 +29,7 @@ export const SessionTime = ({
   event?: string | null;
   // name?: Session_Name_Choices_Enum | null;
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [now] = useState(() => Date.now());
 
   const futureEvent = new Date(time || '').getTime() > now;
@@ -42,9 +42,15 @@ export const SessionTime = ({
       )}
       onClick={() =>
         !futureEvent &&
-        router.push(
-          `${year}/${eventLocationEncode(event)}/${eventLocationEncode(name)}`,
-        )
+        navigate({
+          to: '/$year/$event/$session',
+          params: {
+            year: String(year),
+            event: eventLocationEncode(event ?? '') ?? '',
+            session: eventLocationEncode(name ?? '') ?? '',
+          },
+          search: { chart: 'grid', drivers: undefined },
+        })
       }
     >
       {name && (

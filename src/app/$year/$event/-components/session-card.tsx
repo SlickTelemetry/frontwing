@@ -86,10 +86,11 @@ export function SessionCards({
           key={sessId}
           to='/$year/$event/$session'
           params={{
-            year: parseInt(year, 10) || new Date().getFullYear(),
+            year: String(parseInt(year, 10) || new Date().getFullYear()),
             event,
             session: sessionEncoded,
           }}
+          search={{ chart: 'grid', drivers: undefined }}
           {...commonProps}
         >
           {children}

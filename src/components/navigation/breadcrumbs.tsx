@@ -26,7 +26,7 @@ export function Breadcrumbs() {
           ) : (
             <BreadcrumbLink
               className='cursor-pointer'
-              onClick={() => updateUrl('year', year)}
+              onClick={() => updateUrl('year', year != null ? String(year) : '')}
             >
               {year}
             </BreadcrumbLink>

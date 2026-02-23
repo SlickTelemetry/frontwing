@@ -48,8 +48,9 @@ export const Route = createFileRoute('/$year/')({
 
 function SeasonPage() {
   const { year } = Route.useParams();
+  const yearNum = typeof year === 'string' ? parseInt(year, 10) : Number(year);
   const { data, loading, error } = useQuery(GET_SEASON_PAGE, {
-    variables: { year: parseInt(year) },
+    variables: { year: yearNum },
   });
 
   if (error) {
@@ -60,7 +61,11 @@ function SeasonPage() {
     notFound();
   }
 
-  const latestYear = parseInt(year) === SUPPORTED_SEASONS[0];
+  if (!SUPPORTED_SEASONS.includes(yearNum)) {
+    notFound();
+  }
+
+  const latestYear = yearNum === SUPPORTED_SEASONS[0];
   return (
     <div className='p-4 lg:p-6'>
       <div className='grid gap-4 md:grid-cols-3 2xl:grid-cols-4'>
