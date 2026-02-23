@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './app/__root'
 import { Route as YearRouteImport } from './app/$year'
 import { Route as IndexRouteImport } from './app/index'
+import { Route as YearIndexRouteImport } from './app/$year/index'
 import { Route as YearStandingsRouteRouteImport } from './app/$year/standings/route'
 import { Route as YearMapRouteRouteImport } from './app/$year/map/route'
 import { Route as YearEventRouteRouteImport } from './app/$year/$event/route'
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const YearIndexRoute = YearIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => YearRoute,
 } as any)
 const YearStandingsRouteRoute = YearStandingsRouteRouteImport.update({
   id: '/standings',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/$year/$event': typeof YearEventRouteRouteWithChildren
   '/$year/map': typeof YearMapRouteRouteWithChildren
   '/$year/standings': typeof YearStandingsRouteRouteWithChildren
+  '/$year/': typeof YearIndexRoute
   '/$year/$event/$session': typeof YearEventSessionRouteRouteWithChildren
   '/$year/$event/': typeof YearEventIndexRoute
   '/$year/map/': typeof YearMapIndexRoute
@@ -85,7 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$year': typeof YearRouteWithChildren
+  '/$year': typeof YearIndexRoute
   '/$year/$event': typeof YearEventIndexRoute
   '/$year/map': typeof YearMapIndexRoute
   '/$year/standings': typeof YearStandingsIndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesById {
   '/$year/$event': typeof YearEventRouteRouteWithChildren
   '/$year/map': typeof YearMapRouteRouteWithChildren
   '/$year/standings': typeof YearStandingsRouteRouteWithChildren
+  '/$year/': typeof YearIndexRoute
   '/$year/$event/$session': typeof YearEventSessionRouteRouteWithChildren
   '/$year/$event/': typeof YearEventIndexRoute
   '/$year/map/': typeof YearMapIndexRoute
@@ -112,6 +120,7 @@ export interface FileRouteTypes {
     | '/$year/$event'
     | '/$year/map'
     | '/$year/standings'
+    | '/$year/'
     | '/$year/$event/$session'
     | '/$year/$event/'
     | '/$year/map/'
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/$year/$event'
     | '/$year/map'
     | '/$year/standings'
+    | '/$year/'
     | '/$year/$event/$session'
     | '/$year/$event/'
     | '/$year/map/'
@@ -159,6 +169,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/$year/': {
+      id: '/$year/'
+      path: '/'
+      fullPath: '/$year/'
+      preLoaderRoute: typeof YearIndexRouteImport
+      parentRoute: typeof YearRoute
     }
     '/$year/standings': {
       id: '/$year/standings'
@@ -273,12 +290,14 @@ interface YearRouteChildren {
   YearEventRouteRoute: typeof YearEventRouteRouteWithChildren
   YearMapRouteRoute: typeof YearMapRouteRouteWithChildren
   YearStandingsRouteRoute: typeof YearStandingsRouteRouteWithChildren
+  YearIndexRoute: typeof YearIndexRoute
 }
 
 const YearRouteChildren: YearRouteChildren = {
   YearEventRouteRoute: YearEventRouteRouteWithChildren,
   YearMapRouteRoute: YearMapRouteRouteWithChildren,
   YearStandingsRouteRoute: YearStandingsRouteRouteWithChildren,
+  YearIndexRoute: YearIndexRoute,
 }
 
 const YearRouteWithChildren = YearRoute._addFileChildren(YearRouteChildren)

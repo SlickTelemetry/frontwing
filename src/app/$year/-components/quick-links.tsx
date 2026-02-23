@@ -1,6 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import { useParams } from 'next/navigation';
+import { useParams } from '@tanstack/react-router';
 
 interface LinkData {
   href: string;
@@ -65,8 +65,8 @@ function LinkRenderer({ href, name, description }: LinkData) {
 
 // Composing and rendering the quick links container
 export function SeasonQuickLinks() {
-  const { year } = useParams<{ year?: string }>();
-  const links = createQuickLinks(year ?? '');
+  const { year } = useParams({ strict: false });
+  const links = createQuickLinks(String(year) ?? '');
 
   return (
     <div

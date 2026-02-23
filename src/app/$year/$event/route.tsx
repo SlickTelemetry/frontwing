@@ -9,7 +9,10 @@ import { PossibleEvents } from '@/components/event-details';
 export const Route = createFileRoute('/$year/$event')({
   notFoundComponent: EventNotFound,
   head: ({ params }: { params: { year: string; event: string } }) => {
-    const eventName = eventLocationDecode(params.event).replace('Grand Prix', 'GP');
+    const eventName = eventLocationDecode(params.event).replace(
+      'Grand Prix',
+      'GP',
+    );
     return {
       meta: [
         {

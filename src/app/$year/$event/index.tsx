@@ -1,5 +1,10 @@
 import { useQuery } from '@apollo/client/react';
-import { createFileRoute, Link, notFound, useRouter } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import posthog from 'posthog-js';
 import { useEffect } from 'react';
@@ -131,11 +136,7 @@ function EventPage() {
   );
 }
 
-function PrevNextEventButtons({
-  eventName,
-}: {
-  eventName?: string | null;
-}) {
+function PrevNextEventButtons({ eventName }: { eventName?: string | null }) {
   const { year } = Route.useParams();
   const router = useRouter();
   const { data } = useQuery(GET_NAV_EVENTS, {
@@ -160,10 +161,11 @@ function PrevNextEventButtons({
           <Link
             to='/$year/$event'
             params={{
-              year: parseInt(year, 10),
-              event: eventLocationEncode(
-                data.schedule.at(currEvtIdx - 1)?.event_name ?? '',
-              ) ?? '',
+              year: year,
+              event:
+                eventLocationEncode(
+                  data.schedule.at(currEvtIdx - 1)?.event_name ?? '',
+                ) ?? '',
             }}
           >
             <ChevronLeft />
@@ -183,10 +185,11 @@ function PrevNextEventButtons({
           <Link
             to='/$year/$event'
             params={{
-              year: parseInt(year, 10),
-              event: eventLocationEncode(
-                data.schedule.at(currEvtIdx + 1)?.event_name ?? '',
-              ) ?? '',
+              year: year,
+              event:
+                eventLocationEncode(
+                  data.schedule.at(currEvtIdx + 1)?.event_name ?? '',
+                ) ?? '',
             }}
           >
             <div className='flex items-center gap-2'>

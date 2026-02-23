@@ -1,6 +1,4 @@
-'use client';
-
-import { useParams } from 'next/navigation';
+import { useParams } from '@tanstack/react-router';
 
 import { getTodayMidnightUTC } from '@/lib/utils';
 
@@ -36,7 +34,7 @@ export function Schedule(props: {
   schedule?: FragmentType<typeof SeasonSchedule>[];
   circuits?: FragmentType<typeof SeasonCircuits>[];
 }) {
-  const { year } = useParams();
+  const { year } = useParams({ strict: false });
 
   const schedule = useFragment(SeasonSchedule, props.schedule);
   const circuits = useFragment(SeasonCircuits, props.circuits);

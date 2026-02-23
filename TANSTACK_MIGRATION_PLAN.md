@@ -274,6 +274,7 @@ Use TanStack’s “layout route” pattern: a route file that exports a compone
 - **Catch-all routes**: For `app/$year/$.tsx` (path `/$year/...`), access the splat via **`const { _splat } = Route.useParams()`**.
 - **Search params**: `useSearchParams()` → **`Route.useSearch()`** (returns typed search object). Add `validateSearch` on the route for type safety.
 - **Router**: `useRouter()` → `useRouter()` from `@tanstack/react-router` (e.g. `router.push()`, `router.navigate()`).
+  - **`router.navigate()` to routes with `validateSearch`**: TanStack Router requires the **`search`** object when navigating to a route that defines `validateSearch`. TypeScript infers the search shape from `validateSearch`'s return type. You must pass a complete `search` object; optional keys still need to be present with `undefined` (e.g. `search: { chart: 'grid', drivers: undefined }`). Passing a raw string path to `navigate()` is not supported—use `{ to, params, search }` instead.
 - **Pathname**: `usePathname()` → `Route.useLocation().pathname` or `useLocation().pathname`.
 - **notFound()**: In loaders (or components), **throw notFound()** from `@tanstack/react-router` when a resource is missing; the nearest route with **`notFoundComponent`** (or root) will render. See §5.6 and [Not Found Errors](https://tanstack.com/router/latest/docs/guide/not-found-errors).
 
@@ -482,6 +483,7 @@ When migrating complex routes like `/map` and `/standings`, the following was di
 
 - Use **`validateSearch`** on the route for typed search (e.g. `chart: 'drivers' | 'constructors'`).
 - In components, use **`Route.useSearch()`** instead of `useSearchParams()`.
+- **`router.navigate()` requires `search`** when targeting a route with `validateSearch`. The router infers the search type from the validator, so `search` must be a full object. Optional params must be explicitly set to `undefined` (e.g. `search: { chart: 'grid', drivers: undefined }`); omitting them causes TypeScript errors.
 
 ### Cookies (still TODO)
 

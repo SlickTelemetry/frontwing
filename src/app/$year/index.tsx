@@ -1,8 +1,6 @@
-'use client';
 import { useQuery } from '@apollo/client/react';
-import { notFound } from '@tanstack/react-router';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import posthog from 'posthog-js';
-import { use } from 'react';
 
 import { SUPPORTED_SEASONS } from '@/lib/constants';
 import { isAllEmptyArrays } from '@/lib/utils';
@@ -44,12 +42,12 @@ const GET_SEASON_PAGE = graphql(`
   }
 `);
 
-export default function SeasonPage({
-  params,
-}: {
-  params: Promise<{ year: string }>;
-}) {
-  const { year } = use(params);
+export const Route = createFileRoute('/$year/')({
+  component: SeasonPage,
+});
+
+function SeasonPage() {
+  const { year } = Route.useParams();
   const { data, loading, error } = useQuery(GET_SEASON_PAGE, {
     variables: { year: parseInt(year) },
   });

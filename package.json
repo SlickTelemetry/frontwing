@@ -47,7 +47,7 @@
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@eslint/js": "latest",
-    "@fontsource/rubik-one": "latest",
+    "@fontsource/rubik": "latest",
     "@graphql-codegen/cli": "latest",
     "@tailwindcss/vite": "latest",
     "@types/node": "latest",

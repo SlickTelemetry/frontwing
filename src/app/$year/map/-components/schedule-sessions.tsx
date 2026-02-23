@@ -37,9 +37,17 @@ export function EventSessions(props: EventSessionProps) {
           className='hover:bg-accent flex cursor-pointer items-center justify-between gap-4 rounded px-1'
           key={evt[session]}
           onClick={() => {
-            router.navigate(
-              `/${evt.year}/${eventLocationEncode(evt.event_name)}/${eventLocationEncode(evt[session])}`,
-            );
+            const sessionValue = evt[session];
+            if (!sessionValue) return;
+            router.navigate({
+              to: '/$year/$event/$session',
+              params: {
+                year: String(evt.year),
+                event: eventLocationEncode(evt.event_name ?? '') ?? '',
+                session: eventLocationEncode(sessionValue) ?? '',
+              },
+              search: { chart: 'grid', drivers: undefined },
+            });
           }}
           aria-label={`${evt[session]} of ${evt.year} ${evt.event_name}`}
         >

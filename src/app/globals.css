@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource/rubik-one';
+@import '@fontsource/rubik';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -149,7 +149,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: 'Rubik One', sans-serif;
+  --font-sans: 'Rubik', sans-serif;
 
   @keyframes accordion-down {
     from {

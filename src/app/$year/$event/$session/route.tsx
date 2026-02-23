@@ -7,10 +7,11 @@ import NotFoundError from '@/components/errors/not-found-error';
 
 export const Route = createFileRoute('/$year/$event/$session')({
   validateSearch: (search: Record<string, unknown>) => ({
-    chart:
-      ['grid', 'laps', 'stints', 'sectors'].includes(search.chart as string)
-        ? (search.chart as 'grid' | 'laps' | 'stints' | 'sectors')
-        : 'grid',
+    chart: ['grid', 'laps', 'stints', 'sectors'].includes(
+      search.chart as string,
+    )
+      ? (search.chart as 'grid' | 'laps' | 'stints' | 'sectors')
+      : 'grid',
     drivers: typeof search.drivers === 'string' ? search.drivers : undefined,
   }),
   notFoundComponent: SessionNotFound,
@@ -46,8 +47,7 @@ function SessionLayout() {
 function SessionNotFound() {
   const params = useParams({ strict: false }) as { year?: string };
   const year = params?.year;
-  const validYear =
-    year && SUPPORTED_SEASONS.includes(parseInt(year, 10));
+  const validYear = year && SUPPORTED_SEASONS.includes(parseInt(year, 10));
   const linkYear = validYear ? year : String(SUPPORTED_SEASONS[0]);
   return (
     <NotFoundError

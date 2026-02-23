@@ -102,10 +102,9 @@ importers:
         version: 10.0.1(eslint@10.0.2(jiti@2.6.1))
 =======
         version: 10.0.1(eslint@10.0.1(jiti@2.6.1))
-      '@fontsource/rubik-one':
+      '@fontsource/rubik':
         specifier: latest
         version: 5.2.5
->>>>>>> 934e74e (chore: phase 3)
       '@graphql-codegen/cli':
         specifier: latest
         version: 6.1.1(@parcel/watcher@2.5.6)(@types/node@25.3.0)(graphql-sock@1.0.1(graphql@16.12.0))(graphql@16.12.0)(typescript@5.9.3)
@@ -633,8 +632,8 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@fontsource/rubik-one@5.2.5':
-    resolution: {integrity: sha512-NGnSpWvOzMZ3ahj77b9dAA6FieSVkefaeqSSKrlaMWSiiKw17qK7eWR6LUBJKA4whxMEn5DCqCYhCQ/aXvjViQ==}
+  '@fontsource/rubik@5.2.8':
+    resolution: {integrity: sha512-PIc8QR7FqWPcYhbdRiGff56vQlKqg/ytES1YqecSq1GkgxiH4TBshrFvDEOZ9JonUF9m1qQ+qXxJj7wD5zgXEw==}
 
   '@graphql-codegen/add@6.0.0':
     resolution: {integrity: sha512-biFdaURX0KTwEJPQ1wkT6BRgNasqgQ5KbCI1a3zwtLtO7XTo7/vKITPylmiU27K5DSOWYnY/1jfSqUAEBuhZrQ==}
@@ -6011,9 +6010,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-<<<<<<< HEAD
-  '@graphql-codegen/add@6.0.0(graphql@16.13.1)':
-=======
   '@fontsource/rubik-one@5.2.5': {}
 
   '@graphql-codegen/add@6.0.0(graphql@16.12.0)':

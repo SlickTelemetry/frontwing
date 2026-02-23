@@ -133,9 +133,7 @@ export const LapTimesChart = ({
           return [lapNum, null];
 
         if (hideOutliers) {
-          const outlierTime = avgLapTime
-            ? avgLapTime * hideOutliers
-            : Infinity;
+          const outlierTime = avgLapTime ? avgLapTime * hideOutliers : Infinity;
           if ((lap.lap_time ?? 0) > outlierTime) {
             return [lapNum, null];
           }

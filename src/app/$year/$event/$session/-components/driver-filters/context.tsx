@@ -126,12 +126,7 @@ export function SessionItemProvider({
         replace: true,
       });
     }
-  }, [
-    selectedDrivers,
-    allDriverAbbreviations,
-    search.drivers,
-    navigate,
-  ]);
+  }, [selectedDrivers, allDriverAbbreviations, search.drivers, navigate]);
 
   const setHidden = useCallback(
     (ids: string[], value: boolean) =>
