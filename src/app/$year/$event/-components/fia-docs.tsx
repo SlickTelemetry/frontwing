@@ -1,4 +1,3 @@
-'use client';
 import { ArrowUpDown, FileText, Loader2, Search } from 'lucide-react';
 import { useState } from 'react';
 
@@ -31,7 +30,6 @@ export function FIADocs({ loading, ...props }: FIADocsProps) {
   const [ascending, setAscending] = useState(false);
   const [searchInput, setSearchInput] = useState('');
 
-  // TODO: Contemplate if should separate filtering and sorting logic
   const getDocNumber = (title: string): number | null => {
     const match = title.match(/^Doc\s+(\d+)\s*-/i);
     return match ? parseInt(match[1], 10) : null;
@@ -43,12 +41,10 @@ export function FIADocs({ loading, ...props }: FIADocsProps) {
       const aDocNum = getDocNumber(a.title);
       const bDocNum = getDocNumber(b.title);
 
-      // If both have doc numbers, sort by doc number
       if (aDocNum !== null && bDocNum !== null) {
         return ascending ? aDocNum - bDocNum : bDocNum - aDocNum;
       }
 
-      // If neither has doc number, fall back to publish_time
       return ascending
         ? new Date(a.publish_time).getTime() -
             new Date(b.publish_time).getTime()
@@ -122,7 +118,6 @@ function FIADocButton(doc: FIADocsFragmentType) {
         doc.url &&
         window.open(
           `https://docs.google.com/gview?embedded=true&url=${doc.url}`,
-          // '_blank',
         )
       }
     >
@@ -138,7 +133,6 @@ function FIADocButton(doc: FIADocsFragmentType) {
             year: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
-            // hourCycle: 'h24',
           })}
         </p>
       </div>

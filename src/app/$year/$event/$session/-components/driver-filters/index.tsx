@@ -1,12 +1,10 @@
-'use client';
-
 import clsx from 'clsx';
 import { Circle } from 'lucide-react';
 
 import { DriverBadges } from '@/components/badges/driver-badge';
 import { Button } from '@/components/ui/button';
 
-import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
+import { useSessionItems } from '@/app/$year/$event/$session/-components/driver-filters/context';
 
 import { GetSessionDetailsQuery } from '@/types/graphql';
 
@@ -67,7 +65,6 @@ export const DriverFilters = ({
           aria-label={`Toggle ${constructor.name}`}
           aria-pressed={constructor.isHidden}
         >
-          {/* Constructor Name Toggle */}
           <div
             className={clsx(
               'flex items-center gap-1',
@@ -98,7 +95,6 @@ const getConstructorsWithDrivers = (
   sessions: GetSessionDetailsQuery['sessions'][number]['driver_sessions'],
   hiddenItems: string[],
 ) => {
-  // Create a map to group drivers by constructor
   const constructorMap = new Map<
     string,
     {
@@ -118,7 +114,6 @@ const getConstructorsWithDrivers = (
       ? `#${session.constructorByConstructorId.color}`
       : 'var(--foreground)';
 
-    // If the constructor doesn't exist in the map, initialize it
     if (!constructorMap.has(constructorName)) {
       constructorMap.set(constructorName, {
         name: constructorName,
@@ -128,7 +123,6 @@ const getConstructorsWithDrivers = (
       });
     }
 
-    // Add the driver to the constructor's drivers list
     const driver = session.driver;
     if (driver) {
       constructorMap.get(constructorName)?.drivers.push({
@@ -138,6 +132,5 @@ const getConstructorsWithDrivers = (
     }
   });
 
-  // Convert the map to an array of constructors
   return Array.from(constructorMap.values());
 };

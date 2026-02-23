@@ -1,12 +1,11 @@
-'use client';
 import { format, SeriesOption } from 'echarts';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useECharts } from '@/hooks/use-EChart';
 
-import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
-import { baseOptions } from '@/app/[year]/[event]/[session]/_components/stints/config';
-import { tyreCompoundColors } from '@/app/[year]/[event]/[session]/constants';
+import { useSessionItems } from '@/app/$year/$event/$session/-components/driver-filters/context';
+import { baseOptions } from '@/app/$year/$event/$session/-components/stints/config';
+import { tyreCompoundColors } from '@/app/$year/$event/$session/constants';
 
 import { GetSessionStintsQuery } from '@/types/graphql';
 
@@ -14,7 +13,6 @@ interface StintsEchartsChartProps {
   driverSessions: GetSessionStintsQuery['sessions'][number]['driver_sessions'];
 }
 
-// Define a type for the custom data you want to attach to each bar
 interface CustomBarDataItem {
   value: [number, string];
   stint: number;
@@ -64,7 +62,6 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     tooltipContent += `<p class="font-bold">Stint ${stintNumber}</p><hr class="my-2"/>`;
 
     const data = params.data as CustomBarDataItem;
-    // Only show tooltip if there is actual data for the stint
     if (data.value[0] === 0 || data.value === null) return;
 
     const driverName = (params.data as CustomBarDataItem).value[1];
@@ -93,7 +90,6 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
     return tooltipContent;
   };
 
-  // Initialize base options and tooltip
   useEffect(() => {
     if (!chartInstance.current) return;
 
@@ -106,29 +102,25 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
   useEffect(() => {
     if (!chartInstance.current) return;
 
-    // Handle no data
     if (driverSessions.length <= 0) {
       setNoDataState();
       return;
     }
 
     const series: SeriesOption[] = [];
-    const driversSet = new Set<string>(); // To collect unique driver names
+    const driversSet = new Set<string>();
     let maxStintNumber = 0;
     let maxLaps = 0;
 
-    // Dynamically determine the maximum stint number
     driverSessions.forEach((ds) => {
       maxStintNumber = Math.max(maxStintNumber, ds.laps.at(-1)?.stint ?? 0);
       maxLaps = Math.max(maxLaps, ds.laps.length);
     });
 
-    // Extract driver names in sorted order
     const sortedDriverNames = driverSessions
       .map((ds) => ds.driver?.abbreviation || '')
       .filter((name) => !hiddenItems.includes(name));
 
-    // Build series data for each stint
     for (let stintNumber = 1; stintNumber <= maxStintNumber; stintNumber++) {
       const stintDataForSeries: CustomBarDataItem[] = [];
 
@@ -136,7 +128,6 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
         const driverName = ds.driver?.abbreviation || '';
         if (hiddenItems.includes(driverName)) return;
 
-        // Aggregate laps for the current stint
         const stintData = ds.laps.reduce<CustomBarDataItem | null>(
           (acc, lap, index) => {
             if (lap.stint === stintNumber) {
@@ -144,12 +135,12 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
 
               if (!acc) {
                 return {
-                  value: [1, driverName], // Set stint number as value[0]
+                  value: [1, driverName],
                   stint: stintNumber,
                   driver: ds.driver?.full_name || '',
                   constructor: ds.constructorByConstructorId?.name || 'Unknown',
                   color: ds.constructorByConstructorId?.color
-                    ? `#${ds.constructorByConstructorId?.color}`
+                    ? `#${ds.constructorByConstructorId.color}`
                     : null,
                   tyreCompound: lap.tyre_compound?.value || 'unknown',
                   freshTyre: lap.fresh_tyre || false,
@@ -170,7 +161,7 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
                 };
               } else {
                 acc.value[0] = acc.value[0] + 1;
-                acc.originalEndLap = index + 1; // Update end lap
+                acc.originalEndLap = index + 1;
               }
             }
             return acc;
@@ -183,12 +174,11 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
         }
       });
 
-      // Format bar series for chart
       if (stintDataForSeries.length > 0) {
         series.push({
           name: `stint ${stintNumber}`,
           type: 'bar',
-          stack: 'total', // Stack all stints for a driver together
+          stack: 'total',
           backgroundStyle: {
             color: 'var(--muted)',
           },
@@ -205,8 +195,8 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
               return format.encodeHTML(label);
             },
 
-            position: 'inside', // Position label inside the bar
-            color: '#000', // Set label color for visibility
+            position: 'inside',
+            color: '#000',
           },
           itemStyle: {
             borderRadius: 4,
@@ -233,7 +223,6 @@ export const StintsChart = ({ driverSessions }: StintsEchartsChartProps) => {
       return;
     }
 
-    // Update chart options
     chartInstance.current.setOption(
       {
         xAxis: { max: maxLaps },

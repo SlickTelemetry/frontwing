@@ -1,13 +1,12 @@
-'use client';
 import { LineSeriesOption } from 'echarts/charts';
 import { useEffect, useRef } from 'react';
 
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
-import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
-import { baseOptions } from '@/app/[year]/[event]/[session]/_components/lap-times/config';
-import { tyreCompoundColors } from '@/app/[year]/[event]/[session]/constants';
+import { useSessionItems } from '@/app/$year/$event/$session/-components/driver-filters/context';
+import { baseOptions } from '@/app/$year/$event/$session/-components/lap-times/config';
+import { tyreCompoundColors } from '@/app/$year/$event/$session/constants';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
 
@@ -25,7 +24,6 @@ export const LapTimesChart = ({
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(chartRef);
 
-  // Initialize base options once (tooltip uses item color, not external maps)
   useEffect(() => {
     if (!chartInstance.current) return;
 
@@ -47,7 +45,6 @@ export const LapTimesChart = ({
     ) {
       let tooltipContent = '';
       if (params && params.length > 0 && params[0]?.value) {
-        // value[0] is a zero-based index, display as 1-based lap number
         const lapIdx = Number(params[0].value[0] ?? 0);
         tooltipContent = `<div class='font-bold text-foreground'>Lap: ${lapIdx + 1}</div>`;
         tooltipContent += `<div class="grid grid-cols-[auto_1fr_1fr] items-center text-foreground">`;
@@ -94,7 +91,6 @@ export const LapTimesChart = ({
     );
   }, [chartInstance, data]);
 
-  // Update only dynamic pieces (series/xAxis/title)
   useEffect(() => {
     if (!chartInstance.current) return;
 
@@ -128,31 +124,24 @@ export const LapTimesChart = ({
     }
 
     const series = driverSessions.map((driver) => {
-      //TODO:  Halfway to 107% rule, should be based on field average not driver avg
       const avgLapTime = driver.laps_aggregate.aggregate?.avg?.lap_time;
       const color = `#${driver?.constructorByConstructorId?.color || 'cccccc'}`;
-      const lapData = [...driver?.laps]
-        // ?.filter((lap) => !!lap?.lap_number && lap.lap_time !== null)
-        .map((lap) => {
-          // Use zero-based lap index so it maps to xAxis category indexes (0 -> lap 1)
-          const lapNum = lap.lap_number ? lap.lap_number - 1 : 0;
+      const lapData = [...driver?.laps].map((lap) => {
+        const lapNum = lap.lap_number ? lap.lap_number - 1 : 0;
 
-          // Filter pit laps
-          if (!showPitIn && (lap.pitin_time || lap.pitout_time))
+        if (!showPitIn && (lap.pitin_time || lap.pitout_time))
+          return [lapNum, null];
+
+        if (hideOutliers) {
+          const outlierTime = avgLapTime
+            ? avgLapTime * hideOutliers
+            : Infinity;
+          if ((lap.lap_time ?? 0) > outlierTime) {
             return [lapNum, null];
-
-          // Filter outliers
-          if (hideOutliers) {
-            const outlierTime = avgLapTime
-              ? avgLapTime * hideOutliers
-              : Infinity;
-            if ((lap.lap_time ?? 0) > outlierTime) {
-              return [lapNum, null];
-            }
           }
-          // Include tyre compound in data for tooltip
-          return [lapNum, lap.lap_time ?? null, lap.compound];
-        });
+        }
+        return [lapNum, lap.lap_time ?? null, lap.compound];
+      });
 
       return {
         name: driver?.driver?.abbreviation,

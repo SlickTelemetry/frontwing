@@ -1,4 +1,4 @@
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 import {
   createContext,
   useCallback,
@@ -9,13 +9,14 @@ import {
   useRef,
 } from 'react';
 
-import { visibilityReducer } from '@/app/[year]/[event]/[session]/_components/driver-filters/reducer';
+import { visibilityReducer } from '@/app/$year/$event/$session/-components/driver-filters/reducer';
 
 import { GetSessionDetailsQuery } from '@/types/graphql';
 
+import { Route } from '@/app/$year/$event/$session/route';
+
 type SessionItemContextValue = {
   hiddenItems: string[];
-  // New explicit APIs
   setHidden: (ids: string[], value: boolean) => void;
   resetHidden: () => void;
   setAllHidden: () => void;
@@ -42,13 +43,11 @@ export function SessionItemProvider({
   sessions?: GetSessionDetailsQuery['sessions'][number]['driver_sessions'];
   initialHiddenDrivers?: string[];
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const search = Route.useSearch();
   const initAppliedRef = useRef(false);
   const [hiddenItems, dispatch] = useReducer(visibilityReducer, {});
 
-  // Get all available driver abbreviations
   const allDriverAbbreviations = useMemo(() => {
     return (
       sessions
@@ -60,7 +59,6 @@ export function SessionItemProvider({
   const hiddenKeys = useMemo(() => {
     const hiddenConstructors = new Set<string>();
 
-    // Check if all drivers of a constructor are hidden
     sessions?.forEach((ds) => {
       const constructorName = ds.constructorByConstructorId?.name;
       const driverAbbreviation = ds.driver?.abbreviation;
@@ -81,19 +79,16 @@ export function SessionItemProvider({
       .concat(Array.from(hiddenConstructors));
   }, [hiddenItems, sessions]);
 
-  // Calculate selected drivers (not hidden)
   const selectedDrivers = useMemo(() => {
     return allDriverAbbreviations.filter((abbr) => !hiddenItems[abbr]);
   }, [allDriverAbbreviations, hiddenItems]);
 
-  // Initialize from search params or initialHiddenDrivers
   useEffect(() => {
     if (initAppliedRef.current || !allDriverAbbreviations.length) return;
 
-    const driversParam = searchParams.get('drivers');
+    const driversParam = search.drivers;
 
     if (driversParam) {
-      // Parse selected drivers from search params
       const selectedFromParams = driversParam.split(',').filter(Boolean);
       const hiddenFromParams = allDriverAbbreviations.filter(
         (abbr) => !selectedFromParams.includes(abbr),
@@ -106,7 +101,6 @@ export function SessionItemProvider({
         });
       }
     } else if (initialHiddenDrivers?.length) {
-      // Fallback to initialHiddenDrivers if no search params
       dispatch({
         type: 'SET_HIDDEN',
         payload: { ids: initialHiddenDrivers, value: true },
@@ -114,46 +108,30 @@ export function SessionItemProvider({
     }
 
     initAppliedRef.current = true;
-  }, [searchParams, initialHiddenDrivers, allDriverAbbreviations]);
+  }, [search.drivers, initialHiddenDrivers, allDriverAbbreviations]);
 
-  // Update search params when selected drivers change
   useEffect(() => {
-    if (!initAppliedRef.current || !allDriverAbbreviations.length) return; // Don't update on initial load or before sessions load
+    if (!initAppliedRef.current || !allDriverAbbreviations.length) return;
 
-    const params = new URLSearchParams(searchParams);
-    const currentDriversParam = params.get('drivers') || '';
+    const currentDriversParam = search.drivers || '';
     const newDriversParam =
       selectedDrivers.length === allDriverAbbreviations.length
-        ? '' // All drivers selected, remove the param
+        ? undefined
         : selectedDrivers.join(',');
 
-    // Only update if the value actually changed
-    if (currentDriversParam !== newDriversParam) {
-      // Remove drivers param to rebuild manually
-      params.delete('drivers');
-
-      // Build query string manually to avoid encoding the pipe separator
-      const queryParts: string[] = [];
-
-      // Add all other params (properly encoded)
-      params.forEach((value, key) => {
-        queryParts.push(
-          `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
-        );
+    if (currentDriversParam !== (newDriversParam ?? '')) {
+      navigate({
+        to: '.',
+        search: (prev) => ({ ...prev, drivers: newDriversParam }),
+        replace: true,
       });
-
-      // Add drivers param first (unencoded pipe separator)
-      if (newDriversParam) {
-        queryParts.push(`drivers=${newDriversParam}`);
-      }
-
-      const newUrl =
-        queryParts.length > 0
-          ? `${pathname}?${queryParts.join('&')}`
-          : pathname;
-      router.replace(newUrl, { scroll: false });
     }
-  }, [selectedDrivers, allDriverAbbreviations, searchParams, router, pathname]);
+  }, [
+    selectedDrivers,
+    allDriverAbbreviations,
+    search.drivers,
+    navigate,
+  ]);
 
   const setHidden = useCallback(
     (ids: string[], value: boolean) =>
@@ -201,7 +179,6 @@ export function SessionItemProvider({
     <SessionItemContext.Provider
       value={{
         hiddenItems: hiddenKeys,
-        // Actions
         setHidden,
         resetHidden,
         setAllHidden,

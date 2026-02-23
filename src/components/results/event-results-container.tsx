@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { EyeOff, Settings } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { useParams } from '@tanstack/react-router';
 import React, { useEffect } from 'react';
 
 import {
@@ -91,7 +91,10 @@ export default function EventResultsContainer({
   loading: boolean;
   sessions: FragmentType<typeof EventSessionResults>[];
 }) {
-  const { year, event } = useParams();
+  const { year, event } = useParams({ strict: false }) as {
+    year?: string;
+    event?: string;
+  };
   const [data] = useFragment(EventSessionResults, props?.sessions);
   const sessions = data
     ? [...data.practice, ...data.qualifying, ...data.competition].sort(

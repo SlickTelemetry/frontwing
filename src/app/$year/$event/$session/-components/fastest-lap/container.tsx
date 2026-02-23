@@ -1,6 +1,4 @@
-'use client';
 import { useQuery } from '@apollo/client/react';
-import { useParams } from 'next/navigation';
 
 import { GET_SESSION_FASTEST_TIMES } from '@/lib/queries';
 import { eventLocationDecode, sessionDecode } from '@/lib/utils';
@@ -8,13 +6,15 @@ import { eventLocationDecode, sessionDecode } from '@/lib/utils';
 import { ChartContainer } from '@/components/chart-container';
 import { ServerPageError } from '@/components/errors/ServerError';
 
-import { useSessionItems } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
-import { FastestLapChart } from '@/app/[year]/[event]/[session]/_components/fastest-lap';
+import { useSessionItems } from '@/app/$year/$event/$session/-components/driver-filters/context';
+import { FastestLapChart } from '@/app/$year/$event/$session/-components/fastest-lap/bar-chart';
 
 import {
   GetSessionFastestTimesQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
+
+import { Route } from '@/app/$year/$event/$session/route';
 
 type Sector = {
   time: number | null;
@@ -41,12 +41,12 @@ export interface DriverTimes {
 
 export const FastestLapContainer = () => {
   const { hiddenItems } = useSessionItems();
-  const { year, event, session } = useParams();
+  const { year, event, session } = Route.useParams();
   const { data, loading, error } = useQuery(GET_SESSION_FASTEST_TIMES, {
     variables: {
-      year: parseInt(year as string),
-      event: eventLocationDecode(event as string),
-      session: sessionDecode(session as string) as Session_Name_Choices_Enum,
+      year: parseInt(year),
+      event: eventLocationDecode(event),
+      session: sessionDecode(session) as Session_Name_Choices_Enum,
     },
   });
 

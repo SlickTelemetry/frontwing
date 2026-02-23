@@ -1,7 +1,5 @@
-'use client';
 import { useQuery } from '@apollo/client/react';
 import { Info } from 'lucide-react';
-import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { GET_SESSION_LAP_TIMES } from '@/lib/queries';
@@ -26,18 +24,20 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 
-import { LapTimesChart } from '@/app/[year]/[event]/[session]/_components/lap-times';
+import { LapTimesChart } from '@/app/$year/$event/$session/-components/lap-times/line-chart';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
 import { Session_Name_Choices_Enum } from '@/types/graphql';
 
+import { Route } from '@/app/$year/$event/$session/route';
+
 export const LapTimeContainer = () => {
-  const { year, event, session } = useParams();
+  const { year, event, session } = Route.useParams();
   const { loading, data, error } = useQuery(GET_SESSION_LAP_TIMES, {
     variables: {
-      year: parseInt(year as string),
-      event: eventLocationDecode(event as string),
-      session: sessionDecode(session as string) as Session_Name_Choices_Enum,
+      year: parseInt(year),
+      event: eventLocationDecode(event),
+      session: sessionDecode(session) as Session_Name_Choices_Enum,
     },
   });
 

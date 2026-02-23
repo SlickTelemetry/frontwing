@@ -77,9 +77,9 @@ export function EventWinners({ location, country }: EventWinnersProps) {
   );
 }
 
-function EventWinner({
-  ...props
-}: GetEventWinnersQuery['results'][number]['driver_session']) {
+function EventWinner(
+  props: GetEventWinnersQuery['results'][number]['driver_session'],
+) {
   const team = props?.constructor;
   const driver = props?.driver;
 

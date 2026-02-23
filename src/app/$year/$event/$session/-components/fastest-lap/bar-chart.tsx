@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
-import { baseOptions } from '@/app/[year]/[event]/[session]/_components/fastest-lap/config';
-import { DriverTimes } from '@/app/[year]/[event]/[session]/_components/fastest-lap/container';
+import { baseOptions } from '@/app/$year/$event/$session/-components/fastest-lap/config';
+import { DriverTimes } from '@/app/$year/$event/$session/-components/fastest-lap/container';
 
 interface FastestLapEChartsProps {
   times: DriverTimes[];
@@ -13,9 +13,8 @@ interface FastestLapEChartsProps {
 
 interface EChartsCallbackParams {
   name: string;
-  value: number | string | number[]; // Value of the data item
+  value: number | string | number[];
   seriesName?: string;
-  // Data item itself (e.g., for bar series, it's {value: ..., itemStyle: ...})
   data: { value: number | null; itemStyle?: { color: string } };
   color?: string;
 }
@@ -49,7 +48,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
     [times],
   );
 
-  // Initialize base options once (tooltip uses item color, not external maps)
   useEffect(() => {
     if (!chartInstance.current) return;
 
@@ -110,7 +108,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
         {
           name: 'Sector 1 PB',
           type: 'bar',
-          // barWidth: 16,
           stack: 'Potential Best Breakdown',
           data: driverTimes.map((value, index) => ({
             value: value.sectors.sector1.time,
@@ -126,7 +123,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
           name: 'Sector 2  PB',
           type: 'bar',
           stack: 'Potential Best Breakdown',
-          // barWidth: 16,
           data: driverTimes.map((value, index) => ({
             value: value.sectors.sector2.time,
             itemStyle: {
@@ -141,7 +137,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
           name: 'Sector 3 PB',
           type: 'bar',
           stack: 'Potential Best Breakdown',
-          // barWidth: 16,
           data: driverTimes.map((value, index) => ({
             value: value.sectors.sector3.time,
             itemStyle: {
@@ -156,7 +151,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
           name: 'Sector 1',
           type: 'bar',
           stack: 'Fastest Lap Breakdown',
-          // barWidth: 16,
           data: driverTimes.map((value, index) => ({
             value: value.fastestLap.sector1,
             itemStyle: {
@@ -171,7 +165,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
           name: 'Sector 2',
           type: 'bar',
           stack: 'Fastest Lap Breakdown',
-          // barWidth: 16,
           data: driverTimes.map((value, index) => ({
             value: value.fastestLap.sector2,
             itemStyle: {
@@ -186,8 +179,6 @@ export const FastestLapChart: React.FC<FastestLapEChartsProps> = ({
           name: 'Sector 3',
           type: 'bar',
           stack: 'Fastest Lap Breakdown',
-          // barWidth: 16,
-
           data: driverTimes.map((value, index) => ({
             value: value.fastestLap.sector3,
             itemStyle: {

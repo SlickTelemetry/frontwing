@@ -1,6 +1,4 @@
-'use client';
 import { useQuery } from '@apollo/client/react';
-import { useParams } from 'next/navigation';
 import React from 'react';
 
 import { GET_SESSION_STINTS } from '@/lib/queries';
@@ -14,12 +12,14 @@ import {
 import { ChartContainer } from '@/components/chart-container';
 import { ServerPageError } from '@/components/errors/ServerError';
 
-import { StintsChart } from '@/app/[year]/[event]/[session]/_components/stints/chart';
+import { StintsChart } from '@/app/$year/$event/$session/-components/stints/chart';
 
 import {
   GetSessionStintsQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
+
+import { Route } from '@/app/$year/$event/$session/route';
 
 const Stints = ({
   sessionType,
@@ -30,7 +30,7 @@ const Stints = ({
     isPractice: boolean;
   };
 }) => {
-  const { year, event, session } = useParams();
+  const { year, event, session } = Route.useParams();
 
   const {
     data: sessionData,
@@ -38,9 +38,9 @@ const Stints = ({
     error,
   } = useQuery(GET_SESSION_STINTS, {
     variables: {
-      year: parseInt(year as string),
-      event: eventLocationDecode(event as string),
-      session: sessionDecode(session as string) as Session_Name_Choices_Enum,
+      year: parseInt(year),
+      event: eventLocationDecode(event),
+      session: sessionDecode(session) as Session_Name_Choices_Enum,
     },
   });
 
@@ -51,7 +51,6 @@ const Stints = ({
     [key: string]: GetSessionStintsQuery['sessions'][number]['driver_sessions'];
   } = {};
 
-  // Sorting logic based on session type
   if (sessionType.isCompetition) {
     driverSessions = sortResults(driverSessions);
   } else if (sessionType.isPractice) {
@@ -86,22 +85,18 @@ const Stints = ({
     <div className='grid gap-4'>
       {!sessionType.isQualifying && (
         <ChartContainer title='Tyre Analysis' loading={loading}>
-          {/* Need to reverse for descending order */}
           <StintsChart driverSessions={driverSessions.reverse()} />
         </ChartContainer>
       )}
       {sessionType.isQualifying && (
         <>
           <ChartContainer title='Q3 Tyre Analysis' loading={loading}>
-            {/* Need to reverse for descending order */}
             <StintsChart driverSessions={qualifyingSessions.q3.reverse()} />
           </ChartContainer>
           <ChartContainer title='Q2 Tyre Analysis' loading={loading}>
-            {/* Need to reverse for descending order */}
             <StintsChart driverSessions={qualifyingSessions.q2.reverse()} />
           </ChartContainer>
           <ChartContainer title='Q1 Tyre Analysis' loading={loading}>
-            {/* Need to reverse for descending order */}
             <StintsChart driverSessions={qualifyingSessions.q1.reverse()} />
           </ChartContainer>
         </>

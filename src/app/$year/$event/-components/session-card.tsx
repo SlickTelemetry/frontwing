@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import { ArrowUpRight } from 'lucide-react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { Link, useParams } from '@tanstack/react-router';
 
 import { SESSION_KEYS } from '@/lib/constants';
 import { eventLocationEncode } from '@/lib/utils';
@@ -31,7 +30,9 @@ export function SessionCards({
   availableSessions: string[];
   schedule?: FragmentType<typeof EventSessionCards>;
 }) {
-  const { event } = useParams<{ event: string }>();
+  const params = useParams({ strict: false }) as { year?: string; event?: string };
+  const event = params.event ?? '';
+  const year = params.year ?? '';
   const schedule = useFragment(EventSessionCards, props?.schedule);
   const trackTime = useReadLocalStorage('track-time');
 
@@ -39,11 +40,8 @@ export function SessionCards({
     const name = schedule?.[sessId] ?? '';
     const date = schedule?.[`${sessId}_date`] ?? '';
 
-    // Resolve if button should be clickable or not
     const availableData = availableSessions.includes(name);
-    const href = availableData
-      ? `${event}/${eventLocationEncode(name)}`
-      : undefined;
+    const sessionEncoded = eventLocationEncode(name);
 
     const children = (
       <>
@@ -82,9 +80,18 @@ export function SessionCards({
       tabIndex: 0,
     };
 
-    if (href) {
+    if (availableData && sessionEncoded) {
       return (
-        <Link key={sessId} href={href} {...commonProps}>
+        <Link
+          key={sessId}
+          to='/$year/$event/$session'
+          params={{
+            year: parseInt(year, 10) || new Date().getFullYear(),
+            event,
+            session: sessionEncoded,
+          }}
+          {...commonProps}
+        >
           {children}
         </Link>
       );

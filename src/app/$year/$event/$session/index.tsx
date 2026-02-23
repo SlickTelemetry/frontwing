@@ -1,8 +1,6 @@
-'use client';
 import { useQuery } from '@apollo/client/react';
-import { notFound } from 'next/navigation';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import posthog from 'posthog-js';
-import { use } from 'react';
 
 import {
   COMPETITION_SESSIONS,
@@ -23,20 +21,20 @@ import { Breadcrumbs } from '@/components/navigation/breadcrumbs';
 import {
   ChartViewController,
   SessionHeader,
-} from '@/app/[year]/[event]/[session]';
-import { SessionItemProvider } from '@/app/[year]/[event]/[session]/_components/driver-filters/context';
+} from '@/app/$year/$event/$session/-components';
+import { SessionItemProvider } from '@/app/$year/$event/$session/-components/driver-filters/context';
 
 import {
   GetSessionDetailsQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
 
-export default function SessionPage({
-  params,
-}: {
-  params: Promise<{ year: string; event: string; session: string }>;
-}) {
-  const { year, event: eventLoc, session } = use(params);
+export const Route = createFileRoute('/$year/$event/$session/')({
+  component: SessionPage,
+});
+
+function SessionPage() {
+  const { year, event: eventLoc, session } = Route.useParams();
   const sessionName = sessionDecode(session) as Session_Name_Choices_Enum;
 
   const isCompetition = COMPETITION_SESSIONS.includes(sessionName);
@@ -59,11 +57,10 @@ export default function SessionPage({
     posthog.capture('graphql_error', error);
   }
 
-  if (error || (!loading && !data)) return notFound();
+  if (error || (!loading && !data)) throw notFound();
 
   const driverSessions = data?.sessions[0]?.driver_sessions || [];
 
-  // Sorting logic
   let sortedSessions = driverSessions;
   if (data) {
     if (isQualifying || isCompetition) {
@@ -87,7 +84,6 @@ export default function SessionPage({
       initialHiddenDrivers={initialHiddenDrivers}
     >
       <div className='p-4 lg:p-6'>
-        {/* Content wont change after data loads */}
         <Breadcrumbs />
         <div className='grid items-center gap-x-4 gap-y-4 lg:grid-cols-2 xl:grid-cols-4'>
           <div className='xl:col-span-2'>
