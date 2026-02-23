@@ -7,7 +7,7 @@ import {
 import appCss from './globals.css?url';
 import { ThemeProvider } from 'next-themes';
 
-import { ApolloProvider } from '@/app/apollo-provider';
+import { ApolloProvider } from '@/app/-apollo-provider';
 import NotFoundError from '@/components/errors/not-found-error';
 import { Footer } from '@/components/Footer';
 
@@ -18,7 +18,10 @@ export const Route = createRootRoute({
     <div className='container flex min-h-screen flex-col'>
       <LandingNav />
       <div className='flex flex-1 items-center justify-center'>
-        <NotFoundError title='Page not found' link={{ href: '/', title: 'Home' }} />
+        <NotFoundError
+          title='Page not found'
+          link={{ href: '/', title: 'Home' }}
+        />
       </div>
       <Footer />
     </div>

@@ -5,7 +5,7 @@ import { useECharts } from '@/hooks/use-EChart';
 
 import { useSessionItems } from '@/app/$year/$event/$session/-components/driver-filters/context';
 import { baseOptions } from '@/app/$year/$event/$session/-components/stints/config';
-import { tyreCompoundColors } from '@/app/$year/$event/$session/constants';
+import { tyreCompoundColors } from '@/app/$year/$event/$session/-constants';
 
 import { GetSessionStintsQuery } from '@/types/graphql';
 
