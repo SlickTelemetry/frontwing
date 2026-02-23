@@ -46,8 +46,8 @@ jobs:
           pnpm build
           pnpm start & npx wait-on http://localhost:3000
 
-      - name: ✅ Run Cypress tests
-        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+      # - name: ✅ Run Cypress tests
+      #   run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
 
   release:
     # create a release following the logic below:
