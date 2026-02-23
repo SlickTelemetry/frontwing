@@ -35,9 +35,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# turbo
-.turbo
-
 #cypress
 cypress/e2e/example
 cypress/screenshots
@@ -45,3 +42,6 @@ cypress/screenshots
 # GraphQL schema files (should not be committed to public repos)
 schema.graphql
 graphql.schema.json
+
+# tanstack
+.output/

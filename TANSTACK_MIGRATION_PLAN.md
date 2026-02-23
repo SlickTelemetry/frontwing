@@ -42,6 +42,7 @@ Table of Contents:
   - [9.3 Environment variables (deploy checklist)](#93-environment-variables-deploy-checklist)
   - [9.4 Platform-specific notes](#94-platform-specific-notes)
   - [9.5 Things to confirm at deploy time](#95-things-to-confirm-at-deploy-time)
+  - [9.6 Vercel + Nitro troubleshooting](#96-vercel--nitro-troubleshooting)
 - [Lessons from /map and /standings Migration](#lessons-from-map-and-standings-migration)
   - [Imports from `-components`](#imports-from--components)
   - [notFoundComponent on parent routes](#notfoundcomponent-on-parent-routes)
@@ -443,6 +444,29 @@ Build output with Nitro is under **`.output/`** (not `dist/`). For Appwrite with
 - [ ] All client env vars are set on the host (and use the same names as in code / Vite `define`).
 - [ ] Codegen: if you run `pnpm run generate` in CI or on the host, build-time env (Hasura admin role/secret) is available there.
 - [ ] PostHog proxy (Phase 2.3) works in production or PostHog is configured for your production domain.
+
+### 9.6 Vercel + Nitro troubleshooting
+
+**Symptom**: After deploy, requests return `{"status":500,"unhandled":true,"message":"HTTPError"}`. Runtime logs show:
+
+```
+Error: Cannot find package '/var/task/node_modules/graphql/index' imported from /var/task/_libs/apollo__client.mjs
+```
+
+**Cause**: Apollo Client imports the `graphql` package. Nitro externalizes it by default, so it is not bundled into the serverless function. Vercel’s dependency tracing may not include it correctly, or ESM resolution fails for the external reference.
+
+**Fix**: Bundle the `graphql` package into the Nitro server output by adding to `vite.config.ts`:
+
+```ts
+export default defineConfig({
+  nitro: {
+    noExternals: ['graphql'],
+  },
+  // ...rest
+});
+```
+
+This ensures `graphql` is bundled (not externalized) so Apollo Client can resolve it at runtime. For Nitro v3, use `noExternals`; older Nitro versions may use `externals.inline`.
 
 ---
 

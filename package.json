@@ -34,6 +34,7 @@
     "lucide-react": "latest",
     "mapbox-gl": "latest",
     "next-themes": "latest",
+    "nitro": "npm:nitro-nightly@latest",
     "posthog-js": "latest",
     "radix-ui": "latest",
     "react": "latest",

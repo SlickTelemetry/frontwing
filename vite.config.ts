@@ -3,8 +3,12 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
+import { nitro } from 'nitro/vite';
 
 export default defineConfig({
+  nitro: {
+    noExternals: ['graphql'],
+  },
   server: {
     port: 3000,
     proxy: {
@@ -27,6 +31,7 @@ export default defineConfig({
       srcDirectory: 'src',
       router: { routesDirectory: 'app' },
     }),
+    nitro(),
     viteReact(),
   ],
 });
