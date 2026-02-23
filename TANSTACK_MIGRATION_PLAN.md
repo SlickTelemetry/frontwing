@@ -52,6 +52,16 @@ Table of Contents:
   - [Route layout structure](#route-layout-structure)
   - [Search params](#search-params)
   - [Cookies (still TODO)](#cookies-still-todo)
+- [Lessons from /$year, /$year/$event, and /$year/$event/$session Migration](#lessons-from-year-yearevent-and-yeareventsession-migration)
+  - [Index route must use `createFileRoute`](#index-route-must-use-createfileroute)
+  - [`Link` also requires `search` for routes with `validateSearch`](#link-also-requires-search-for-routes-with-validatesearch)
+  - [Param type inconsistency across routes](#param-type-inconsistency-across-routes)
+  - [`-components` import resolution with deep dynamic paths](#-components-import-resolution-with-deep-dynamic-paths)
+  - [Shared components: `useParams` and type guards](#shared-components-useparams-and-type-guards)
+  - [Programmatic navigation and `next/navigation` replacement](#programmatic-navigation-and-nextnavigation-replacement)
+  - [`notFoundComponent` on event and session routes](#notfoundcomponent-on-event-and-session-routes)
+  - [Throw `notFound` with `routeId` to preserve layout](#throw-notfound-with-routeid-to-preserve-layout)
+- [ESLint integration (TODO)](#eslint-integration-todo)
 - [File-by-File Checklist (high level)](#file-by-file-checklist-high-level)
 - [References](#references)
 
@@ -360,6 +370,7 @@ You already use **GraphQL Code Generator** (client preset, `./src/types/`) and `
 
 ## Phase 8: Optional and Follow-ups
 
+- **ESLint integration**: See **ESLint integration (TODO)** section below — explicit config path, `files` pattern for `$` paths, lint-staged workaround, TanStack ESLint config.
 - **Trailing slashes**: If you relied on `skipTrailingSlashRedirect`, replicate with TanStack/Vite (router config or server).
 - **Image domains**: If you add server-side or build-time image optimization, mirror previous `remotePatterns` (via Unpic or similar) for via.placeholder.com, media.formula1.com, www.formula1.com.
 - **Cypress**: Update baseUrl or visit paths if dev server URL or structure changed.
@@ -535,6 +546,26 @@ When migrating the season, event, and session routes, the following was discover
 
 - Add `notFoundComponent` to `$year/$event/route.tsx` and `$year/$event/$session/route.tsx` for event/session-specific 404 UI (e.g. "No Event Found", "No Session Found" with links back to season).
 
+### Throw `notFound` with `routeId` to preserve layout
+
+- **Symptom**: Invalid URLs (e.g. `/5646/standings`, `/68745/miami_gp`) show a generic "404 Page not found" with broken layout/theme — no sidebar, unstyled.
+- **Cause**: Without `routeId`, `notFound()` bubbles to the root route. The root's `notFoundComponent` replaces the layout tree, so theme and sidebar are lost.
+- **Fix**: Use **`throw notFound({ routeId: '/$year' })`** (or the appropriate parent route) so the parent's `notFoundComponent` renders within the layout:
+  - Invalid year → `routeId: '/$year'` (YearNotFound with supported seasons list)
+  - Invalid event → `routeId: '/$year/$event'` (EventNotFound)
+  - Invalid session → `routeId: '/$year/$event/$session'` (SessionNotFound)
+
+---
+
+## ESLint integration (TODO)
+
+ESLint flat config and lint-staged integration may need tuning:
+
+- **Explicit config path**: Use `-c eslint.config.mjs` in lint scripts and lint-staged so the config is picked up reliably (e.g. when cwd differs in git hooks): `eslint -c eslint.config.mjs . --max-warnings=0`.
+- **`files` in flat config**: Add explicit `files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx']` to the main ESLint config block so paths with `$` (e.g. `$year.tsx`) match and avoid "no matching configuration" warnings.
+- **lint-staged + paths with `$`**: On Windows, lint-staged passes file paths to ESLint. Paths like `src/app/$year.tsx` can trigger shell variable expansion (`$year`). Workaround: run `eslint .` (lint the whole project) in lint-staged instead of passing individual file paths, so no path with `$` is passed through the shell.
+- **TanStack ESLint config**: The `@tanstack/eslint-config` is commented out in `eslint.config.mjs` (`// ...tanstackConfig, // TODO!: here be dragons!`). Integrate when ready; verify compatibility with existing plugins.
+
 ---
 
 ## File-by-File Checklist (high level)
@@ -560,6 +591,7 @@ When migrating the season, event, and session routes, the following was discover
 | GraphQL codegen (`codegen.ts`, `pnpm run generate`, `@/types`)                                     | Keep as-is; works with TanStack Start. Env vars: see Phase 2.5.                                                                                                                                  |
 | Apollo Client (or optional TanStack Query + graphql-request)                                       | Keep Apollo in root; optionally migrate to TanStack Query + graphql-request using same codegen later ([TanStack Query GraphQL](https://tanstack.com/query/latest/docs/framework/react/graphql)). |
 | PostHog, next-themes (`ThemeProvider`)                                                             | Keep; next-themes is framework-agnostic, not Next.js—use in root as today.                                                                                                                       |
+| ESLint (`eslint.config.mjs`, lint-staged)                                                          | **TODO**: See ESLint integration section. Use `-c eslint.config.mjs`; add `files` pattern; consider `eslint .` in lint-staged to avoid `$` path expansion.                                       |
 
 ---
 
