@@ -491,6 +491,52 @@ When migrating complex routes like `/map` and `/standings`, the following was di
 
 ---
 
+## Lessons from /$year, /$year/$event, and /$year/$event/$session Migration
+
+When migrating the season, event, and session routes, the following was discovered:
+
+### Index route must use `createFileRoute`
+
+- **Symptom**: The season page (`/$year`, e.g. `/2026`) renders blank — sidebar and layout appear, but main content is empty.
+- **Cause**: The `$year/index.tsx` file used the Next.js pattern (`params: Promise<{ year }>`, `use(params)`) and did not call `createFileRoute`. TanStack Router only registers routes that export a Route from `createFileRoute`; without it, the index route is never added to the route tree, so the `Outlet` has nothing to render.
+- **Fix**: Use `createFileRoute('/$year/')({ component: SeasonPage })` and `Route.useParams()` instead of the `params` prop and `use()`.
+
+### `Link` also requires `search` for routes with `validateSearch`
+
+- In addition to `router.navigate()`, **`<Link>` components** targeting a route with `validateSearch` must include the **`search`** prop.
+- Example: `<Link to='/$year/$event/$session' params={{ year, event, session }} search={{ chart: 'grid', drivers: undefined }} />`
+- Same rule applies for `/standings` (e.g. `search={{ chart: 'drivers' }}`) and `/map` (e.g. `search={{ event: undefined }}`).
+
+### Param type inconsistency across routes
+
+- **`/$year`**: Some `Link` usages (e.g. nav season dropdown) expect `params={{ year }}` with `year` as a **number**.
+- **`/$year/$event`**, **`/$year/$event/$session`**: Expect `year`, `event`, `session` as **strings** in params.
+- **Rule of thumb**: Use `String(...)` for path params when the route type expects string; omit it when the route type expects number. When in doubt, check the route's typed params.
+
+### `-components` import resolution with deep dynamic paths
+
+- The `@/` alias (`@/app/$year/$event/$session/-components/...`) can fail module resolution in some setups (TypeScript/IDE), causing "Cannot find module" even when the file exists.
+- **Fallback**: Use **relative imports** from within the same `-components` tree: `../driver-filters/context`, `./bar-chart`, etc. This avoids the long `$year/$event/$session` path in the alias.
+- Prefer `@/` when it works; use relative imports if resolution fails.
+
+### Shared components: `useParams` and type guards
+
+- Components used across routes (breadcrumbs, event-selector, session-selector, event-results-container) use `useParams({ strict: false })`, which returns `Partial` types.
+- **Normalize before use**: `const yearStr = params.year != null ? String(params.year) : ''`; for GraphQL variables: `parseInt(String(year ?? ''), 10)`.
+- Replace `next/navigation` `useParams` with TanStack `useParams` in all shared components.
+
+### Programmatic navigation and `next/navigation` replacement
+
+- **`SessionTime`**, **schedule-sessions**, and similar components: Replace `useRouter` from `next/navigation` with `useNavigate` from `@tanstack/react-router`.
+- Use `navigate({ to, params, search })` instead of `router.push(pathString)`.
+- Include `search` when the target route has `validateSearch`.
+
+### `notFoundComponent` on event and session routes
+
+- Add `notFoundComponent` to `$year/$event/route.tsx` and `$year/$event/$session/route.tsx` for event/session-specific 404 UI (e.g. "No Event Found", "No Session Found" with links back to season).
+
+---
+
 ## File-by-File Checklist (high level)
 
 | Area                                                                                               | Action                                                                                                                                                                                           |
