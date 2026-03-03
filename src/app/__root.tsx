@@ -1,17 +1,26 @@
+import { PostHogProvider } from '@posthog/react';
 import {
-  Outlet,
   createRootRoute,
   HeadContent,
+  Outlet,
   Scripts,
 } from '@tanstack/react-router';
-import appCss from './globals.css?url';
 import { ThemeProvider } from 'next-themes';
 
-import { ApolloProvider } from '@/app/-apollo-provider';
 import NotFoundError from '@/components/errors/not-found-error';
 import { Footer } from '@/components/Footer';
 
+import { ApolloProvider } from '@/app/-apollo-provider';
 import { LandingNav } from '@/app/-components/nav';
+
+import appCss from './globals.css?url';
+
+const options = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: '2026-01-30',
+} as const;
+
+// TODO!: https://posthog.com/docs/error-tracking/upload-source-maps/react
 
 export const Route = createRootRoute({
   notFoundComponent: () => (
@@ -56,17 +65,22 @@ function RootLayout() {
         <HeadContent />
       </head>
       <body>
-        <ApolloProvider>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='system'
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Outlet />
-            <Scripts />
-          </ThemeProvider>
-        </ApolloProvider>
+        <PostHogProvider
+          apiKey={import.meta.env.VITE_POSTHOG_KEY}
+          options={options}
+        >
+          <ApolloProvider>
+            <ThemeProvider
+              attribute='class'
+              defaultTheme='system'
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Outlet />
+              <Scripts />
+            </ThemeProvider>
+          </ApolloProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

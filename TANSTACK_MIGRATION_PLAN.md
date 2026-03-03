@@ -375,6 +375,8 @@ You already use **GraphQL Code Generator** (client preset, `./src/types/`) and `
 - **Trailing slashes**: If you relied on `skipTrailingSlashRedirect`, replicate with TanStack/Vite (router config or server).
 - **Image domains**: If you add server-side or build-time image optimization, mirror previous `remotePatterns` (via Unpic or similar) for via.placeholder.com, media.formula1.com, www.formula1.com.
 - **Cypress**: Update baseUrl or visit paths if dev server URL or structure changed. **TODO**: Update Cypress test config/workflow to support TanStack framework (component tests, e2e router interactions, etc.).
+- **PostHog sourcemaps**: **TODO**: Re-enable sourcemap generation and upload to PostHog (e.g. build-time sourcemaps + upload step with `releaseVersion`, `deleteAfterUpload`) so production errors resolve to original source in PostHog.
+- **PostHog CORS**: **TODO**: Configure CORS for error resolution on PostHog so the project’s production domain is allowed for error reporting.
 - **Vercel**: If you deploy on Vercel, check TanStack Start’s Vercel adapter or deployment docs and adjust build/output.
 
 ---

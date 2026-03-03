@@ -6,7 +6,6 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 import { Nav } from '@/app/$year/-components/nav';
 import { AppSidebar } from '@/app/$year/-components/sidebar';
-
 import YearNotFound from '@/app/$year/-not-found';
 
 export const Route = createFileRoute('/$year')({

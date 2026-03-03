@@ -1,5 +1,5 @@
-import { Image } from '@unpic/react';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { Image } from '@unpic/react';
 
 import { Footer } from '@/components/Footer';
 import NextEvent from '@/components/next-event';
