@@ -64,11 +64,11 @@ export default function SeasonPage({
 
   const latestYear = parseInt(year) === SUPPORTED_SEASONS[0];
   return (
-    <div className='p-4 lg:p-6'>
+    <div className=''>
+      <div className='col-span-full'>
+        <Breadcrumbs />
+      </div>
       <div className='grid gap-4 md:grid-cols-3 2xl:grid-cols-4'>
-        <div className='col-span-full'>
-          <Breadcrumbs />
-        </div>
         <div className='flex flex-col gap-4 md:col-span-2'>
           <div className='flex h-full min-h-48 justify-center overflow-hidden rounded border'>
             {latestYear && <NextEvent />}
@@ -79,7 +79,11 @@ export default function SeasonPage({
               />
             )}
           </div>
-          {loading ? <SeasonQuickLinksSkeleton /> : <SeasonQuickLinks />}
+          {loading ? (
+            <SeasonQuickLinksSkeleton />
+          ) : (
+            <SeasonQuickLinks year={year} />
+          )}
         </div>
         <TopThreeStandings
           loading={loading}

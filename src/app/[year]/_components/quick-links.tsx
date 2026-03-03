@@ -1,6 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 
 interface LinkData {
   href: string;
@@ -64,8 +63,8 @@ function LinkRenderer({ href, name, description }: LinkData) {
 }
 
 // Composing and rendering the quick links container
-export function SeasonQuickLinks() {
-  const { year } = useParams<{ year?: string }>();
+export function SeasonQuickLinks({ year }: { year: string }) {
+  // const { year } = useParams<{ year?: string }>();
   const links = createQuickLinks(year ?? '');
 
   return (

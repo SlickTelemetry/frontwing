@@ -84,10 +84,7 @@ export function AppSidebar({
 }: React.ComponentProps<typeof HoverSidebar>) {
   const params = useParams<DashParams>();
   return (
-    <HoverSidebar
-      className='top-(--header-height) h-[calc(100svh-var(--header-height))]!'
-      {...props}
-    >
+    <HoverSidebar className='top-(--header-height) h-fit!' {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

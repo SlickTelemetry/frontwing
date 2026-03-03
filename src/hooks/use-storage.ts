@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useState } from 'react';
 
 // Create a custom event bus for synchronizing state

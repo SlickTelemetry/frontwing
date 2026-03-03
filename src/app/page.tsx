@@ -1,44 +1,45 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import { cookies } from 'next/headers';
 
-import { Footer } from '@/components/Footer';
-import NextEvent from '@/components/next-event';
-import { Button } from '@/components/ui/button';
+import { SUPPORTED_SEASONS } from '@/lib/constants';
 
-import { LandingNav } from '@/app/_components/nav';
+import { SidebarHoverProvider } from '@/components/hover-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
-export default function Home() {
+import { AppSidebar } from '@/app/[year]/_components/sidebar';
+import SeasonPage from '@/app/[year]/page';
+import ScheduleComponent from '@/feature/scrolling-schedule';
+
+export default async function Home() {
+  const defaultYear = SUPPORTED_SEASONS[0];
+
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
   return (
     <>
-      <main className='flex flex-1'>
-        <div className='container flex flex-1 flex-col items-center'>
-          <LandingNav />
+      <ScheduleComponent />
 
-          <div className='flex flex-1 flex-col items-center justify-center gap-2 text-center'>
-            <Image
-              src='/slick-telemetry.png'
-              width={64}
-              height={64}
-              alt='Slick Telemetry Logo'
-            />
-            <h1 className='scroll-m-20 text-center text-8xl font-extrabold tracking-tight text-balance uppercase'>
-              Slick Telemetry
-            </h1>
-            <p className='font-light uppercase sm:text-xl lg:text-3xl'>
-              Home of Formula 1 insights
-            </p>
-
-            <Button asChild>
-              <Link href={'/' + new Date().getFullYear()} className='w-fit'>
-                Explore Now
-              </Link>
-            </Button>
+      <SidebarProvider
+        className='relative flex flex-col'
+        defaultOpen={defaultOpen}
+        style={
+          {
+            '--sidebar-width': 'calc(var(--spacing) * 52)',
+            '--header-height': 'calc(var(--spacing) * 16)',
+          } as React.CSSProperties
+        }
+      >
+        <SidebarHoverProvider>
+          {/* <Nav /> */}
+          <div className='flex gap-4 p-4'>
+            <AppSidebar variant='floating' className='sticky h-fit p-0' />
+            <SidebarInset>
+              <SeasonPage
+                params={Promise.resolve({ year: defaultYear.toString() })}
+              />
+            </SidebarInset>
           </div>
-
-          <NextEvent />
-          <Footer />
-        </div>
-      </main>
+        </SidebarHoverProvider>
+      </SidebarProvider>
     </>
   );
 }

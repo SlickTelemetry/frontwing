@@ -96,7 +96,7 @@ function ScheduleSkeleton() {
       className='flex flex-col overflow-hidden rounded border'
     >
       <div className='group hover:bg-muted flex flex-1 items-center gap-2 pr-4'>
-        <div className='bg-secondary border-background flex h-full w-[50px] items-center justify-center border-r text-2xl'>
+        <div className='bg-secondary border-background flex h-full w-12.5 items-center justify-center border-r text-2xl'>
           {idx + 1}
         </div>
         <div className='grid flex-1 animate-pulse gap-0.5 py-2'>
