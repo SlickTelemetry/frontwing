@@ -1,9 +1,9 @@
 import tslintPlugin from '@typescript-eslint/eslint-plugin';
 import tslintParser from '@typescript-eslint/parser';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import prettier from 'eslint-config-prettier/flat';
 // import nextVitals from 'eslint-config-next/core-web-vitals';
-// import nextTs from 'eslint-config-next/typescript';
+import nextTs from 'eslint-config-next/typescript';
+import prettier from 'eslint-config-prettier/flat';
 import cypress from 'eslint-plugin-cypress';
 import react from 'eslint-plugin-react';
 import reactHook from 'eslint-plugin-react-hooks';
@@ -13,7 +13,7 @@ import globals from 'globals';
 
 export default defineConfig([
   // ...nextVitals,
-  // ...nextTs,
+  ...nextTs,
   prettier,
 
   globalIgnores([
