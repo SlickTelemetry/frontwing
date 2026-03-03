@@ -17,7 +17,11 @@ function createQuickLinks(year: string): LinkData[] {
       href: `${year}/map`,
       description: 'View the travel of the season',
     },
-    { name: 'Head to Head', href: '#', description: 'Compare driver results' },
+    {
+      name: 'Head to Head',
+      href: `${year}/head-to-head`,
+      description: 'Compare driver results',
+    },
   ];
 }
 

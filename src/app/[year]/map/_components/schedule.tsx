@@ -16,17 +16,17 @@ export const Schedule = ({
   activeEvent,
   ...props
 }: {
-  events?: FragmentType<typeof MapScheduleFragment>[];
+  schedule?: FragmentType<typeof MapScheduleFragment>[];
   activeEvent: string | null;
   selectEvent: (event: string) => void;
 }) => {
-  const events = useFragment(MapScheduleFragment, props?.events);
-
+  const events = useFragment(MapScheduleFragment, props?.schedule);
+  // console.log('events', events);
   if (!events || events.length === 0) return null;
   const now = new Date();
 
   return (
-    <div className='hidden h-fit min-w-[250px] lg:@5xl/sidebar:block'>
+    <div className='h-fit min-w-62.5'>
       <div className='grid divide-y overflow-hidden rounded border'>
         {events?.map((e) => {
           const name = e.event_name ?? '';

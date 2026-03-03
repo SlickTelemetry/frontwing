@@ -27,16 +27,14 @@ export default async function RootLayout({
           rubik.className,
         )}
       >
-        <ApolloProvider>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='system'
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </ApolloProvider>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='system'
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ApolloProvider>{children}</ApolloProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

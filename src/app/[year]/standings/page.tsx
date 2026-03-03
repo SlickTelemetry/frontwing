@@ -68,7 +68,7 @@ const StandingsContent = () => {
               </Button>
             ))}
           </div>
-          <div className='@container min-w-0 overflow-hidden'>
+          <div className='min-w-0 overflow-hidden'>
             <Table events={standings.events} chartType={chartType} />
           </div>
         </div>

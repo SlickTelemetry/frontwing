@@ -6,16 +6,20 @@ import { useParams } from 'next/navigation';
 
 import { useLocalStorage } from '@/hooks/use-storage';
 
+import { ConstructorBadge } from '@/components/badges/constructor-badge';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 
 type StandingsListProps<T> = {
+  type: ViewType;
   active?: boolean;
   items: T[];
   loading?: boolean;
   getName: (item: T) => string;
   getTeam?: (item: T) => string;
+  getColor?: (item: T) => string | undefined;
   getStandings: (
     item: T,
   ) => { points?: number | null; position?: number | null }[];
@@ -62,10 +66,6 @@ export const ConstructorStandings = graphql(`
   }
 `);
 
-const getLast = <T,>(arr: T[]): T => arr[arr.length - 1];
-const sortByLastPoints = <T,>(items: T[], getPoints: (item: T) => number) =>
-  [...items].sort((a, b) => getPoints(b) - getPoints(a));
-
 export default function TopThreeStandings(props: {
   loading?: boolean;
   drivers?: FragmentType<typeof DriverStandings>[];
@@ -74,23 +74,29 @@ export default function TopThreeStandings(props: {
   const { year } = useParams();
   const [view, setView] = useLocalStorage('season-standings', 'drivers');
 
-  const drivers = useFragment(DriverStandings, props.drivers);
-  const sortedDrivers = sortByLastPoints(drivers ?? [], (d) =>
-    d ? (getLast(d.driver_standings).points as number) : 0,
+  const drivers = useFragment(DriverStandings, props.drivers) || [];
+  const sortedDrivers = [...drivers].sort(
+    (a, b) =>
+      (a.driver_standings[0]?.position || 0) -
+      (b.driver_standings[0]?.position || 0),
   );
 
-  const constructors = useFragment(ConstructorStandings, props.constructors);
-  const sortedConstructors = sortByLastPoints(constructors ?? [], (c) =>
-    c ? (getLast(c.constructor_standings).points as number) : 0,
+  const constructors =
+    useFragment(ConstructorStandings, props.constructors) || [];
+
+  const sortedConstructors = [...constructors].sort(
+    (a, b) =>
+      (a.constructor_standings[0]?.position || 0) -
+      (b.constructor_standings[0].position || 0),
   );
 
   if (!props?.loading && !constructors?.length && !drivers?.length) return null;
 
   return (
-    <div className='flex h-full min-h-[296px] flex-col gap-2 rounded border p-4 2xl:col-span-2'>
+    <div className='flex h-fit flex-col gap-2 rounded'>
       <Link
         href={`${year}/standings?chart=${view}`}
-        className='flex w-full items-center justify-between text-xl font-bold hover:underline'
+        className='flex w-full items-center gap-2 text-2xl font-bold hover:underline'
       >
         Standings
         <ArrowUpRight />
@@ -100,7 +106,7 @@ export default function TopThreeStandings(props: {
         {(['drivers', 'constructors'] as ViewType[]).map((v) => (
           <Button
             key={v}
-            variant={view === v ? 'secondary' : 'outline'}
+            variant={view === v ? 'default' : 'outline'}
             onClick={() => setView(v)}
             className='block truncate capitalize'
           >
@@ -109,19 +115,26 @@ export default function TopThreeStandings(props: {
         ))}
       </div>
 
-      <div className='grid flex-1 gap-2 2xl:grid-cols-2'>
+      <div className='grid flex-1 gap-2'>
         {props.loading && <StandingSkeleton />}
         <StandingsList
+          type='drivers'
           active={view === 'drivers' && sortedDrivers.length > 0}
           items={sortedDrivers}
           getName={(d) => d.full_name!}
           getTeam={(d) => d.latest_constructor[0]?.constructor?.name ?? ''}
+          getColor={(d) =>
+            d.latest_constructor[0]?.constructor?.color ?? undefined
+          }
           getStandings={(d) => d.driver_standings}
         />
         <StandingsList
+          type='constructors'
           active={view === 'constructors' && sortedConstructors.length > 0}
           items={sortedConstructors}
           getName={(c) => c.name!}
+          getColor={(c) => c.color ?? undefined}
+          getTeam={(c) => c.name!}
           getStandings={(c) => c.constructor_standings}
         />
       </div>
@@ -131,41 +144,46 @@ export default function TopThreeStandings(props: {
 
 // *** Takes functions as props to get values dynamically
 function StandingsList<T>({
+  type = 'drivers',
   active = false,
   items,
   getName,
   getTeam,
   getStandings,
+  getColor,
 }: StandingsListProps<T>) {
   return (
-    <div
-      className={clsx('2xl:flex', {
+    <Table
+      className={clsx({
         hidden: !active,
-        flex: active,
+        block: active,
       })}
     >
-      <div className='bg-muted divide-background flex flex-1 flex-col divide-y overflow-hidden rounded'>
+      <TableBody>
+        {/* <div className='bg-muted divide-background flex h-fit flex-col divide-y overflow-hidden rounded'> */}
         {items.map((item, idx) => {
           const standings = getStandings(item);
-          const last = getLast(standings);
+          const [last] = standings;
 
           return (
             <StandingRow
               key={getName(item)}
               position={last.position || idx + 1}
-              name={getName(item)}
+              name={type === 'drivers' ? getName(item) : undefined}
               team={getTeam?.(item) ?? ''}
+              color={getColor?.(item)}
               points={last.points as number}
               prevPoints={
                 idx > 0
-                  ? (getLast(getStandings(items[idx - 1])).points ?? undefined)
+                  ? (getStandings(items[idx - 1])[0].points ?? undefined)
                   : undefined
               }
             />
           );
         })}
-      </div>
-    </div>
+        {/* </div> */}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -173,27 +191,31 @@ function StandingRow({
   position,
   name,
   team,
+  color,
   points,
   prevPoints,
 }: {
-  name: string;
   position: number;
-  points: number;
+  name?: string;
   team?: string;
+  color?: string;
+  points: number;
   prevPoints?: number;
 }) {
   return (
-    <div className='flex flex-1 items-center gap-4 px-4 py-1'>
-      <p className='text-xl'>{position}</p>
-      <div className='flex-1'>
-        <h4 className='line-clamp-1 font-semibold'>{name}</h4>
-        {team && <p className='line-clamp-1 text-sm'>{team}</p>}
-      </div>
-      <p>{points}</p>
-      <p className='hidden lg:block'>
+    <TableRow>
+      <TableCell>
+        <p className='w-8 text-center text-xl'>{position}</p>
+      </TableCell>
+      <TableCell className='w-full'>
+        {name && <h4 className='line-clamp-1'>{name}</h4>}
+        {team && <ConstructorBadge color={color} name={team} />}
+      </TableCell>
+      <TableCell className='text-center'>{points}</TableCell>
+      <TableCell className='text-center'>
         {prevPoints !== undefined ? points - prevPoints : 'Gap'}
-      </p>
-    </div>
+      </TableCell>
+    </TableRow>
   );
 }
 

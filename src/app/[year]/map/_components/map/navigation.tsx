@@ -16,7 +16,6 @@ export default function MapNavigation({
   return (
     <div className='absolute inset-0 top-2 mx-auto flex h-fit w-72 gap-2'>
       <Button
-        variant='inverted'
         size='sm'
         disabled={!prev}
         className='mr-auto flex w-full max-w-36 cursor-pointer items-center'
@@ -33,7 +32,6 @@ export default function MapNavigation({
       </Button>
 
       <Button
-        variant='inverted'
         size='sm'
         disabled={!next}
         className='ml-auto flex w-full max-w-36 cursor-pointer items-center'

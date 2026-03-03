@@ -56,11 +56,11 @@ const GET_NEXT_EVENT_CIRCUIT = graphql(`
 `);
 
 const scheduleSessionKeys = [
-  'session5_date_utc',
-  'session4_date_utc',
-  'session3_date_utc',
-  'session2_date_utc',
   'session1_date_utc',
+  'session2_date_utc',
+  'session3_date_utc',
+  'session4_date_utc',
+  'session5_date_utc',
 ] as const;
 
 export default function NextEvent() {
@@ -95,48 +95,59 @@ export default function NextEvent() {
   if (!isValidEvent) return null;
 
   return (
-    <div className='flex w-full items-center justify-center gap-4 px-4 lg:grid-cols-2'>
-      <div className='flex w-fit flex-col rounded-lg py-4'>
-        {/* Subtitle */}
-        <div className='flex justify-between gap-4'>
-          <p className='text-sm font-light uppercase'>Next Race</p>
-          {nextEvent.event_format && (
-            <SprintBadge
-              format={nextEvent.event_format as Event_Format_Choices_Enum}
-            />
-          )}
+    <>
+      <div className='flex flex-col items-center justify-between rounded-lg xl:flex-row'>
+        <div>
+          {/* Subtitle */}
+          <div className='flex justify-between gap-4'>
+            <p className='font-light uppercase'>Next Event</p>
+            {nextEvent.event_format && (
+              <SprintBadge
+                format={nextEvent.event_format as Event_Format_Choices_Enum}
+              />
+            )}
+          </div>
+
+          {/* Title */}
+          <h2 className='text-4xl font-semibold'>
+            <Link
+              className='line-clamp-1 text-inherit hover:underline'
+              href={`/${nextEvent.year}/${eventLocationEncode(nextEvent?.event_name)}`}
+              data-cy='next-event-name'
+            >
+              {[
+                nextEvent.round_number,
+                nextEvent.event_name?.replace('Grand Prix', 'GP'),
+              ]
+                .filter(Boolean)
+                .join('. ')}
+            </Link>
+          </h2>
+
+          {/* Location */}
+          <p className='line-clamp-1'>
+            {nextEvent.location}, {nextEvent.country}
+          </p>
         </div>
-
-        {/* Title */}
-        <h2 className='text-2xl'>
-          <Link
-            className='line-clamp-1 text-inherit hover:underline'
-            href={`/${nextEvent.year}/${eventLocationEncode(nextEvent?.event_name)}`}
-            data-cy='next-event-name'
-          >
-            {[nextEvent.round_number, nextEvent.event_name]
-              .filter(Boolean)
-              .join('. ')}
-          </Link>
-        </h2>
-
-        {/* Location */}
-        <p className='line-clamp-1 text-sm'>
-          {nextEvent.location}, {nextEvent.country}
-        </p>
 
         {/* Coundown */}
         {lastSession && (
-          <>
-            <hr className='border-foreground mt-2 mb-4' />
+          <div className='xl:mx-4 xl:w-1/3'>
+            <hr className='border-foreground mt-2 mb-4 xl:hidden' />
             <Countdown targetDate={lastSession} data-cy='countdown-timer' />
-          </>
+          </div>
         )}
       </div>
 
-      {nextEvent.location && nextEvent.country && (
-        <CircuitMap circuitData={circuitData?.circuits[0]} />
-      )}
-    </div>
+      <div className='pt-4 text-center'>
+        {nextEvent.location && nextEvent.country && (
+          <CircuitMap
+            className='aspect-auto w-full lg:max-h-70'
+            circuitData={circuitData?.circuits[0]}
+          />
+        )}
+        <p className='text-xs italic'>*Circuit generated from last season</p>
+      </div>
+    </>
   );
 }

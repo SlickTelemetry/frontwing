@@ -1,44 +1,38 @@
-import Image from 'next/image';
-import Link from 'next/link';
-
 import { Footer } from '@/components/Footer';
+import LastEvents from '@/components/last-events';
 import NextEvent from '@/components/next-event';
-import { Button } from '@/components/ui/button';
 
 import { LandingNav } from '@/app/_components/nav';
 
 export default function Home() {
   return (
     <>
-      <main className='flex flex-1'>
-        <div className='container flex flex-1 flex-col items-center'>
-          <LandingNav />
-
-          <div className='flex flex-1 flex-col items-center justify-center gap-2 text-center'>
-            <Image
-              src='/slick-telemetry.png'
-              width={64}
-              height={64}
-              alt='Slick Telemetry Logo'
-            />
-            <h1 className='scroll-m-20 text-center text-8xl font-extrabold tracking-tight text-balance uppercase'>
-              Slick Telemetry
-            </h1>
-            <p className='font-light uppercase sm:text-xl lg:text-3xl'>
-              Home of Formula 1 insights
-            </p>
-
-            <Button asChild>
-              <Link href={'/' + new Date().getFullYear()} className='w-fit'>
-                Explore Now
-              </Link>
-            </Button>
+      <LandingNav />
+      <main className='flex-1 px-4 lg:px-6'>
+        <div className='grid gap-8 md:grid-cols-2'>
+          {/* <div className='rounded border'> */}
+          <div className='rounded border p-4'>
+            <NextEvent />
           </div>
+          <div className=''>
+            <h2 className='scroll-m-20 pb-2 text-3xl font-semibold tracking-tight'>
+              Recent Events
+            </h2>
+            <LastEvents />
+          </div>
+          {/* </div> */}
 
-          <NextEvent />
-          <Footer />
+          <div className='grid md:col-span-2'>
+            <h2 className='scroll-m-20 pb-2 text-3xl font-semibold tracking-tight'>
+              Schedules
+            </h2>
+            {/* <ScheduleComponent /> */}
+          </div>
         </div>
       </main>
+      <div className='bg-background sticky bottom-0 w-full'>
+        <Footer />
+      </div>
     </>
   );
 }

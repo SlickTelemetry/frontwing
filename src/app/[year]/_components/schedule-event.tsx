@@ -117,18 +117,42 @@ export function ScheduleEventItem({
 
       {details && (
         <div className='border-t px-3 py-2'>
-          {sessions.map((s, idx) => (
-            <div
-              key={idx}
-              className={clsx(
-                'flex justify-between gap-2 py-1',
-                idx > 0 && 'border-t',
-              )}
-            >
-              <p className='flex-1 capitalize'>{s.name?.replace('_', ' ')}</p>
-              <p>{formatDate(s.date, true)}</p>
-            </div>
-          ))}
+          {sessions.map((s, idx) => {
+            // console.log('session date', s.date, new Date());
+            if (new Date(s.date as string).getTime() >= new Date().getTime()) {
+              return (
+                <p
+                  key={idx}
+                  className={clsx(
+                    'flex justify-between gap-2 py-1',
+                    idx > 0 && 'border-t',
+                  )}
+                >
+                  <span className='flex-1 capitalize'>
+                    {s.name?.replace('_', ' ')}
+                  </span>
+                  <span>{formatDate(s.date, true)}</span>
+                </p>
+              );
+            }
+            return (
+              <Link
+                href={`${event.year}/${eventLocationEncode(
+                  event.event_name,
+                )}/${s.name?.toLowerCase().replace(' ', '_')}`}
+                key={idx}
+                className={clsx(
+                  'flex justify-between gap-2 py-1',
+                  idx > 0 && 'border-t',
+                )}
+              >
+                <span className='flex-1 capitalize'>
+                  {s.name?.replace('_', ' ')}
+                </span>
+                <span>{formatDate(s.date, true)}</span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </li>

@@ -24,6 +24,7 @@
     "@apollo/client": "latest",
     "@graphql-typed-document-node/core": "latest",
     "@tailwindcss/postcss": "latest",
+    "@tanstack/react-table": "^8.21.3",
     "@turf/great-circle": "latest",
     "class-variance-authority": "latest",
     "clsx": "latest",
@@ -70,6 +71,7 @@
     "postcss": "latest",
     "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
+    "tailwind-scrollbar": "latest",
     "tailwindcss": "latest",
     "typescript": "latest"
   },

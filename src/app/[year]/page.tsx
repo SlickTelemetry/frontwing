@@ -27,6 +27,7 @@ const GET_SEASON_PAGE = graphql(`
       limit: $limit
     ) {
       ...DriverStandings
+      full_name
     }
     constructors(
       where: { constructor_standings: { season: { _eq: $year } } }
@@ -34,12 +35,32 @@ const GET_SEASON_PAGE = graphql(`
       limit: $limit
     ) {
       ...ConstructorStandings
+      name
     }
     schedule(where: { year: { _eq: $year } }, order_by: { round_number: asc }) {
       ...SeasonSchedule
     }
     circuits(where: { year: { _eq: $year } }) {
       ...SeasonCircuits
+    }
+
+    events(where: { year: { _eq: $year } }) {
+      round_number
+      name
+      format
+      race_sessions: sessions(where: { name: { _eq: Race } }) {
+        driver_sessions {
+          driver {
+            abbreviation
+          }
+          constructorByConstructorId {
+            name
+          }
+          results {
+            classified_position
+          }
+        }
+      }
     }
   }
 `);
@@ -51,7 +72,7 @@ export default function SeasonPage({
 }) {
   const { year } = use(params);
   const { data, loading, error } = useQuery(GET_SEASON_PAGE, {
-    variables: { year: parseInt(year) },
+    variables: { year: parseInt(year), limit: 20 },
   });
 
   if (error) {
@@ -65,11 +86,11 @@ export default function SeasonPage({
   const latestYear = parseInt(year) === SUPPORTED_SEASONS[0];
   return (
     <div className='p-4 lg:p-6'>
-      <div className='grid gap-4 md:grid-cols-3 2xl:grid-cols-4'>
+      <div className='grid gap-4 md:grid-cols-3'>
         <div className='col-span-full'>
           <Breadcrumbs />
         </div>
-        <div className='flex flex-col gap-4 md:col-span-2'>
+        <div className='flex h-fit flex-col gap-4 md:col-span-2'>
           <div className='flex h-full min-h-48 justify-center overflow-hidden rounded border'>
             {latestYear && <NextEvent />}
             {!latestYear && (
@@ -80,19 +101,16 @@ export default function SeasonPage({
             )}
           </div>
           {loading ? <SeasonQuickLinksSkeleton /> : <SeasonQuickLinks />}
+          <Schedule
+            loading={loading}
+            schedule={data?.schedule}
+            circuits={data?.circuits}
+          />
         </div>
         <TopThreeStandings
           loading={loading}
           drivers={data?.drivers}
           constructors={data?.constructors}
-        />
-      </div>
-
-      <div className='pt-6'>
-        <Schedule
-          loading={loading}
-          schedule={data?.schedule}
-          circuits={data?.circuits}
         />
       </div>
     </div>

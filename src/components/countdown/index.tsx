@@ -28,11 +28,11 @@ const Digit = ({
   name: string;
   'data-cy'?: string;
 }) => (
-  <div className='flex w-16 flex-col text-center' data-cy={dataCy}>
+  <div className='flex w-full flex-col text-center' data-cy={dataCy}>
     <p className='text-2xl leading-5' data-cy='countdown-value'>
       {time}
     </p>
-    <p className='font-space-grotesk text-xs leading-6 font-bold uppercase'>
+    <p className='font-space-grotesk text-xs leading-6 uppercase'>
       {name}
       {time !== 1 && 's'}
     </p>

@@ -49,9 +49,12 @@ export function Schedule(props: {
   );
 
   return (
-    <>
-      <div className='bg-background/80 sticky top-16 z-20 flex flex-col justify-between gap-2 py-4 md:flex-row md:items-end'>
-        <h1 className='text-4xl font-extrabold tracking-tight text-balance'>
+    <div className='border-t'>
+      <div className='bg-background/80 sticky top-16 z-10 flex flex-col justify-between gap-2 py-4 md:flex-row md:items-end'>
+        <h1
+          id='schedule'
+          className='scroll-m-24 text-3xl font-semibold tracking-tight'
+        >
           {year} Schedule
         </h1>
         <div className='flex items-center gap-2'>
@@ -68,7 +71,7 @@ export function Schedule(props: {
         </div>
       </div>
 
-      <ul className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
+      <ul className='grid gap-4 sm:grid-cols-2 2xl:grid-cols-3'>
         {props.loading && <ScheduleSkeleton />}
         {schedule?.map((event) => {
           const circuitData = circuits?.find(
@@ -85,7 +88,7 @@ export function Schedule(props: {
           );
         })}
       </ul>
-    </>
+    </div>
   );
 }
 

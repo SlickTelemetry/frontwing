@@ -6,6 +6,7 @@ import { useParams, usePathname } from 'next/navigation';
 import * as React from 'react';
 
 import { HoverSidebar } from '@/components/hover-sidebar';
+import { SeasonSelector } from '@/components/navigation';
 import {
   SidebarContent,
   SidebarGroup,
@@ -21,21 +22,23 @@ import {
 type SidebarEndpoint = {
   title: string;
   url: string;
+  selector?: React.ReactNode;
   items?: SidebarEndpoint[];
 };
 
 const sidebarEndpoints: SidebarEndpoint[] = [
   {
     title: 'Season',
+    selector: <SeasonSelector />,
     url: '/$year',
     items: [
       {
-        title: 'Map',
-        url: '/$year/map',
-      },
-      {
         title: 'Standings',
         url: '/$year/standings',
+      },
+      {
+        title: 'Map',
+        url: '/$year/map',
       },
     ],
   },
@@ -137,16 +140,19 @@ function SidebarItem({
   const url = formatLink(item.url, params);
   return (
     <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild isActive={pathname === url}>
-        {!url ? (
-          <span className='text-muted-foreground cursor-not-allowed font-medium opacity-50'>
-            {item.title}
-          </span>
-        ) : (
-          <Link href={url} className='font-medium'>
-            {item.title}
-          </Link>
-        )}
+      <SidebarMenuButton isActive={pathname === url}>
+        <div className='flex w-full items-center justify-between gap-2'>
+          {!url ? (
+            <span className='text-muted-foreground cursor-not-allowed font-medium opacity-50'>
+              {item.title}
+            </span>
+          ) : (
+            <Link href={url} className='font-medium'>
+              {item.title}
+            </Link>
+          )}
+          {item.selector}
+        </div>
       </SidebarMenuButton>
       {item.items?.length ? (
         <SidebarMenuSub>

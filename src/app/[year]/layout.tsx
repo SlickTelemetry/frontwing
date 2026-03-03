@@ -44,9 +44,12 @@ export default async function Layout({
           <Nav />
           <div className='flex flex-1'>
             <AppSidebar />
-            <SidebarInset className='@container/sidebar'>
+            <SidebarInset>
               {children}
-              <Footer />
+
+              <div className='bg-background sticky bottom-0 z-50 w-full'>
+                <Footer />
+              </div>
             </SidebarInset>
           </div>
         </SidebarHoverProvider>

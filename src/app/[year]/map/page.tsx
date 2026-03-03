@@ -86,7 +86,7 @@ export default function MapPage({
 
         {data.schedule && (
           <Schedule
-            events={data.schedule}
+            schedule={data.schedule}
             activeEvent={selection}
             selectEvent={handleNewSelected}
           />
