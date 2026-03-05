@@ -56,8 +56,8 @@
     "cypress": "latest",
     "dotenv": "latest",
     "eslint": "latest",
-    "eslint-config-prettier": "latest",
     "eslint-config-next": "latest",
+    "eslint-config-prettier": "latest",
     "eslint-plugin-cypress": "latest",
     "eslint-plugin-react": "latest",
     "eslint-plugin-react-hooks": "latest",
@@ -86,5 +86,5 @@
     "node": "24.13.x",
     "pnpm": "10.x"
   },
-  "packageManager": "pnpm@10.30.1"
+  "packageManager": "pnpm@10.30.3"
 }
