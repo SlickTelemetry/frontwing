@@ -13,7 +13,6 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [],
     "paths": {
       "@/*": ["./src/*"]
     },
