@@ -138,7 +138,7 @@ export const sessionDecode = (location?: string) => {
   }
 
   return location
-    .replace(/-/g, ' ')
+    .replace(/-|_/g, ' ')
     .replace(/(^|_|\s)\w/g, (match) => match.toUpperCase());
 };
 

@@ -1,4 +1,3 @@
-'use client';
 import { EChartsOption, format } from 'echarts';
 import { LineSeriesOption } from 'echarts/charts';
 import { useEffect, useRef } from 'react';
@@ -6,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
-import { GetTelemetryQuery } from '@/types/graphql';
+import { TelemetryItemContextValue } from '@/features/telemetry/hooks/useTelemetryData';
 
 export const baseOptions: EChartsOption = {
   backgroundColor: 'transparent',
@@ -39,32 +38,35 @@ export const baseOptions: EChartsOption = {
     },
     axisLabel: {
       formatter: (value) => {
-        const totalMs = parseFloat(value) / 1e9;
-        const formatted = formatLapTime(totalMs) as string;
+        const formatted = formatLapTime(value) as string;
         return format.encodeHTML(formatted);
       },
     },
   },
   yAxis: {
     type: 'value',
-    name: 'Gear',
+    name: 'RPM',
     nameTextStyle: {
       fontSize: '1rem',
     },
     axisLine: {
       show: true,
     },
+    min: (value) => Math.floor(value.min / 500) * 500,
     splitLine: { show: true, lineStyle: { opacity: 0.75 } },
     axisTick: { show: true },
     nameLocation: 'middle',
     nameGap: 40,
+    axisLabel: {
+      formatter: (value) => value / 1000 + 'k',
+    },
   },
 };
 
-export function GearChart({
-  driverSessions,
+export function RPMChart({
+  telemetries,
 }: {
-  driverSessions: GetTelemetryQuery['driver_sessions'];
+  telemetries: TelemetryItemContextValue[];
 }) {
   const speedChartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(speedChartRef);
@@ -73,7 +75,7 @@ export function GearChart({
   useEffect(() => {
     if (!chartInstance.current) return;
 
-    if (driverSessions.length === 0) {
+    if (telemetries.length === 0) {
       chartInstance.current.setOption(
         {
           title: {
@@ -89,20 +91,16 @@ export function GearChart({
       return;
     }
 
-    const series = driverSessions?.map((driver) => {
-      const lapData = driver.telemetries.map((telemetry) => [
+    const series = telemetries?.map((telemetryItem) => {
+      const lapData = telemetryItem.telemetry.map((telemetry) => [
         telemetry.time,
-        telemetry.gear,
+        telemetry.rpm,
       ]);
       return {
         name: 'VER',
         type: 'line',
         smooth: true,
         connectNulls: true,
-        lineStyle: {
-          cap: 'round',
-          width: 2,
-        },
         color: '#3671C6',
         areaStyle: {
           opacity: 0.1,
@@ -119,7 +117,7 @@ export function GearChart({
       },
       { replaceMerge: ['series'] },
     );
-  }, [chartInstance, driverSessions]);
+  }, [chartInstance, telemetries]);
 
   return <div ref={speedChartRef} style={{ width: '100%', height: '100%' }} />;
 }

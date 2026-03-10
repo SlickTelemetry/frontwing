@@ -1,65 +1,41 @@
-import { client } from '@/lib/client';
+'use client';
 
 import { graphql } from '@/types';
-import { Session_Name_Choices_Enum } from '@/types/graphql';
 
-const GetTelemetry = graphql(`
+export const GetTelemetry = graphql(`
   query GetTelemetry(
-    $year: String!
-    $event: String!
-    $session: session_name_choices_enum!
+    $season: String!
+    $event: String_comparison_exp = {}
+    $circuit: String_comparison_exp = {}
+    $session: session_name_choices_enum
     $lap: Int!
+    $driver: String!
   ) {
-    driver_sessions(
+    telemetry(
+      order_by: { session_time: asc }
       where: {
-        driver: { abbreviation: { _eq: "RUS" } }
-        session: {
-          date: { _regex: $year }
-          event: { name: { _eq: $event } }
-          name: { _eq: $session }
+        lap: {
+          lap_number: { _eq: $lap }
+          driver_session: {
+            driver: { abbreviation: { _eq: $driver } }
+            session: {
+              date: { _regex: $season }
+              event: { name: $event }
+              name: { _eq: $session }
+            }
+          }
         }
       }
     ) {
-      driver {
-        full_name
-      }
-      telemetries(
-        where: { lap: { lap_number: { _eq: $lap } } }
-        order_by: { session_time: asc }
-      ) {
-        drs
-        gear
-        rpm
-        speed
-        throttle
-        brake
-        session_time
-        time
-      }
+      drs
+      gear
+      rpm
+      speed
+      throttle
+      brake
+      session_time
+      distance
+      time
     }
   }
 `);
-
-export async function getTelemetry({
-  year,
-  event,
-  session,
-  lap,
-}: {
-  year: string;
-  event: string;
-  session: Session_Name_Choices_Enum;
-  lap: number;
-}) {
-  if (!year || !event || !session || !lap) return { data: null, error: null };
-
-  return await client.query({
-    query: GetTelemetry,
-    variables: {
-      year,
-      event,
-      session,
-      lap,
-    },
-  });
-}

@@ -1,4 +1,3 @@
-'use client';
 import { EChartsOption, format } from 'echarts';
 import { LineSeriesOption } from 'echarts/charts';
 import { useEffect, useRef } from 'react';
@@ -6,19 +5,19 @@ import { useEffect, useRef } from 'react';
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
-import { GetTelemetryQuery } from '@/types/graphql';
+import { TelemetryItemContextValue } from '@/features/telemetry/hooks/useTelemetryData';
 
 export const baseOptions: EChartsOption = {
   backgroundColor: 'transparent',
   color: 'var(--foreground)',
-  // tooltip: {
-  //   trigger: 'axis',
-  //   backgroundColor: 'var(--background)',
-  //   order: 'valueDesc',
-  //   confine: true,
-  //   borderColor: '#333',
-  //   borderWidth: 1,
-  // },
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'var(--background)',
+    order: 'valueDesc',
+    confine: true,
+    borderColor: '#333',
+    borderWidth: 1,
+  },
   grid: {
     bottom: 0,
     left: 0,
@@ -30,7 +29,7 @@ export const baseOptions: EChartsOption = {
     axisTick: {
       show: true,
     },
-    // axisPointer: { type: 'shadow' },
+    axisPointer: { type: 'shadow' },
     nameLocation: 'middle',
     nameGap: 35,
     nameTextStyle: {
@@ -39,15 +38,14 @@ export const baseOptions: EChartsOption = {
     },
     axisLabel: {
       formatter: (value) => {
-        const totalMs = parseFloat(value) / 1e9;
-        const formatted = formatLapTime(totalMs) as string;
+        const formatted = formatLapTime(value) as string;
         return format.encodeHTML(formatted);
       },
     },
   },
   yAxis: {
     type: 'value',
-    name: 'DRS (ON/OFF)',
+    name: 'Brake (On/Off)',
     nameTextStyle: {
       fontSize: '1rem',
     },
@@ -61,10 +59,10 @@ export const baseOptions: EChartsOption = {
   },
 };
 
-export function DRSChart({
-  driverSessions,
+export function BrakeChart({
+  telemetries,
 }: {
-  driverSessions: GetTelemetryQuery['driver_sessions'];
+  telemetries: TelemetryItemContextValue[];
 }) {
   const speedChartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(speedChartRef);
@@ -73,7 +71,7 @@ export function DRSChart({
   useEffect(() => {
     if (!chartInstance.current) return;
 
-    if (driverSessions.length === 0) {
+    if (telemetries.length === 0) {
       chartInstance.current.setOption(
         {
           title: {
@@ -89,10 +87,10 @@ export function DRSChart({
       return;
     }
 
-    const series = driverSessions?.map((driver) => {
-      const lapData = driver.telemetries.map((telemetry) => [
+    const series = telemetries?.map((telemetryItem) => {
+      const lapData = telemetryItem.telemetry.map((telemetry) => [
         telemetry.time,
-        [10, 12, 14].includes(telemetry.drs ?? 0) ? 1 : 0,
+        telemetry.brake,
       ]);
       return {
         name: 'VER',
@@ -119,7 +117,7 @@ export function DRSChart({
       },
       { replaceMerge: ['series'] },
     );
-  }, [chartInstance, driverSessions]);
+  }, [chartInstance, telemetries]);
 
   return <div ref={speedChartRef} style={{ width: '100%', height: '100%' }} />;
 }

@@ -1,4 +1,3 @@
-'use client';
 import { EChartsOption, format } from 'echarts';
 import { LineSeriesOption } from 'echarts/charts';
 import { useEffect, useRef } from 'react';
@@ -6,11 +5,11 @@ import { useEffect, useRef } from 'react';
 import { formatLapTime } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
 
-import { GetTelemetryQuery } from '@/types/graphql';
+import { TelemetryItemContextValue } from '@/features/telemetry/hooks/useTelemetryData';
 
 export const baseOptions: EChartsOption = {
-  // backgroundColor: 'transparent',
-  // color: 'var(--foreground)',
+  backgroundColor: 'transparent',
+  color: 'var(--foreground)',
   tooltip: {
     trigger: 'axis',
     backgroundColor: 'var(--background)',
@@ -27,7 +26,6 @@ export const baseOptions: EChartsOption = {
   },
   xAxis: {
     type: 'category',
-    // name: 'Time',
     axisTick: {
       show: true,
     },
@@ -40,15 +38,14 @@ export const baseOptions: EChartsOption = {
     },
     axisLabel: {
       formatter: (value) => {
-        const totalMs = parseFloat(value) / 1e9;
-        const formatted = formatLapTime(totalMs) as string;
+        const formatted = formatLapTime(value) as string;
         return format.encodeHTML(formatted);
       },
     },
   },
   yAxis: {
     type: 'value',
-    name: 'Speed (km/h)',
+    name: 'Throttle (%)',
     nameTextStyle: {
       fontSize: '1rem',
     },
@@ -62,10 +59,10 @@ export const baseOptions: EChartsOption = {
   },
 };
 
-export function SpeedChart({
-  driverSessions,
+export function ThrottleChart({
+  telemetries,
 }: {
-  driverSessions: GetTelemetryQuery['driver_sessions'];
+  telemetries: TelemetryItemContextValue[];
 }) {
   const speedChartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useECharts(speedChartRef);
@@ -74,7 +71,7 @@ export function SpeedChart({
   useEffect(() => {
     if (!chartInstance.current) return;
 
-    if (driverSessions.length === 0) {
+    if (telemetries.length === 0) {
       chartInstance.current.setOption(
         {
           title: {
@@ -90,49 +87,26 @@ export function SpeedChart({
       return;
     }
 
-    const series = driverSessions.map((driver) => {
-      const drsData: { xAxis: number }[][] = [];
-      const lapData = driver.telemetries.map((telemetry, index) => {
-        // Two checks for drs
-        // 1. If valid drs differs from previous
-
-        const prevDrsOn = [10, 12, 14].includes(
-          driver.telemetries[index - 1]?.drs || 0,
-        );
-        const currDrsOn = [10, 12, 14].includes(telemetry?.drs || 0);
-
-        // if previous lap was on and this is off add end point for marker
-        if (prevDrsOn && !currDrsOn) {
-          drsData.at(-1)?.push({ xAxis: index });
-        }
-
-        // If current telemetry has drs on add initial marker
-        if (!prevDrsOn && currDrsOn) {
-          drsData.push([{ xAxis: index }]);
-        }
-
-        return [telemetry.time, telemetry.speed];
-      });
-
+    const series = telemetries?.map((telemetryItem) => {
+      const lapData = telemetryItem.telemetry.map((telemetry) => [
+        telemetry.time,
+        telemetry.throttle,
+      ]);
       return {
         name: 'VER',
         type: 'line',
         smooth: true,
         connectNulls: true,
-        emphasis: { focus: 'none' },
+        lineStyle: {
+          cap: 'round',
+          width: 2,
+        },
+
         color: '#3671C6',
         areaStyle: {
           opacity: 0.1,
         },
         data: lapData,
-        markArea: {
-          silent: true,
-          itemStyle: {
-            color: '#3671C680',
-            opacity: 0.5,
-          },
-          data: drsData,
-        },
       } as LineSeriesOption;
     });
 
@@ -144,7 +118,7 @@ export function SpeedChart({
       },
       { replaceMerge: ['series'] },
     );
-  }, [chartInstance, driverSessions]);
+  }, [chartInstance, telemetries]);
 
   return <div ref={speedChartRef} style={{ width: '100%', height: '100%' }} />;
 }

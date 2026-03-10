@@ -1,14 +1,3 @@
-export default function Layout({
-  circuit,
-  children,
-}: {
-  circuit: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <>
-      {circuit}
-      {children}
-    </>
-  );
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return children;
 }

@@ -2,6 +2,7 @@ import { BarChart, LineChart, ScatterChart } from 'echarts/charts';
 import {
   DataZoomComponent,
   GridComponent,
+  LegendComponent,
   MarkAreaComponent,
   TitleComponent,
   TooltipComponent,
@@ -19,6 +20,7 @@ echarts.use([
   MarkAreaComponent,
   DataZoomComponent,
   TitleComponent,
+  LegendComponent,
   TooltipComponent,
   GridComponent,
   CanvasRenderer,

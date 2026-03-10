@@ -1,33 +1,34 @@
-import { TelemetryClient } from '@/app/telemetry/_client';
+'use client';
 
-async function TelemetryExample() {
-  //   props: {
-  //   searchParams: Promise<{ year: string; event: string; session: string }>;
-  // }
-  // const { year, event, session } = await props.searchParams;
+import Charts from '@/features/telemetry/components/container-chart';
+import { DriverContainer } from '@/features/telemetry/components/container-driver';
+import { DriverFilter } from '@/features/telemetry/components/filter-driver';
+import { YearEventFilter } from '@/features/telemetry/components/filter-year-event';
+import { TelemetryDataProvider } from '@/features/telemetry/hooks/useTelemetryData';
 
-  // const { data, error } = await getTelemetry({
-  //   year,
-  //   event: eventLocationDecode(event),
-  //   session: sessionDecode(session) as Session_Name_Choices_Enum,
-  //   lap: 1,
-  // });
+async function TelemetryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ driver: string | string[] | undefined }>;
+}) {
+  const { driver } = await searchParams;
+  const drivers = Array.isArray(driver) ? driver : [driver];
+  return (
+    <TelemetryDataProvider>
+      <div className='grid gap-8 p-4 lg:px-6'>
+        <div className='mx-auto max-w-1/2'>
+          <YearEventFilter />
+          {/* <EventYearFilter /> */}
 
-  // if (!data || error) return notFound();
-
-  // const driverSessions = data.driver_sessions.map((ds) => {
-  //   return {
-  //     ...ds,
-  //     telemetries: ds.telemetries.map((dataPoint) => ({
-  //       ...dataPoint,
-  //       session_time: parseInt(
-  //         dataPoint.session_time?.toString().slice(0, 6) || '',
-  //       ),
-  //     })),
-  //   };
-  // });
-
-  return <TelemetryClient />;
+          <DriverFilter />
+          <div className='mx-auto grid gap-4 py-4'>
+            {drivers.map((d) => d && <DriverContainer driver={d} key={d} />)}
+          </div>
+        </div>
+        <Charts />
+      </div>
+    </TelemetryDataProvider>
+  );
 }
 
-export default TelemetryExample;
+export default TelemetryPage;

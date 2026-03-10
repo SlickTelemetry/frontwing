@@ -13,7 +13,7 @@ export function ConstructorBadge({
   return (
     <Badge
       variant='outline'
-      className={cn('inline w-33 text-center text-xs', className)}
+      className={cn('inline w-33 text-center', className)}
       style={{
         borderColor: `#${team?.color}`,
       }}
