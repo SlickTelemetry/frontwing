@@ -1,9 +1,8 @@
 import { useLocation, useNavigate } from '@tanstack/react-router';
 
 export default function useUrlUpdater() {
-  const location = useLocation();
-  const pathname = location.pathname;
-  const navigate = useNavigate()
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   return (level: 'year' | 'event' | 'session', value: string) => {
     const segments = pathname.split('/').filter(Boolean);

@@ -55,7 +55,7 @@ function StandingsPage() {
           </p>
           <div className='flex flex-wrap justify-center gap-2'>
             <Button variant='outline' asChild>
-              <Link to='/$year' params={{ year: parseInt(year, 10) }}>
+              <Link to='/$year' params={{ year }}>
                 Back to {year} season
               </Link>
             </Button>

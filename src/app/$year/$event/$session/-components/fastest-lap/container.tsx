@@ -8,13 +8,12 @@ import { ServerPageError } from '@/components/errors/ServerError';
 
 import { useSessionItems } from '@/app/$year/$event/$session/-components/driver-filters/context';
 import { FastestLapChart } from '@/app/$year/$event/$session/-components/fastest-lap/bar-chart';
+import { Route } from '@/app/$year/$event/$session/route';
 
 import {
   GetSessionFastestTimesQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
-
-import { Route } from '@/app/$year/$event/$session/route';
 
 type Sector = {
   time: number | null;

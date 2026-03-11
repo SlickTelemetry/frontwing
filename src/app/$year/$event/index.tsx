@@ -1,10 +1,5 @@
 import { useQuery } from '@apollo/client/react';
-import {
-  createFileRoute,
-  Link,
-  notFound,
-  useRouter,
-} from '@tanstack/react-router';
+import { createFileRoute, Link, notFound } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import posthog from 'posthog-js';
 import { useEffect } from 'react';
@@ -29,8 +24,8 @@ import { Button } from '@/components/ui/button';
 import { EventWinners } from '@/app/$year/$event/-components/event-winners';
 import { FIADocs } from '@/app/$year/$event/-components/fia-docs';
 import {
-  SessionCardSkeletons,
   SessionCards,
+  SessionCardSkeletons,
 } from '@/app/$year/$event/-components/session-card';
 
 const adjustRightColumnHeight = () => {
@@ -138,7 +133,6 @@ function EventPage() {
 
 function PrevNextEventButtons({ eventName }: { eventName?: string | null }) {
   const { year } = Route.useParams();
-  const router = useRouter();
   const { data } = useQuery(GET_NAV_EVENTS, {
     variables: {
       year: parseInt(year, 10),

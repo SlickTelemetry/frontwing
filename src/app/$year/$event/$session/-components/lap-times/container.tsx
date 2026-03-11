@@ -25,11 +25,10 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 import { LapTimesChart } from '@/app/$year/$event/$session/-components/lap-times/line-chart';
+import { Route } from '@/app/$year/$event/$session/route';
 
 import { GetSessionLapTimesQuery } from '@/types/graphql';
 import { Session_Name_Choices_Enum } from '@/types/graphql';
-
-import { Route } from '@/app/$year/$event/$session/route';
 
 export const LapTimeContainer = () => {
   const { year, event, session } = Route.useParams();

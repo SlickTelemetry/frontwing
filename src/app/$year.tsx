@@ -10,7 +10,7 @@ import YearNotFound from '@/app/$year/-not-found';
 
 export const Route = createFileRoute('/$year')({
   notFoundComponent: YearNotFound,
-  head: ({ params }: { params: { year: number } }) => ({
+  head: ({ params }) => ({
     meta: [
       {
         title: `${params.year} Season - Slick Telemetry`,

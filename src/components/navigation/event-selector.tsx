@@ -1,5 +1,5 @@
-import { useParams } from '@tanstack/react-router';
 import { useQuery } from '@apollo/client/react';
+import { useParams } from '@tanstack/react-router';
 
 import { eventLocationDecode, eventLocationEncode } from '@/lib/utils';
 import useUrlUpdater from '@/hooks/use-url-updater';

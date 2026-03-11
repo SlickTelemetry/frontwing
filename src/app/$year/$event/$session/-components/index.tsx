@@ -18,14 +18,13 @@ import { DriverFilters } from '@/app/$year/$event/$session/-components/driver-fi
 import { FastestLapContainer } from '@/app/$year/$event/$session/-components/fastest-lap';
 import { LapTimeContainer } from '@/app/$year/$event/$session/-components/lap-times';
 import Stints from '@/app/$year/$event/$session/-components/stints';
+import { Route } from '@/app/$year/$event/$session/route';
 
 import { FragmentType, graphql, useFragment } from '@/types';
 import {
   GetSessionDetailsQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
-
-import { Route } from '@/app/$year/$event/$session/route';
 
 const SessionDetails = graphql(`
   fragment SessionDetails on sessions {
@@ -66,7 +65,6 @@ const ChartConfigs: Record<
     description: 'Best laps & sectors',
   },
 };
-type ChartKey = keyof typeof ChartConfigs;
 
 export const SessionHeader = ({
   loading,

@@ -1,6 +1,6 @@
+import { useNavigate } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { CalendarPlus } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
 import { eventLocationEncode } from '@/lib/utils';

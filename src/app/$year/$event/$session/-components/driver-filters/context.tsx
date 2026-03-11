@@ -10,10 +10,9 @@ import {
 } from 'react';
 
 import { visibilityReducer } from '@/app/$year/$event/$session/-components/driver-filters/reducer';
+import { Route } from '@/app/$year/$event/$session/route';
 
 import { GetSessionDetailsQuery } from '@/types/graphql';
-
-import { Route } from '@/app/$year/$event/$session/route';
 
 type SessionItemContextValue = {
   hiddenItems: string[];

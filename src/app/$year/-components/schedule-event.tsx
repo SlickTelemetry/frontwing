@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import { Link } from '@tanstack/react-router';
+import clsx from 'clsx';
 
 import { eventLocationEncode, isFutureDate } from '@/lib/utils';
 import { useReadLocalStorage } from '@/hooks/use-storage';

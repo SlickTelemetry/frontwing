@@ -1,5 +1,5 @@
-import { House } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { House } from 'lucide-react';
 
 import { SidebarHoverTrigger } from '@/components/hover-sidebar';
 import {

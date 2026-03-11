@@ -1,6 +1,6 @@
-import { ArrowUpRight } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { useParams } from '@tanstack/react-router';
+import { ArrowUpRight } from 'lucide-react';
 
 interface LinkData {
   href: string;

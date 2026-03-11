@@ -13,10 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import {
-  countConstructorPositions,
-  countDriverPositions,
-} from './countback';
+import { countConstructorPositions, countDriverPositions } from './countback';
 import { useHiddenItems } from './legend/context';
 
 import { GetStandingsQuery } from '@/types/graphql';

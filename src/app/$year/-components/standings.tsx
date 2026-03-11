@@ -1,6 +1,6 @@
+import { Link, useParams } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { ArrowUpRight } from 'lucide-react';
-import { Link, useParams } from '@tanstack/react-router';
 
 import { useLocalStorage } from '@/hooks/use-storage';
 

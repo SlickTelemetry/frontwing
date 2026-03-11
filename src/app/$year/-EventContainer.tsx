@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router';
 
+import { eventLocationEncode } from '@/lib/utils';
+
 import { SprintBadge } from '@/components/badges/sprint-badge';
 
 import { SeasonEvent } from '@/types/global';
@@ -24,7 +26,6 @@ export const EventContainer = ({
     event_date,
   } = event;
 
-  const eventUrl = `${year}/${location?.replace(/ /g, '-').toLowerCase()}`;
   const eventDate =
     event_date &&
     new Date(event_date).toLocaleString(undefined, {
@@ -64,8 +65,8 @@ export const EventContainer = ({
 
   return clickable ? (
     <Link
-      to='/$year'
-      params={{ year: year }}
+      to='/$year/$event'
+      params={{ year: year, event: eventLocationEncode(location) as string }}
       className='block border transition-colors hover:bg-gray-50 dark:hover:bg-gray-800'
     >
       {containerContent}

@@ -18,21 +18,18 @@ export function useStandingsSeries({
   showPointsPerRound,
 }: UseStandingsSeriesProps) {
   return useMemo(() => {
-    const topDriverPerConstructor = drivers.reduce(
-      (acc, driver) => {
-        const cName = driver.latest_constructor?.[0]?.constructor?.name;
-        if (!cName) return acc;
+    const topDriverPerConstructor = drivers.reduce((acc, driver) => {
+      const cName = driver.latest_constructor?.[0]?.constructor?.name;
+      if (!cName) return acc;
 
-        const pts = driver.driver_standings.at(-1)?.points ?? 0;
+      const pts = driver.driver_standings.at(-1)?.points ?? 0;
 
-        const current = acc.get(cName);
-        if (!current || pts > current.points) {
-          acc.set(cName, { abbr: driver.abbreviation || '', points: pts });
-        }
-        return acc;
-      },
-      new Map<string, { abbr: string; points: number }>(),
-    );
+      const current = acc.get(cName);
+      if (!current || pts > current.points) {
+        acc.set(cName, { abbr: driver.abbreviation || '', points: pts });
+      }
+      return acc;
+    }, new Map<string, { abbr: string; points: number }>());
 
     const driversSeries = drivers.map((driver) => {
       const points = preparePoints(

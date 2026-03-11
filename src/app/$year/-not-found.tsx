@@ -16,7 +16,7 @@ export default function NotFound() {
           {SUPPORTED_SEASONS.map((year) => (
             <li key={year}>
               <Button variant='outline' asChild className='min-w-20'>
-                <Link to='/$year' params={{ year }}>
+                <Link to='/$year' params={{ year: String(year) }}>
                   {year}
                 </Link>
               </Button>

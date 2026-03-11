@@ -1,6 +1,6 @@
+import { Link, useParams } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { ArrowUpRight } from 'lucide-react';
-import { Link, useParams } from '@tanstack/react-router';
 
 import { SESSION_KEYS } from '@/lib/constants';
 import { eventLocationEncode } from '@/lib/utils';
@@ -30,7 +30,10 @@ export function SessionCards({
   availableSessions: string[];
   schedule?: FragmentType<typeof EventSessionCards>;
 }) {
-  const params = useParams({ strict: false }) as { year?: string; event?: string };
+  const params = useParams({ strict: false }) as {
+    year?: string;
+    event?: string;
+  };
   const event = params.event ?? '';
   const year = params.year ?? '';
   const schedule = useFragment(EventSessionCards, props?.schedule);

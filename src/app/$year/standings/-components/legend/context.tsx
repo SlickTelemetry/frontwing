@@ -6,12 +6,12 @@ import {
   useReducer,
 } from 'react';
 
+import { visibilityReducer } from './reducer';
 import {
   compareCountback,
   countConstructorPositions,
   countDriverPositions,
 } from '../countback';
-import { visibilityReducer } from './reducer';
 
 import { GetStandingsQuery } from '@/types/graphql';
 

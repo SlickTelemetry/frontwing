@@ -1,6 +1,6 @@
+import { useParams, useSearch } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { Circle } from 'lucide-react';
-import { useParams, useSearch } from '@tanstack/react-router';
 
 import { DriverBadges } from '@/components/badges/driver-badge';
 

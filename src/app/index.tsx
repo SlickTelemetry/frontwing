@@ -35,7 +35,7 @@ function Home() {
             <Button asChild>
               <Link
                 to='/$year'
-                params={{ year: new Date().getFullYear() }}
+                params={{ year: String(new Date().getFullYear()) }}
                 className='w-fit'
               >
                 Explore Now

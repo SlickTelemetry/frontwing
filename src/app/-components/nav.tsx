@@ -40,7 +40,11 @@ function Nav() {
           <NavigationMenuContent>
             {SUPPORTED_SEASONS.map((year) => (
               <NavigationMenuLink asChild key={year}>
-                <Link to='/$year' params={{ year }} className='hover:underline'>
+                <Link
+                  to='/$year'
+                  params={{ year: String(year) }}
+                  className='hover:underline'
+                >
                   <p>{year}</p>
                 </Link>
               </NavigationMenuLink>

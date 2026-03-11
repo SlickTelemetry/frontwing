@@ -13,13 +13,12 @@ import { ChartContainer } from '@/components/chart-container';
 import { ServerPageError } from '@/components/errors/ServerError';
 
 import { StintsChart } from '@/app/$year/$event/$session/-components/stints/chart';
+import { Route } from '@/app/$year/$event/$session/route';
 
 import {
   GetSessionStintsQuery,
   Session_Name_Choices_Enum,
 } from '@/types/graphql';
-
-import { Route } from '@/app/$year/$event/$session/route';
 
 const Stints = ({
   sessionType,

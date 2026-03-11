@@ -48,7 +48,9 @@ export function EventDetails({
         <h1 className='pointer-cursor line-clamp-1 scroll-m-20 text-5xl leading-[1.1] font-medium tracking-tight text-balance'>
           <Link
             className='hover:underline focus:underline'
-            to={`/${evt.year}/${eventLocationEncode(evt.event_name) ?? ''}` as '/'}
+            to={
+              `/${evt.year}/${eventLocationEncode(evt.event_name) ?? ''}` as '/'
+            }
           >
             {evt.event_name}
           </Link>
@@ -102,11 +104,10 @@ function EventDetailsSkeleton() {
 }
 
 export function PossibleEvents() {
-  const params = useParams({ strict: false }) as { year?: string | number; event?: string | number };
-  const year = params.year != null ? String(params.year) : undefined;
-  const event = params.event != null ? String(params.event) : undefined;
+  const { year, ...params } = useParams({ strict: false });
+  const event = params.event != null ? params.event : undefined;
   const supportedYear =
-    year != null && SUPPORTED_SEASONS.includes(parseInt(year, 10));
+    year != null && SUPPORTED_SEASONS.includes(parseInt(year));
   const { data } = useQuery(
     graphql(`
       query GetSeasonEventNames($year: Int!, $event: String!) @cached {
@@ -142,7 +143,9 @@ export function PossibleEvents() {
           <li key={event_name}>
             <Link
               className='hover:underline'
-              to={`/${year ?? '2025'}/${eventLocationEncode(event_name) ?? ''}` as '/'}
+              to={
+                `/${year ?? '2025'}/${eventLocationEncode(event_name) ?? ''}` as '/'
+              }
             >
               {event_name}
             </Link>

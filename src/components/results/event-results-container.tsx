@@ -1,6 +1,6 @@
+import { useParams } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { EyeOff, Settings } from 'lucide-react';
-import { useParams } from '@tanstack/react-router';
 import React, { useEffect } from 'react';
 
 import {

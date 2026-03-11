@@ -1,5 +1,5 @@
-import { ServerOffIcon } from 'lucide-react';
 import { useLocation } from '@tanstack/react-router';
+import { ServerOffIcon } from 'lucide-react';
 import { useState } from 'react';
 
 const checkServerHealth = async () => {
@@ -13,11 +13,11 @@ const checkServerHealth = async () => {
 export const ServerStatus = () => {
   const [error, setError] = useState(false);
   const [path, setPath] = useState('');
-  const pathName = useLocation().pathname; // Tracks the current route in the App Router
+  const { pathname } = useLocation(); // Tracks the current route in the App Router
 
   // Check health only pathname has changed
-  if (path !== pathName) {
-    setPath(pathName);
+  if (path !== pathname) {
+    setPath(pathname);
     checkServerHealth()
       .then(() => setError(false))
       .catch(() => setError(true));
