@@ -55,29 +55,52 @@ export function useTooltipFormatter({
         return timeline[timeline.length - 1] ?? [];
       };
 
-      // Body with series names and points, sorted by:
-      // 1) Points (descending)
-      // 2) Countback (finishing positions), to break ties
-      const body = params
-        .sort((a, b) => {
-          const aValue = (a.value as number) ?? 0;
-          const bValue = (b.value as number) ?? 0;
-
-          if (bValue !== aValue) {
-            return bValue - aValue;
+      // Partition: "Available Points" first, then others sorted by points + countback
+      const availablePointsName = 'Available Points';
+      const [availableFirst, rest] = params.reduce<
+        [CallbackDataParams[], CallbackDataParams[]]
+      >(
+        (acc, p) => {
+          if (String(p.seriesName) === availablePointsName) {
+            acc[0].push(p);
+          } else {
+            acc[1].push(p);
           }
+          return acc;
+        },
+        [[], []],
+      );
 
-          const aCounts = getCountsThroughRound(String(a.seriesName));
-          const bCounts = getCountsThroughRound(String(b.seriesName));
+      // Sort rest by: 1) Points (descending) 2) Countback
+      rest.sort((a, b) => {
+        const aValue = (a.value as number) ?? 0;
+        const bValue = (b.value as number) ?? 0;
 
-          return compareCountback(aCounts, bCounts);
-        })
+        if (bValue !== aValue) {
+          return bValue - aValue;
+        }
+
+        const aCounts = getCountsThroughRound(String(a.seriesName));
+        const bCounts = getCountsThroughRound(String(b.seriesName));
+
+        return compareCountback(aCounts, bCounts);
+      });
+
+      const orderedParams = [...availableFirst, ...rest];
+
+      const body = orderedParams
         .map((p, index) => {
+          // Available points should not be ranked
+          const isAvailablePoints =
+            String(p.seriesName) === availablePointsName;
+          const rankDisplay = isAvailablePoints
+            ? ''
+            : String(index - availableFirst.length + 1);
           return format.formatTpl(
             `
           <div class='flex items-center justify-between gap-2 border-t'>
             <div class='flex items-center gap-2'>
-              <span class='w-4 text-right text-xs text-muted-foreground'>${index + 1}</span>
+              <span class='w-4 text-right text-xs text-muted-foreground'>${rankDisplay}</span>
               <span class="inline-block rounded-full w-2 h-2" style="background-color:${p.color};"></span>
               <span style="color:${p.color}">{a}</span>
             </div>
