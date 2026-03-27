@@ -144,6 +144,42 @@ export const GET_DEBUG_LAP_TELEMETRY = gql`
       telemetries(order_by: { session_time: asc }) {
         time
         session_time
+        distance
+        speed
+        throttle
+        brake
+        drs
+        gear
+        rpm
+        x
+        y
+        z
+      }
+    }
+  }
+`;
+
+export const GET_DEBUG_LAP_TELEMETRY_NO_DRS = gql`
+  query GetDebugLapTelemetryNoDrs(
+    $driverId: String!
+    $sessionId: String!
+    $lapNumber: Int!
+  ) @cached {
+    laps(
+      limit: 1
+      where: {
+        lap_number: { _eq: $lapNumber }
+        driver_session: {
+          driver_id: { _eq: $driverId }
+          session_id: { _eq: $sessionId }
+        }
+      }
+    ) {
+      lap_number
+      telemetries(order_by: { session_time: asc }) {
+        time
+        session_time
+        distance
         speed
         throttle
         brake
@@ -152,7 +188,6 @@ export const GET_DEBUG_LAP_TELEMETRY = gql`
         x
         y
         z
-        distance
       }
     }
   }

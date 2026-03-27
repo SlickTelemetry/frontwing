@@ -152,7 +152,22 @@ importers:
         version: 3.8.3
       prettier-plugin-tailwindcss:
         specifier: latest
+<<<<<<< HEAD
         version: 0.7.3(prettier@3.8.3)
+=======
+<<<<<<< HEAD
+        version: 0.7.2(prettier@3.8.3)
+=======
+        version: 0.7.2(prettier@3.8.1)
+      tailwind-scrollbar:
+        specifier: latest
+<<<<<<< HEAD
+        version: 4.0.2(react@19.2.4)(tailwindcss@4.2.1)
+>>>>>>> 5bff672 (chore: debug views)
+=======
+        version: 4.0.2(react@19.2.4)(tailwindcss@4.2.2)
+>>>>>>> 770de25 (chore: telemetry comparison)
+>>>>>>> caa74db (chore: telemetry comparison)
       tailwindcss:
         specifier: latest
         version: 4.2.4
@@ -10178,10 +10193,21 @@ snapshots:
   tailwind-merge@3.5.0: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   tailwindcss-animate@1.0.7(tailwindcss@4.2.4):
 =======
   tailwindcss-animate@1.0.7(tailwindcss@4.2.1):
 >>>>>>> 5bff672 (chore: debug views)
+=======
+  tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.2.2):
+    dependencies:
+      prism-react-renderer: 2.4.1(react@19.2.4)
+      tailwindcss: 4.2.2
+    transitivePeerDependencies:
+      - react
+
+  tailwindcss-animate@1.0.7(tailwindcss@4.2.2):
+>>>>>>> 770de25 (chore: telemetry comparison)
     dependencies:
       tailwindcss: 4.2.4
 
