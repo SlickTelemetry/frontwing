@@ -1,3 +1,9 @@
+## 0.12.5 (2026-03-27)
+
+### Fix
+
+- **standings**: FRON-1 available points ordering in tooltip
+
 ## 0.12.4 (2026-02-20)
 
 ### Fix
