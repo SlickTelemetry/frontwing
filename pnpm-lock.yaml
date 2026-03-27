@@ -9915,10 +9915,21 @@ snapshots:
   tailwind-merge@3.5.0: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   tailwindcss-animate@1.0.7(tailwindcss@4.2.4):
 =======
   tailwindcss-animate@1.0.7(tailwindcss@4.2.1):
 >>>>>>> 5bff672 (chore: debug views)
+=======
+  tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.2.2):
+    dependencies:
+      prism-react-renderer: 2.4.1(react@19.2.4)
+      tailwindcss: 4.2.2
+    transitivePeerDependencies:
+      - react
+
+  tailwindcss-animate@1.0.7(tailwindcss@4.2.2):
+>>>>>>> 770de25 (chore: telemetry comparison)
     dependencies:
       tailwindcss: 4.2.4
 
