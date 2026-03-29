@@ -1,7 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-import { SPRINT_EVENT_FORMATS } from '@/lib/constants';
+import {
+  NEXT_EVENT_GRACE_AFTER_LAST_SESSION_MS,
+  SPRINT_EVENT_FORMATS,
+} from '@/lib/constants';
 
 import { Event_Format_Choices_Enum } from '@/types/graphql';
 
@@ -16,6 +19,50 @@ export const getTodayMidnightUTC = () => {
   now.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
   return now.toISOString(); // Convert to ISO 8601 format
 };
+
+/** Chronological last session of a weekend (session5 → session1); matches schedule row column order. */
+export const SCHEDULE_LAST_SESSION_UTC_KEYS = [
+  'session5_date_utc',
+  'session4_date_utc',
+  'session3_date_utc',
+  'session2_date_utc',
+  'session1_date_utc',
+] as const;
+
+export function getScheduleLastSessionUtc(event: object): string | undefined {
+  const row = event as Record<string, unknown>;
+  for (const key of SCHEDULE_LAST_SESSION_UTC_KEYS) {
+    const d = row[key];
+    if (typeof d === 'string' && d.length > 0) return d;
+  }
+  return undefined;
+}
+
+/** First row still within grace after last session; advance to the following row once now UTC is past lastSession + 4h. */
+export function pickNextScheduleEvent<T extends object>(
+  orderedRows: T[],
+  now: Date = new Date(),
+): T | undefined {
+  const t = now.getTime();
+  return orderedRows.find((event) => {
+    const last = getScheduleLastSessionUtc(event);
+    if (!last) return false;
+    const graceEnd =
+      new Date(last).getTime() + NEXT_EVENT_GRACE_AFTER_LAST_SESSION_MS;
+    return t <= graceEnd;
+  });
+}
+
+/**
+ * Stable lower bound for schedule queries (UTC midnight − lookback days).
+ * Must not include sub-day clock noise or Apollo will refetch every render.
+ */
+export function getScheduleNextEventQuerySinceISO(lookbackDays = 21) {
+  const d = new Date();
+  d.setUTCHours(0, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() - lookbackDays);
+  return d.toISOString();
+}
 
 export const isFutureDate = (date?: string | null) => {
   if (!date) return false;

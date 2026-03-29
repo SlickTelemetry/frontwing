@@ -96,3 +96,6 @@ export const AVAILABLE_POINTS_BY_YEAR: Record<number, AvailablePointsConfig> = {
 // stable as you move between points. If future calendars introduce noticeably
 // longer names, this value can be bumped slightly.
 export const FIXED_STANDINGS_CHART_TOOLTIP_WIDTH_CH = 25;
+
+/** After this many ms past the last session’s `date_utc`, the homepage advances to the following event. */
+export const NEXT_EVENT_GRACE_AFTER_LAST_SESSION_MS = 4 * 60 * 60 * 1000; // 4 hours

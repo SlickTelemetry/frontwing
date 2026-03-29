@@ -2,7 +2,12 @@
 import { useQuery } from '@apollo/client/react';
 import Link from 'next/link';
 
-import { eventLocationEncode, getTodayMidnightUTC } from '@/lib/utils';
+import {
+  eventLocationEncode,
+  getScheduleLastSessionUtc,
+  getScheduleNextEventQuerySinceISO,
+  pickNextScheduleEvent,
+} from '@/lib/utils';
 
 import { SprintBadge } from '@/components/badges/sprint-badge';
 import { CircuitMap } from '@/components/circuit-map';
@@ -13,11 +18,11 @@ import { graphql } from '@/types';
 import { Event_Format_Choices_Enum } from '@/types/graphql';
 
 const GET_NEXT_EVENT = graphql(`
-  query GetNextEvent($today: String!) {
+  query GetNextEvent($since: String!) {
     schedule(
-      where: { session5_date_utc: { _gte: $today } }
+      where: { session5_date_utc: { _gte: $since } }
       order_by: { event_date: asc }
-      limit: 1
+      limit: 25
     ) {
       year
       event_name
@@ -55,38 +60,30 @@ const GET_NEXT_EVENT_CIRCUIT = graphql(`
   }
 `);
 
-const scheduleSessionKeys = [
-  'session5_date_utc',
-  'session4_date_utc',
-  'session3_date_utc',
-  'session2_date_utc',
-  'session1_date_utc',
-] as const;
-
 export default function NextEvent() {
-  const midnight = getTodayMidnightUTC();
+  const since = getScheduleNextEventQuerySinceISO();
 
   const { loading, data, error } = useQuery(GET_NEXT_EVENT, {
-    variables: { today: midnight },
+    variables: { since },
   });
 
-  const nextEvent = data?.schedule?.[0];
-  const lastSession = scheduleSessionKeys
-    .map((key) => nextEvent?.[key])
-    .find(Boolean);
+  const rows = data?.schedule ?? [];
+  const nextEvent = pickNextScheduleEvent(rows);
+  const lastSession = nextEvent
+    ? getScheduleLastSessionUtc(nextEvent)
+    : undefined;
 
-  const isValidEvent =
-    !error &&
-    nextEvent &&
-    lastSession &&
-    new Date(lastSession) >= new Date(midnight);
+  const isValidEvent = !error && nextEvent && lastSession;
 
   // Fetch circuit data in parallel if we have a valid event
   const { data: circuitData } = useQuery(GET_NEXT_EVENT_CIRCUIT, {
     variables: {
       location: nextEvent?.location || '',
       country: nextEvent?.country || '',
-      year: nextEvent?.year ? nextEvent.year - 1 : new Date().getFullYear() - 1,
+      year:
+        typeof nextEvent?.year === 'number'
+          ? nextEvent.year - 1
+          : new Date().getFullYear() - 1,
     },
     skip: !isValidEvent || !nextEvent?.location || !nextEvent?.country,
   });
