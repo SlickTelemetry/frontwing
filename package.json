@@ -31,7 +31,7 @@
     "graphql": "latest",
     "lucide-react": "latest",
     "mapbox-gl": "latest",
-    "next": "latest",
+    "next": "15.5.8",
     "next-themes": "latest",
     "posthog-js": "latest",
     "radix-ui": "latest",
