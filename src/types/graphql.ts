@@ -6489,6 +6489,7 @@ export type Race_Control_Messages = {
   category?: Maybe<Race_Control_Messages_Categories_Enum>;
   flag?: Maybe<Race_Control_Messages_Flags_Enum>;
   id: Scalars['String']['output'];
+  lap?: Maybe<Scalars['Int']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
   race_control_messages_category?: Maybe<Race_Control_Messages_Categories>;
@@ -6571,11 +6572,13 @@ export type Race_Control_Messages_Arr_Rel_Insert_Input = {
 /** aggregate avg on columns */
 export type Race_Control_Messages_Avg_Fields = {
   __typename?: 'race_control_messages_avg_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by avg() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Avg_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
@@ -6587,6 +6590,7 @@ export type Race_Control_Messages_Bool_Exp = {
   category?: InputMaybe<Race_Control_Messages_Categories_Enum_Comparison_Exp>;
   flag?: InputMaybe<Race_Control_Messages_Flags_Enum_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
+  lap?: InputMaybe<Int_Comparison_Exp>;
   message?: InputMaybe<String_Comparison_Exp>;
   race_control_messages_category?: InputMaybe<Race_Control_Messages_Categories_Bool_Exp>;
   race_control_messages_flag?: InputMaybe<Race_Control_Messages_Flags_Bool_Exp>;
@@ -6993,6 +6997,7 @@ export type Race_Control_Messages_Flags_Updates = {
 
 /** input type for incrementing numeric columns in table "race_control_messages" */
 export type Race_Control_Messages_Inc_Input = {
+  lap?: InputMaybe<Scalars['Int']['input']>;
   sector?: InputMaybe<Scalars['numeric']['input']>;
 };
 
@@ -7001,6 +7006,7 @@ export type Race_Control_Messages_Insert_Input = {
   category?: InputMaybe<Race_Control_Messages_Categories_Enum>;
   flag?: InputMaybe<Race_Control_Messages_Flags_Enum>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lap?: InputMaybe<Scalars['Int']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   race_control_messages_category?: InputMaybe<Race_Control_Messages_Categories_Obj_Rel_Insert_Input>;
   race_control_messages_flag?: InputMaybe<Race_Control_Messages_Flags_Obj_Rel_Insert_Input>;
@@ -7018,6 +7024,7 @@ export type Race_Control_Messages_Insert_Input = {
 export type Race_Control_Messages_Max_Fields = {
   __typename?: 'race_control_messages_max_fields';
   id?: Maybe<Scalars['String']['output']>;
+  lap?: Maybe<Scalars['Int']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   racing_number?: Maybe<Scalars['String']['output']>;
   sector?: Maybe<Scalars['numeric']['output']>;
@@ -7029,6 +7036,7 @@ export type Race_Control_Messages_Max_Fields = {
 /** order by max() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Max_Order_By = {
   id?: InputMaybe<Order_By>;
+  lap?: InputMaybe<Order_By>;
   message?: InputMaybe<Order_By>;
   racing_number?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
@@ -7041,6 +7049,7 @@ export type Race_Control_Messages_Max_Order_By = {
 export type Race_Control_Messages_Min_Fields = {
   __typename?: 'race_control_messages_min_fields';
   id?: Maybe<Scalars['String']['output']>;
+  lap?: Maybe<Scalars['Int']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   racing_number?: Maybe<Scalars['String']['output']>;
   sector?: Maybe<Scalars['numeric']['output']>;
@@ -7052,6 +7061,7 @@ export type Race_Control_Messages_Min_Fields = {
 /** order by min() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Min_Order_By = {
   id?: InputMaybe<Order_By>;
+  lap?: InputMaybe<Order_By>;
   message?: InputMaybe<Order_By>;
   racing_number?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
@@ -7081,6 +7091,7 @@ export type Race_Control_Messages_Order_By = {
   category?: InputMaybe<Order_By>;
   flag?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lap?: InputMaybe<Order_By>;
   message?: InputMaybe<Order_By>;
   race_control_messages_category?: InputMaybe<Race_Control_Messages_Categories_Order_By>;
   race_control_messages_flag?: InputMaybe<Race_Control_Messages_Flags_Order_By>;
@@ -7292,6 +7303,8 @@ export enum Race_Control_Messages_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  Lap = 'lap',
+  /** column name */
   Message = 'message',
   /** column name */
   RacingNumber = 'racing_number',
@@ -7312,6 +7325,7 @@ export type Race_Control_Messages_Set_Input = {
   category?: InputMaybe<Race_Control_Messages_Categories_Enum>;
   flag?: InputMaybe<Race_Control_Messages_Flags_Enum>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lap?: InputMaybe<Scalars['Int']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   racing_number?: InputMaybe<Scalars['String']['input']>;
   scope?: InputMaybe<Race_Control_Messages_Scopes_Enum>;
@@ -7324,33 +7338,39 @@ export type Race_Control_Messages_Set_Input = {
 /** aggregate stddev on columns */
 export type Race_Control_Messages_Stddev_Fields = {
   __typename?: 'race_control_messages_stddev_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Stddev_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_pop on columns */
 export type Race_Control_Messages_Stddev_Pop_Fields = {
   __typename?: 'race_control_messages_stddev_pop_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_pop() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Stddev_Pop_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_samp on columns */
 export type Race_Control_Messages_Stddev_Samp_Fields = {
   __typename?: 'race_control_messages_stddev_samp_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_samp() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Stddev_Samp_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
@@ -7367,6 +7387,7 @@ export type Race_Control_Messages_Stream_Cursor_Value_Input = {
   category?: InputMaybe<Race_Control_Messages_Categories_Enum>;
   flag?: InputMaybe<Race_Control_Messages_Flags_Enum>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lap?: InputMaybe<Scalars['Int']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   racing_number?: InputMaybe<Scalars['String']['input']>;
   scope?: InputMaybe<Race_Control_Messages_Scopes_Enum>;
@@ -7379,11 +7400,13 @@ export type Race_Control_Messages_Stream_Cursor_Value_Input = {
 /** aggregate sum on columns */
 export type Race_Control_Messages_Sum_Fields = {
   __typename?: 'race_control_messages_sum_fields';
+  lap?: Maybe<Scalars['Int']['output']>;
   sector?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** order by sum() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Sum_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
@@ -7395,6 +7418,8 @@ export enum Race_Control_Messages_Update_Column {
   Flag = 'flag',
   /** column name */
   Id = 'id',
+  /** column name */
+  Lap = 'lap',
   /** column name */
   Message = 'message',
   /** column name */
@@ -7423,33 +7448,39 @@ export type Race_Control_Messages_Updates = {
 /** aggregate var_pop on columns */
 export type Race_Control_Messages_Var_Pop_Fields = {
   __typename?: 'race_control_messages_var_pop_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_pop() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Var_Pop_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
 export type Race_Control_Messages_Var_Samp_Fields = {
   __typename?: 'race_control_messages_var_samp_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_samp() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Var_Samp_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
 /** aggregate variance on columns */
 export type Race_Control_Messages_Variance_Fields = {
   __typename?: 'race_control_messages_variance_fields';
+  lap?: Maybe<Scalars['Float']['output']>;
   sector?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by variance() on columns of table "race_control_messages" */
 export type Race_Control_Messages_Variance_Order_By = {
+  lap?: InputMaybe<Order_By>;
   sector?: InputMaybe<Order_By>;
 };
 
@@ -13181,6 +13212,41 @@ export type GetUpcomingEventsQuery = {
   }>;
 };
 
+export type GetDebugAllEventsRaceLapsQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetDebugAllEventsRaceLapsQuery = {
+  __typename?: 'query_root';
+  events: Array<{
+    __typename?: 'events';
+    year?: number | null;
+    name?: string | null;
+    round_number?: number | null;
+    race_sessions: Array<{
+      __typename?: 'sessions';
+      name?: Session_Name_Choices_Enum | null;
+      total_laps?: number | null;
+    }>;
+  }>;
+};
+
+export type GetDebugHierarchyQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetDebugHierarchyQuery = {
+  __typename?: 'query_root';
+  events: Array<{
+    __typename?: 'events';
+    year?: number | null;
+    name?: string | null;
+    round_number?: number | null;
+    sessions: Array<{
+      __typename?: 'sessions';
+      name?: Session_Name_Choices_Enum | null;
+    }>;
+  }>;
+};
+
 export type GetDebugSessionDriversQueryVariables = Exact<{
   year: Scalars['Int']['input'];
   round: Scalars['Int']['input'];
@@ -13238,6 +13304,42 @@ export type GetDebugDriverLapsQuery = {
   }>;
 };
 
+export type GetRacePlotDataQueryVariables = Exact<{
+  year: Scalars['Int']['input'];
+  event: Scalars['String']['input'];
+}>;
+
+export type GetRacePlotDataQuery = {
+  __typename?: 'query_root';
+  sessions: Array<{
+    __typename?: 'sessions';
+    name?: Session_Name_Choices_Enum | null;
+    event?: {
+      __typename?: 'events';
+      name?: string | null;
+      year?: number | null;
+    } | null;
+    driver_sessions: Array<{
+      __typename?: 'driver_sessions';
+      driver?: { __typename?: 'drivers'; abbreviation?: string | null } | null;
+      constructorByConstructorId?: {
+        __typename?: 'constructors';
+        color?: string | null;
+        name?: string | null;
+      } | null;
+      results: Array<{
+        __typename?: 'results';
+        classified_position?: string | null;
+      }>;
+      laps: Array<{
+        __typename?: 'laps';
+        lap_number?: number | null;
+        lap_time?: number | null;
+      }>;
+    }>;
+  }>;
+};
+
 export type GetDebugLapTelemetryQueryVariables = Exact<{
   driverId: Scalars['String']['input'];
   sessionId: Scalars['String']['input'];
@@ -13253,6 +13355,36 @@ export type GetDebugLapTelemetryQuery = {
       __typename?: 'telemetry';
       time?: number | null;
       session_time?: number | null;
+      distance?: number | null;
+      speed?: number | null;
+      throttle?: number | null;
+      brake?: boolean | null;
+      drs?: number | null;
+      gear?: number | null;
+      rpm?: number | null;
+      x?: number | null;
+      y?: number | null;
+      z?: number | null;
+    }>;
+  }>;
+};
+
+export type GetDebugLapTelemetryNoDrsQueryVariables = Exact<{
+  driverId: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+  lapNumber: Scalars['Int']['input'];
+}>;
+
+export type GetDebugLapTelemetryNoDrsQuery = {
+  __typename?: 'query_root';
+  laps: Array<{
+    __typename?: 'laps';
+    lap_number?: number | null;
+    telemetries: Array<{
+      __typename?: 'telemetry';
+      time?: number | null;
+      session_time?: number | null;
+      distance?: number | null;
       speed?: number | null;
       throttle?: number | null;
       brake?: boolean | null;
@@ -13647,6 +13779,14 @@ export type GetSessionLapTimesQuery = {
         compound?: Tyre_Compounds_Enum | null;
         session_time?: number | null;
       }>;
+    }>;
+    race_control_messages: Array<{
+      __typename?: 'race_control_messages';
+      category?: Race_Control_Messages_Categories_Enum | null;
+      flag?: Race_Control_Messages_Flags_Enum | null;
+      message?: string | null;
+      status?: string | null;
+      lap?: number | null;
     }>;
   }>;
 };
@@ -18113,6 +18253,190 @@ export const GetUpcomingEventsDocument = {
   GetUpcomingEventsQuery,
   GetUpcomingEventsQueryVariables
 >;
+export const GetDebugAllEventsRaceLapsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDebugAllEventsRaceLaps' },
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'events' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'year' },
+                          value: { kind: 'EnumValue', value: 'desc' },
+                        },
+                      ],
+                    },
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'round_number' },
+                          value: { kind: 'EnumValue', value: 'asc' },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'round_number' },
+                },
+                {
+                  kind: 'Field',
+                  alias: { kind: 'Name', value: 'race_sessions' },
+                  name: { kind: 'Name', value: 'sessions' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'where' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'name' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: { kind: 'EnumValue', value: 'Race' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'total_laps' },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDebugAllEventsRaceLapsQuery,
+  GetDebugAllEventsRaceLapsQueryVariables
+>;
+export const GetDebugHierarchyDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDebugHierarchy' },
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'events' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'year' },
+                          value: { kind: 'EnumValue', value: 'desc' },
+                        },
+                      ],
+                    },
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'round_number' },
+                          value: { kind: 'EnumValue', value: 'asc' },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'round_number' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'sessions' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDebugHierarchyQuery,
+  GetDebugHierarchyQueryVariables
+>;
 export const GetDebugSessionDriversDocument = {
   kind: 'Document',
   definitions: [
@@ -18509,6 +18833,312 @@ export const GetDebugDriverLapsDocument = {
   GetDebugDriverLapsQuery,
   GetDebugDriverLapsQueryVariables
 >;
+export const GetRacePlotDataDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetRacePlotData' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'event' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'sessions' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: { kind: 'IntValue', value: '1' },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'event' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'year' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'year' },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'name' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'event' },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'name' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: '_eq' },
+                            value: { kind: 'EnumValue', value: 'Race' },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'event' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'driver_sessions' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'driver' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'abbreviation' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'constructorByConstructorId',
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'color' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'results' },
+                        arguments: [
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'where' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_or' },
+                                  value: {
+                                    kind: 'ListValue',
+                                    values: [
+                                      {
+                                        kind: 'ObjectValue',
+                                        fields: [
+                                          {
+                                            kind: 'ObjectField',
+                                            name: {
+                                              kind: 'Name',
+                                              value: 'grid_position',
+                                            },
+                                            value: {
+                                              kind: 'ObjectValue',
+                                              fields: [
+                                                {
+                                                  kind: 'ObjectField',
+                                                  name: {
+                                                    kind: 'Name',
+                                                    value: '_is_null',
+                                                  },
+                                                  value: {
+                                                    kind: 'BooleanValue',
+                                                    value: false,
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                      },
+                                      {
+                                        kind: 'ObjectValue',
+                                        fields: [
+                                          {
+                                            kind: 'ObjectField',
+                                            name: {
+                                              kind: 'Name',
+                                              value: 'finishing_position',
+                                            },
+                                            value: {
+                                              kind: 'ObjectValue',
+                                              fields: [
+                                                {
+                                                  kind: 'ObjectField',
+                                                  name: {
+                                                    kind: 'Name',
+                                                    value: '_is_null',
+                                                  },
+                                                  value: {
+                                                    kind: 'BooleanValue',
+                                                    value: false,
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'classified_position',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'laps' },
+                        arguments: [
+                          {
+                            kind: 'Argument',
+                            name: { kind: 'Name', value: 'order_by' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'lap_number' },
+                                  value: { kind: 'EnumValue', value: 'asc' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_number' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_time' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetRacePlotDataQuery,
+  GetRacePlotDataQueryVariables
+>;
 export const GetDebugLapTelemetryDocument = {
   kind: 'Document',
   definitions: [
@@ -18673,6 +19303,204 @@ export const GetDebugLapTelemetryDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'session_time' },
                       },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'distance' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'speed' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'throttle' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'brake' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'drs' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'gear' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rpm' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'x' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'y' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'z' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDebugLapTelemetryQuery,
+  GetDebugLapTelemetryQueryVariables
+>;
+export const GetDebugLapTelemetryNoDrsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDebugLapTelemetryNoDrs' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'driverId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'sessionId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'lapNumber' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'laps' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: { kind: 'IntValue', value: '1' },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'lap_number' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: '_eq' },
+                            value: {
+                              kind: 'Variable',
+                              name: { kind: 'Name', value: 'lapNumber' },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'driver_session' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'driver_id' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'driverId' },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'session_id' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'sessionId' },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'lap_number' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'telemetries' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'order_by' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'session_time' },
+                            value: { kind: 'EnumValue', value: 'asc' },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'time' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'session_time' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'distance' },
+                      },
                       { kind: 'Field', name: { kind: 'Name', value: 'speed' } },
                       {
                         kind: 'Field',
@@ -18695,8 +19523,8 @@ export const GetDebugLapTelemetryDocument = {
     },
   ],
 } as unknown as DocumentNode<
-  GetDebugLapTelemetryQuery,
-  GetDebugLapTelemetryQueryVariables
+  GetDebugLapTelemetryNoDrsQuery,
+  GetDebugLapTelemetryNoDrsQueryVariables
 >;
 export const GetConstructorDocument = {
   kind: 'Document',
@@ -23011,6 +23839,113 @@ export const GetSessionLapTimesDocument = {
                           ],
                         },
                       },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'race_control_messages' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'order_by' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'time' },
+                            value: { kind: 'EnumValue', value: 'asc' },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'where' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: '_or' },
+                            value: {
+                              kind: 'ListValue',
+                              values: [
+                                {
+                                  kind: 'ObjectValue',
+                                  fields: [
+                                    {
+                                      kind: 'ObjectField',
+                                      name: { kind: 'Name', value: 'category' },
+                                      value: {
+                                        kind: 'ObjectValue',
+                                        fields: [
+                                          {
+                                            kind: 'ObjectField',
+                                            name: {
+                                              kind: 'Name',
+                                              value: '_eq',
+                                            },
+                                            value: {
+                                              kind: 'EnumValue',
+                                              value: 'SafetyCar',
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                },
+                                {
+                                  kind: 'ObjectValue',
+                                  fields: [
+                                    {
+                                      kind: 'ObjectField',
+                                      name: { kind: 'Name', value: 'flag' },
+                                      value: {
+                                        kind: 'ObjectValue',
+                                        fields: [
+                                          {
+                                            kind: 'ObjectField',
+                                            name: {
+                                              kind: 'Name',
+                                              value: '_eq',
+                                            },
+                                            value: {
+                                              kind: 'EnumValue',
+                                              value: 'RED',
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'category' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'flag' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'message' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'status' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lap' } },
                     ],
                   },
                 },
