@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@apollo/client/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import {
@@ -8,6 +9,7 @@ import {
   GET_SESSION_LAP_TIMES,
 } from '@/lib/queries';
 
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -59,8 +61,36 @@ export default function DebugRacePlotPage() {
 
   const selectedYear = year ?? years[0] ?? null;
   const selectedEventName = eventName ?? null;
-  const eventsForYear =
-    selectedYear != null ? (eventsByYear.get(selectedYear) ?? []) : [];
+  const eventsForYear = useMemo(() => {
+    return selectedYear != null ? (eventsByYear.get(selectedYear) ?? []) : [];
+  }, [selectedYear, eventsByYear]);
+
+  const currentEventIndex = useMemo(() => {
+    if (!selectedEventName) return -1;
+    return eventsForYear.findIndex((ev) => ev.name === selectedEventName);
+  }, [eventsForYear, selectedEventName]);
+
+  const canGoPrev = currentEventIndex > 0;
+  const canGoNext =
+    eventsForYear.length > 0 &&
+    (currentEventIndex === -1 || currentEventIndex < eventsForYear.length - 1);
+
+  const goPrevEvent = () => {
+    if (!canGoPrev) return;
+    const ev = eventsForYear[currentEventIndex - 1];
+    setEventName(ev?.name ?? null);
+  };
+
+  const goNextEvent = () => {
+    if (eventsForYear.length === 0) return;
+    if (currentEventIndex === -1) {
+      setEventName(eventsForYear[0]?.name ?? null);
+      return;
+    }
+    if (currentEventIndex < eventsForYear.length - 1) {
+      setEventName(eventsForYear[currentEventIndex + 1]?.name ?? null);
+    }
+  };
 
   const { data: raceData, loading: raceLoading } =
     useQuery<GetSessionLapTimesQuery>(GET_SESSION_LAP_TIMES, {
@@ -107,25 +137,55 @@ export default function DebugRacePlotPage() {
         </div>
         <div className='space-y-2'>
           <Label>Event</Label>
-          <Select
-            value={selectedEventName ?? ''}
-            onValueChange={(v) => setEventName(v || null)}
-            disabled={eventsLoading || eventsForYear.length === 0}
-          >
-            <SelectTrigger className='w-48'>
-              <SelectValue placeholder='Event' />
-            </SelectTrigger>
-            <SelectContent>
-              {eventsForYear.map((ev) => (
-                <SelectItem
-                  key={`${ev.year}-${ev.round_number}-${ev.name}`}
-                  value={ev.name ?? ''}
-                >
-                  {ev.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className='flex items-center gap-1'>
+            <Select
+              value={selectedEventName ?? ''}
+              onValueChange={(v) => setEventName(v || null)}
+              disabled={eventsLoading || eventsForYear.length === 0}
+            >
+              <SelectTrigger className='w-48 min-w-48'>
+                <SelectValue placeholder='Event' />
+              </SelectTrigger>
+              <SelectContent>
+                {eventsForYear.map((ev) => (
+                  <SelectItem
+                    key={`${ev.year}-${ev.round_number}-${ev.name}`}
+                    value={ev.name ?? ''}
+                  >
+                    {ev.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type='button'
+              variant='outline'
+              size='icon'
+              className='shrink-0'
+              disabled={
+                eventsLoading || eventsForYear.length === 0 || !canGoPrev
+              }
+              aria-label='Previous event in season'
+              title='Previous event in season'
+              onClick={goPrevEvent}
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              size='icon'
+              className='shrink-0'
+              disabled={
+                eventsLoading || eventsForYear.length === 0 || !canGoNext
+              }
+              aria-label='Next event in season'
+              title='Next event in season'
+              onClick={goNextEvent}
+            >
+              <ChevronRight />
+            </Button>
+          </div>
         </div>
       </div>
 

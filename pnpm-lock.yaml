@@ -31,7 +31,7 @@ importers:
         version: 6.0.0
       framer-motion:
         specifier: latest
-        version: 12.36.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 12.36.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       graphql:
         specifier: latest
         version: 16.13.2
@@ -153,8 +153,11 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: latest
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 0.7.3(prettier@3.8.3)
 =======
+=======
+>>>>>>> 24a5e97 (chore(race-plot): show vsc, sc and red flags)
 <<<<<<< HEAD
         version: 0.7.2(prettier@3.8.3)
 =======
@@ -167,7 +170,16 @@ importers:
 =======
         version: 4.0.2(react@19.2.4)(tailwindcss@4.2.2)
 >>>>>>> 770de25 (chore: telemetry comparison)
+<<<<<<< HEAD
 >>>>>>> caa74db (chore: telemetry comparison)
+=======
+=======
+        version: 0.7.2(prettier@3.8.2)
+      tailwind-scrollbar:
+        specifier: latest
+        version: 4.0.2(react@19.2.5)(tailwindcss@4.2.2)
+>>>>>>> ca7f95c (chore(race-plot): show vsc, sc and red flags)
+>>>>>>> 24a5e97 (chore(race-plot): show vsc, sc and red flags)
       tailwindcss:
         specifier: latest
         version: 4.2.4
@@ -8588,14 +8600,14 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
-  framer-motion@12.36.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  framer-motion@12.36.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       motion-dom: 12.36.0
       motion-utils: 12.36.0
       tslib: 2.8.1
     optionalDependencies:
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
 
   fs-extra@9.1.0:
     dependencies:
@@ -9623,11 +9635,11 @@ snapshots:
 
   pretty-bytes@5.6.0: {}
 
-  prism-react-renderer@2.4.1(react@19.2.4):
+  prism-react-renderer@2.4.1(react@19.2.5):
     dependencies:
       '@types/prismjs': 1.26.6
       clsx: 2.1.1
-      react: 19.2.4
+      react: 19.2.5
 
   process@0.11.10: {}
 
@@ -10194,14 +10206,18 @@ snapshots:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   tailwindcss-animate@1.0.7(tailwindcss@4.2.4):
 =======
   tailwindcss-animate@1.0.7(tailwindcss@4.2.1):
 >>>>>>> 5bff672 (chore: debug views)
 =======
   tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.2.2):
+=======
+  tailwind-scrollbar@4.0.2(react@19.2.5)(tailwindcss@4.2.2):
+>>>>>>> ca7f95c (chore(race-plot): show vsc, sc and red flags)
     dependencies:
-      prism-react-renderer: 2.4.1(react@19.2.4)
+      prism-react-renderer: 2.4.1(react@19.2.5)
       tailwindcss: 4.2.2
     transitivePeerDependencies:
       - react

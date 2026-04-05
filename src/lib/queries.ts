@@ -580,6 +580,21 @@ export const GET_SESSION_LAP_TIMES = graphql(`
           session_time
         }
       }
+      race_control_messages(
+        order_by: { time: asc }
+        where: {
+          _or: [
+            { category: { _eq: SafetyCar } }
+            { flag: { _eq: RED } }
+          ]
+        }
+      ) {
+        category
+        flag
+        message
+        status
+        lap
+      }
     }
   }
 `);

@@ -33,6 +33,11 @@ export default function Home() {
                 Explore Now
               </Link>
             </Button>
+            <Button asChild>
+              <Link href='/debug' className='w-fit'>
+                debug
+              </Link>
+            </Button>
           </div>
 
           <NextEvent />

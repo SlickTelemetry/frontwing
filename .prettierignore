@@ -44,3 +44,4 @@ package-lock.json
 
 # graphql
 graphql.schema.json
+queries.ts
