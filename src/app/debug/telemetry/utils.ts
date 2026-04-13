@@ -76,6 +76,24 @@ type MetricConfig = {
   step?: 'start' | 'middle' | 'end';
 };
 
+export type CircuitCornerMarker = {
+  distance: number;
+  label: string;
+};
+
+export type TrackCornerLabel = {
+  x: number;
+  y: number;
+  label: string;
+};
+
+export type TrackTransform = {
+  originX: number;
+  originY: number;
+  cos: number;
+  sin: number;
+};
+
 export type DerivedLapSeries = {
   lap: SelectedLap;
   samples: LapSample[];
@@ -96,12 +114,12 @@ export type CompareResult = {
 
 export const METRIC_CONFIGS: MetricConfig[] = [
   { id: 'speed', label: 'Speed', yAxisName: 'km/h', smooth: true },
+  { id: 'delta', label: 'Delta', yAxisName: 's', smooth: true },
   { id: 'throttle', label: 'Throttle %', yAxisName: '%', smooth: true },
   { id: 'brake', label: 'Brake', yAxisName: 'ON/OFF', step: 'end' },
   { id: 'rpm', label: 'RPM', yAxisName: 'rpm', smooth: true },
   { id: 'drs', label: 'DRS', yAxisName: 'ON/OFF', step: 'end' },
   { id: 'gear', label: 'Gear', yAxisName: 'gear', step: 'end' },
-  { id: 'delta', label: 'Delta', yAxisName: 's', smooth: true },
 ];
 
 export const CHART_HEIGHT_BY_METRIC: Record<MetricId, number> = {
@@ -115,6 +133,7 @@ export const CHART_HEIGHT_BY_METRIC: Record<MetricId, number> = {
 };
 
 export const DRS_LAST_YEAR = 2025;
+const DRS_ON_VALUES = new Set([10, 12, 14]);
 
 export const CHART_PALETTE = [
   '#ef4444',
@@ -202,13 +221,15 @@ export function buildLapSamples(points: DebugTelemetryPoint[]) {
     seenDistance.add(distance);
     const rawElapsed =
       (p.session_time ?? p.time ?? timeOrigin) - (timeOrigin ?? 0);
+    const rawDrs = Number(p.drs ?? 0);
+    const drs = DRS_ON_VALUES.has(rawDrs) ? 1 : 0;
     samples.push({
       distance,
       elapsed: Math.max(0, rawElapsed),
       speed: Number(p.speed ?? 0),
       throttle: Number(p.throttle ?? 0),
       brake: p.brake ? 100 : 0,
-      drs: Number(p.drs ?? 0),
+      drs,
       rpm: Number(p.rpm ?? 0),
       gear: Number(p.gear ?? 0),
       x: p.x ?? null,
@@ -216,6 +237,48 @@ export function buildLapSamples(points: DebugTelemetryPoint[]) {
     });
   }
   return samples;
+}
+
+export function createTrackTransform(
+  points: Array<[number, number]>,
+  rotationDegrees?: number | null,
+): TrackTransform | null {
+  if (points.length === 0) return null;
+
+  let originX = Number.POSITIVE_INFINITY;
+  let originY = Number.POSITIVE_INFINITY;
+  for (const [x, y] of points) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    originX = Math.min(originX, x);
+    originY = Math.min(originY, y);
+  }
+
+  if (!Number.isFinite(originX) || !Number.isFinite(originY)) return null;
+
+  const angle = Number.isFinite(Number(rotationDegrees))
+    ? Number(rotationDegrees)
+    : 0;
+  const radians = (angle * Math.PI) / 180;
+  return {
+    originX,
+    originY,
+    cos: Math.cos(radians),
+    sin: Math.sin(radians),
+  };
+}
+
+export function transformTrackCoordinate(
+  point: [number, number],
+  transform: TrackTransform | null,
+): [number, number] {
+  if (!transform) return point;
+  const [x, y] = point;
+  const normalizedX = x - transform.originX;
+  const normalizedY = y - transform.originY;
+  const flippedY = -normalizedY;
+  const rotatedX = normalizedX * transform.cos - flippedY * transform.sin;
+  const rotatedY = normalizedX * transform.sin + flippedY * transform.cos;
+  return [rotatedX, -rotatedY];
 }
 
 /** Map distance along lap to track plane (x,y) using baseline samples with coordinates. */
@@ -253,7 +316,7 @@ export function distanceFromAxisPointerEvent(raw: unknown): number | null {
   return null;
 }
 
-export type MetricValueFormat = 'integer' | 'deltaFloat';
+export type MetricValueFormat = 'integer' | 'deltaFloat' | 'onOff';
 
 /** Shared dark tooltip panel (matches telemetry UI on dark background). */
 const ECHARTS_DARK_TOOLTIP = {
@@ -270,6 +333,7 @@ const ECHARTS_DARK_TOOLTIP = {
 function formatMetricYValue(value: unknown, format: MetricValueFormat): string {
   const n = Number(value);
   if (Number.isNaN(n)) return '—';
+  if (format === 'onOff') return n >= 1 ? 'ON' : 'OFF';
   if (format === 'deltaFloat') return n.toFixed(3);
   return Math.round(n).toString();
 }
@@ -286,7 +350,6 @@ function yFromTooltipParam(item: { value?: unknown; data?: unknown }): unknown {
 
 export function buildMetricOption(params: {
   title: string;
-  yAxisName: string;
   series: { name: string; color: string; data: [number, number][] }[];
   step?: 'start' | 'middle' | 'end';
   smooth?: boolean;
@@ -295,8 +358,14 @@ export function buildMetricOption(params: {
   /** Integer metrics vs delta (seconds, max 3 decimals). */
   valueFormat?: MetricValueFormat;
   yAxisSplitNumber?: number;
+  cornerMarkers?: CircuitCornerMarker[];
 }) {
   const valueFormat = params.valueFormat ?? 'integer';
+  const cornerLineData =
+    params.cornerMarkers?.map((corner) => ({
+      xAxis: corner.distance,
+      name: corner.label,
+    })) ?? [];
 
   const option: EChartsOption = {
     animation: false,
@@ -350,17 +419,15 @@ export function buildMetricOption(params: {
     },
     xAxis: {
       type: 'value',
-      name: 'Distance',
-      nameLocation: 'middle',
-      nameGap: 20,
+      axisLabel: { show: false },
+      axisTick: { show: false },
       axisPointer: { show: true, snap: false },
-      splitLine: { show: true },
+      splitLine: { show: false },
       min: 0,
       max: 'dataMax',
     },
     yAxis: {
       type: 'value',
-      name: params.yAxisName,
       nameLocation: 'start',
       min: params.yMin ?? 'dataMin',
       max: params.yMax ?? 'dataMax',
@@ -371,17 +438,56 @@ export function buildMetricOption(params: {
           formatMetricYValue(value, valueFormat),
       },
     },
-    series: params.series.map((series) => ({
-      type: 'line',
-      name: series.name,
-      data: series.data,
-      showSymbol: false,
-      smooth: Boolean(params.smooth),
-      step: params.step,
-      lineStyle: { width: 1, color: series.color },
-      itemStyle: { color: series.color },
-      emphasis: { focus: 'series' },
-    })),
+    series: [
+      ...params.series.map(
+        (series) =>
+          ({
+            type: 'line' as const,
+            name: series.name,
+            data: series.data,
+            showSymbol: false,
+            smooth: Boolean(params.smooth),
+            step: params.step,
+            lineStyle: { width: 1, color: series.color },
+            itemStyle: { color: series.color },
+            emphasis: { focus: 'series' },
+          }) as LineSeriesOption,
+      ),
+      ...(cornerLineData.length > 0
+        ? [
+            {
+              type: 'line',
+              name: '__corners__',
+              // Keep helper series invisible but bound to same coordinate system.
+              data: params.series[0]?.data ?? [],
+              showSymbol: false,
+              silent: true,
+              lineStyle: { opacity: 0 },
+              itemStyle: { opacity: 0 },
+              tooltip: { show: false },
+              z: 50,
+              markLine: {
+                symbol: 'none',
+                silent: true,
+                animation: false,
+                lineStyle: {
+                  type: 'dashed',
+                  width: 0.5,
+                  color: 'rgba(255, 255, 255, 0.65)',
+                },
+                label: {
+                  show: true,
+                  position: 'start',
+                  formatter: '{b}',
+                  color: '#e4e4e7',
+                  fontSize: 10,
+                },
+                data: cornerLineData,
+              },
+            } as LineSeriesOption,
+          ]
+        : []),
+    ],
   };
   return option;
 }
@@ -389,6 +495,7 @@ export function buildMetricOption(params: {
 export function buildTrackMapOption(
   series: LineSeriesOption[],
   cursorXY?: [number, number] | null,
+  cornerLabels?: TrackCornerLabel[],
 ) {
   const cursorSeries: ScatterSeriesOption[] =
     cursorXY != null
@@ -413,6 +520,32 @@ export function buildTrackMapOption(
         ]
       : [];
 
+  const cornerLabelSeries: ScatterSeriesOption[] =
+    cornerLabels && cornerLabels.length > 0
+      ? [
+          {
+            id: 'track-corners',
+            type: 'scatter',
+            name: 'Corners',
+            data: cornerLabels.map((corner) => [corner.x, corner.y]),
+            symbolSize: 1,
+            itemStyle: { color: 'transparent' },
+            label: {
+              show: true,
+              formatter: (params: { dataIndex?: number }) =>
+                cornerLabels[params.dataIndex ?? 0]?.label ?? '',
+              position: 'top',
+              color: '#f4f4f5',
+              fontSize: 10,
+              fontWeight: 600,
+            },
+            z: 900,
+            silent: true,
+            tooltip: { show: false },
+          },
+        ]
+      : [];
+
   const option: EChartsOption = {
     animation: false,
     title: {
@@ -428,7 +561,11 @@ export function buildTrackMapOption(
     grid: { left: 10, right: 10, top: 30, bottom: 10 },
     xAxis: { type: 'value', show: false, scale: true },
     yAxis: { type: 'value', show: false, scale: true },
-    series: [...series, ...cursorSeries] as EChartsOption['series'],
+    series: [
+      ...series,
+      ...cornerLabelSeries,
+      ...cursorSeries,
+    ] as EChartsOption['series'],
   };
   return option;
 }

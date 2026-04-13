@@ -6,6 +6,7 @@ import { LineChart, ScatterChart } from 'echarts/charts';
 import {
   AxisPointerComponent,
   GridComponent,
+  MarkLineComponent,
   TooltipComponent,
 } from 'echarts/components';
 import { TitleComponent } from 'echarts/components';
@@ -17,6 +18,7 @@ import { GripVertical, Search, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
+  GET_DEBUG_CIRCUIT_DETAILS,
   GET_DEBUG_DRIVER_LAPS,
   GET_DEBUG_HIERARCHY,
   GET_DEBUG_LAP_TELEMETRY,
@@ -41,7 +43,9 @@ import {
   buildTrackMapOption,
   CHART_HEIGHT_BY_METRIC,
   CHART_PALETTE,
+  CircuitCornerMarker,
   CompareResult,
+  createTrackTransform,
   DebugDriverSession,
   DebugLap,
   DebugTelemetryPoint,
@@ -55,6 +59,8 @@ import {
   METRIC_CONFIGS,
   MetricId,
   SelectedLap,
+  TrackCornerLabel,
+  transformTrackCoordinate,
   xyAtDistanceOnTrack,
 } from './utils';
 
@@ -66,6 +72,7 @@ echarts.use([
   TooltipComponent,
   GridComponent,
   AxisPointerComponent,
+  MarkLineComponent,
   CanvasRenderer,
   TitleComponent,
 ]);
@@ -141,6 +148,8 @@ export default function DebugTelemetryPage() {
   );
   const loadingByLapKeyRef = useRef<Record<string, boolean>>({});
   const errorByLapKeyRef = useRef<Record<string, string | null>>({});
+  const selectedLapKeySetRef = useRef<Set<string>>(new Set());
+  const activeRequestIdByLapKeyRef = useRef<Record<string, number>>({});
 
   const [chartOrder, setChartOrder] = useState<MetricId[]>(
     METRIC_CONFIGS.map((metric) => metric.id),
@@ -199,6 +208,17 @@ export default function DebugTelemetryPage() {
       skip: !selectedDriver,
     },
   );
+
+  const { data: circuitData } = useQuery<{
+    circuits: { circuit_details?: unknown | null }[];
+  }>(GET_DEBUG_CIRCUIT_DETAILS, {
+    variables: {
+      year: selectedYear ?? 0,
+      round: selectedRound ?? 0,
+      session: selectedSessionName ?? Session_Name_Choices_Enum.Race,
+    },
+    skip: !selectedYear || !selectedRound || !selectedSessionName,
+  });
 
   const session = useMemo(
     () => driversData?.sessions?.[0] ?? null,
@@ -270,7 +290,7 @@ export default function DebugTelemetryPage() {
   }, [errorByLapKey]);
 
   useEffect(() => {
-    let cancelled = false;
+    selectedLapKeySetRef.current = new Set(selectedLaps.map((lap) => lap.key));
     const pendingLaps = selectedLaps.filter(
       (lap) =>
         !telemetryByLapKeyRef.current[lap.key] &&
@@ -280,6 +300,9 @@ export default function DebugTelemetryPage() {
     if (pendingLaps.length === 0) return;
 
     for (const lap of pendingLaps) {
+      const nextRequestId =
+        (activeRequestIdByLapKeyRef.current[lap.key] ?? 0) + 1;
+      activeRequestIdByLapKeyRef.current[lap.key] = nextRequestId;
       setLoadingByLapKey((prev) => ({ ...prev, [lap.key]: true }));
       setErrorByLapKey((prev) => ({ ...prev, [lap.key]: null }));
 
@@ -297,23 +320,25 @@ export default function DebugTelemetryPage() {
           fetchPolicy: 'cache-first',
         })
         .then((result) => {
-          if (cancelled) return;
+          if (activeRequestIdByLapKeyRef.current[lap.key] !== nextRequestId)
+            return;
+          if (!selectedLapKeySetRef.current.has(lap.key)) return;
           const points = result.data?.laps?.[0]?.telemetries ?? [];
           setTelemetryByLapKey((prev) => ({ ...prev, [lap.key]: points }));
         })
         .catch((error: Error) => {
-          if (cancelled) return;
+          if (activeRequestIdByLapKeyRef.current[lap.key] !== nextRequestId)
+            return;
+          if (!selectedLapKeySetRef.current.has(lap.key)) return;
           setErrorByLapKey((prev) => ({ ...prev, [lap.key]: error.message }));
         })
         .finally(() => {
-          if (cancelled) return;
+          if (activeRequestIdByLapKeyRef.current[lap.key] !== nextRequestId)
+            return;
+          if (!selectedLapKeySetRef.current.has(lap.key)) return;
           setLoadingByLapKey((prev) => ({ ...prev, [lap.key]: false }));
         });
     }
-
-    return () => {
-      cancelled = true;
-    };
   }, [client, selectedLaps]);
 
   useEffect(() => {
@@ -376,6 +401,23 @@ export default function DebugTelemetryPage() {
     const xAxis = useInterpolation
       ? baseline.samples.map((sample) => sample.distance)
       : lapSeries[0].samples.map((sample) => sample.distance);
+    const baselineMaxDistance =
+      baseline.samples[baseline.samples.length - 1]?.distance ?? 0;
+
+    const mapDistanceByLapProgress = (
+      targetDistanceOnBaseline: number,
+      lapMaxDistance: number,
+    ) => {
+      if (
+        !useInterpolation ||
+        baselineMaxDistance <= 0 ||
+        lapMaxDistance <= 0
+      ) {
+        return targetDistanceOnBaseline;
+      }
+      const progress = targetDistanceOnBaseline / baselineMaxDistance;
+      return progress * lapMaxDistance;
+    };
 
     const createSeriesData = (
       lap: DerivedLapSeries,
@@ -397,12 +439,60 @@ export default function DebugTelemetryPage() {
       );
     };
 
+    const createBinarySeriesData = (
+      lap: DerivedLapSeries,
+      selector: (sample: LapSample) => number,
+    ) => {
+      if (!useInterpolation) {
+        return lap.samples.map(
+          (sample) => [sample.distance, selector(sample)] as [number, number],
+        );
+      }
+
+      const distances = lap.samples.map((sample) => sample.distance);
+      const values = lap.samples.map(selector);
+      const lapMaxDistance = distances[distances.length - 1] ?? 0;
+
+      return xAxis.map((distance) => {
+        const mappedDistance = mapDistanceByLapProgress(
+          distance,
+          lapMaxDistance,
+        );
+        let right = distances.length - 1;
+        while (right >= 0 && distances[right] > mappedDistance) {
+          right -= 1;
+        }
+        const heldValue = right >= 0 ? values[right] : (values[0] ?? 0);
+        return [distance, heldValue >= 1 ? 1 : 0] as [number, number];
+      });
+    };
+
+    const elapsedByLapKey = new Map<string, number[]>();
+    for (const lap of lapSeries) {
+      const rawElapsed = lap.samples.map((sample) => sample.elapsed);
+      const rawLapElapsedMs = rawElapsed[rawElapsed.length - 1] ?? 0;
+      const officialLapTimeMs = lap.lap.lapTime ?? null;
+      if (
+        officialLapTimeMs != null &&
+        officialLapTimeMs > 0 &&
+        rawLapElapsedMs > 0
+      ) {
+        const scale = officialLapTimeMs / rawLapElapsedMs;
+        elapsedByLapKey.set(
+          lap.lap.key,
+          rawElapsed.map((value) => value * scale),
+        );
+      } else {
+        elapsedByLapKey.set(lap.lap.key, rawElapsed);
+      }
+    }
+
     const baselineElapsedDistances = baseline.samples.map(
       (sample) => sample.distance,
     );
-    const baselineElapsedValues = baseline.samples.map(
-      (sample) => sample.elapsed,
-    );
+    const baselineElapsedValues =
+      elapsedByLapKey.get(baseline.lap.key) ??
+      baseline.samples.map((sample) => sample.elapsed);
 
     const seriesByMetric: CompareResult['seriesByMetric'] = {
       speed: [],
@@ -419,9 +509,9 @@ export default function DebugTelemetryPage() {
       const color = lapColorByKey[lap.lap.key] ?? '#999999';
       const speed = createSeriesData(lap, (sample) => sample.speed);
       const throttle = createSeriesData(lap, (sample) => sample.throttle);
-      const brake = createSeriesData(lap, (sample) => sample.brake);
+      const brake = createBinarySeriesData(lap, (sample) => sample.brake);
       const rpm = createSeriesData(lap, (sample) => sample.rpm);
-      const drs = createSeriesData(lap, (sample) => sample.drs);
+      const drs = createBinarySeriesData(lap, (sample) => sample.drs);
       const gear = createSeriesData(lap, (sample) => sample.gear);
       let delta: [number, number][] = [];
 
@@ -429,12 +519,19 @@ export default function DebugTelemetryPage() {
         delta = xAxis.map((distance) => [distance, 0] as [number, number]);
       } else {
         const distances = lap.samples.map((sample) => sample.distance);
-        const elapsedValues = lap.samples.map((sample) => sample.elapsed);
+        const elapsedValues =
+          elapsedByLapKey.get(lap.lap.key) ??
+          lap.samples.map((sample) => sample.elapsed);
+        const lapMaxDistance = distances[distances.length - 1] ?? 0;
         delta = xAxis.map((distance) => {
+          const mappedDistance = mapDistanceByLapProgress(
+            distance,
+            lapMaxDistance,
+          );
           const lapElapsed = binaryInterpolate(
             distances,
             elapsedValues,
-            distance,
+            mappedDistance,
           );
           const baselineElapsed = binaryInterpolate(
             baselineElapsedDistances,
@@ -482,49 +579,121 @@ export default function DebugTelemetryPage() {
       } else {
         const lapsWithInterpolation = lapSeries.map((lap) => {
           const distances = lap.samples.map((sample) => sample.distance);
-          const elapsed = lap.samples.map((sample) => sample.elapsed);
-          return { lap, distances, elapsed };
+          const elapsed =
+            elapsedByLapKey.get(lap.lap.key) ??
+            lap.samples.map((sample) => sample.elapsed);
+          const lapMaxDistance = distances[distances.length - 1] ?? 0;
+          return { lap, distances, elapsed, lapMaxDistance };
         });
+
+        const TRACK_SWITCH_TOLERANCE_MS = 2.5;
+        const MIN_WINNER_RUN_DISTANCE_M = 45;
 
         type Segment = {
           winnerKey: string;
           points: [number, number][];
         };
-        const segments: Segment[] = [];
+        const rawWinnerKeys: string[] = [];
+        const segmentLengths: number[] = [];
 
         for (let index = 0; index < baselineTrack.length - 1; index += 1) {
           const start = baselineTrack[index];
           const end = baselineTrack[index + 1];
+          const timeByLapKey: Record<string, number> = {};
           let bestLapKey = baseline.lap.key;
           let bestTime = Number.POSITIVE_INFINITY;
 
           for (const item of lapsWithInterpolation) {
+            const startDistance = mapDistanceByLapProgress(
+              start.distance,
+              item.lapMaxDistance,
+            );
+            const endDistance = mapDistanceByLapProgress(
+              end.distance,
+              item.lapMaxDistance,
+            );
             const t0 = binaryInterpolate(
               item.distances,
               item.elapsed,
-              start.distance,
+              startDistance,
             );
             const t1 = binaryInterpolate(
               item.distances,
               item.elapsed,
-              end.distance,
+              endDistance,
             );
             const segmentTime = t1 - t0;
+            timeByLapKey[item.lap.lap.key] = segmentTime;
             if (segmentTime < bestTime) {
               bestTime = segmentTime;
               bestLapKey = item.lap.lap.key;
             }
           }
 
+          const previousWinner = rawWinnerKeys[rawWinnerKeys.length - 1];
+          if (previousWinner && previousWinner !== bestLapKey) {
+            const previousWinnerTime = timeByLapKey[previousWinner];
+            if (
+              Number.isFinite(previousWinnerTime) &&
+              previousWinnerTime - bestTime <= TRACK_SWITCH_TOLERANCE_MS
+            ) {
+              bestLapKey = previousWinner;
+            }
+          }
+
+          rawWinnerKeys.push(bestLapKey);
+          segmentLengths.push(Math.max(0, end.distance - start.distance));
+        }
+
+        const stabilizedWinnerKeys = [...rawWinnerKeys];
+        let runStart = 0;
+        while (runStart < stabilizedWinnerKeys.length) {
+          let runEnd = runStart + 1;
+          while (
+            runEnd < stabilizedWinnerKeys.length &&
+            stabilizedWinnerKeys[runEnd] === stabilizedWinnerKeys[runStart]
+          ) {
+            runEnd += 1;
+          }
+
+          const runDistance = segmentLengths
+            .slice(runStart, runEnd)
+            .reduce((sum, value) => sum + value, 0);
+          const previousWinner =
+            runStart > 0 ? stabilizedWinnerKeys[runStart - 1] : null;
+          const nextWinner =
+            runEnd < stabilizedWinnerKeys.length
+              ? stabilizedWinnerKeys[runEnd]
+              : null;
+
+          if (
+            runDistance < MIN_WINNER_RUN_DISTANCE_M &&
+            previousWinner &&
+            nextWinner &&
+            previousWinner === nextWinner
+          ) {
+            for (let i = runStart; i < runEnd; i += 1) {
+              stabilizedWinnerKeys[i] = previousWinner;
+            }
+          }
+
+          runStart = runEnd;
+        }
+
+        const segments: Segment[] = [];
+        for (let index = 0; index < stabilizedWinnerKeys.length; index += 1) {
+          const start = baselineTrack[index];
+          const end = baselineTrack[index + 1];
+          const winnerKey = stabilizedWinnerKeys[index];
           const linePoints: [number, number][] = [
             [start.x ?? 0, start.y ?? 0],
             [end.x ?? 0, end.y ?? 0],
           ];
           const last = segments[segments.length - 1];
-          if (last && last.winnerKey === bestLapKey) {
+          if (last && last.winnerKey === winnerKey) {
             last.points.push(linePoints[1]);
           } else {
-            segments.push({ winnerKey: bestLapKey, points: linePoints });
+            segments.push({ winnerKey, points: linePoints });
           }
         }
 
@@ -558,70 +727,174 @@ export default function DebugTelemetryPage() {
   const derivedSeriesRef = useRef(derivedSeries);
   derivedSeriesRef.current = derivedSeries;
 
+  const baselineLapTimeMs = useMemo(() => {
+    if (!derivedSeries.baselineKey) return null;
+    const baselineLap = selectedLaps.find(
+      (lap) => lap.key === derivedSeries.baselineKey,
+    );
+    return baselineLap?.lapTime ?? null;
+  }, [derivedSeries.baselineKey, selectedLaps]);
+
+  const cornerMarkers = useMemo<CircuitCornerMarker[]>(() => {
+    const details = circuitData?.circuits?.[0]?.circuit_details as
+      | {
+          corners?: Array<{
+            Number?: number | null;
+            Letter?: string | null;
+            Distance?: number | null;
+          }>;
+        }
+      | undefined;
+
+    const corners = details?.corners ?? [];
+    const markers = corners
+      .map((corner) => {
+        const distance = Number(corner.Distance);
+        if (!Number.isFinite(distance)) return null;
+        const number = corner.Number;
+        const letter = corner.Letter?.trim();
+        const label = `${number ?? ''}${letter ?? ''}`.trim();
+        return {
+          distance,
+          label: label.length > 0 ? label : 'Corner',
+        };
+      })
+      .filter((marker): marker is CircuitCornerMarker => marker !== null)
+      .sort((a, b) => a.distance - b.distance);
+    return markers;
+  }, [circuitData]);
+
+  const trackCornerLabels = useMemo<TrackCornerLabel[]>(() => {
+    const labels = cornerMarkers
+      .map((corner) => {
+        const xy = xyAtDistanceOnTrack(
+          derivedSeries.baselineTrackSamples,
+          corner.distance,
+        );
+        if (!xy) return null;
+        return { x: xy[0], y: xy[1], label: corner.label };
+      })
+      .filter((item): item is TrackCornerLabel => item !== null);
+    return labels;
+  }, [cornerMarkers, derivedSeries.baselineTrackSamples]);
+
+  const trackTransform = useMemo(() => {
+    const details = circuitData?.circuits?.[0]?.circuit_details as
+      | { rotation?: number | null }
+      | undefined;
+    const referencePoints = derivedSeries.baselineTrackSamples
+      .filter(
+        (sample) =>
+          sample.x != null &&
+          sample.y != null &&
+          Number.isFinite(sample.x) &&
+          Number.isFinite(sample.y),
+      )
+      .map(
+        (sample) =>
+          [sample.x as number, sample.y as number] as [number, number],
+      );
+    return createTrackTransform(referencePoints, details?.rotation ?? 0);
+  }, [circuitData, derivedSeries.baselineTrackSamples]);
+
+  const rotatedTrackSeries = useMemo<LineSeriesOption[]>(() => {
+    return derivedSeries.trackSeries.map((series) => {
+      const transformedData = (series.data ?? []).map((point) => {
+        if (!Array.isArray(point) || point.length < 2)
+          return [0, 0] as [number, number];
+        const x = Number(point[0]);
+        const y = Number(point[1]);
+        if (!Number.isFinite(x) || !Number.isFinite(y))
+          return [0, 0] as [number, number];
+        return transformTrackCoordinate([x, y], trackTransform);
+      });
+      return {
+        ...series,
+        data: transformedData,
+      };
+    });
+  }, [derivedSeries.trackSeries, trackTransform]);
+
+  const rotatedTrackCornerLabels = useMemo<TrackCornerLabel[]>(() => {
+    return trackCornerLabels.map((corner) => {
+      const [x, y] = transformTrackCoordinate(
+        [corner.x, corner.y],
+        trackTransform,
+      );
+      return { ...corner, x, y };
+    });
+  }, [trackCornerLabels, trackTransform]);
+
+  const rotatedTrackMapCursor = useMemo<[number, number] | null>(() => {
+    if (!trackMapCursor) return null;
+    return transformTrackCoordinate(trackMapCursor, trackTransform);
+  }, [trackMapCursor, trackTransform]);
+
   const metricOptions = useMemo(() => {
     const options: Record<MetricId, EChartsOption> = {
       speed: buildMetricOption({
-        title: 'Speed',
-        yAxisName: 'km/h',
+        title: 'Speed (km/h)',
         series: derivedSeries.seriesByMetric.speed,
         smooth: true,
         valueFormat: 'integer',
+        cornerMarkers,
       }),
       throttle: buildMetricOption({
         title: 'Throttle %',
-        yAxisName: '%',
         series: derivedSeries.seriesByMetric.throttle,
         smooth: true,
         yMin: 0,
         yMax: 100,
         valueFormat: 'integer',
         yAxisSplitNumber: 2,
+        cornerMarkers,
       }),
       brake: buildMetricOption({
-        title: 'Brake',
-        yAxisName: 'ON/OFF',
+        title: 'Brake (ON/OFF)',
         series: derivedSeries.seriesByMetric.brake,
         step: 'end',
         yMin: 0,
-        yMax: 100,
-        valueFormat: 'integer',
+        yMax: 1,
+        valueFormat: 'onOff',
         yAxisSplitNumber: 1,
+        cornerMarkers,
       }),
       rpm: buildMetricOption({
-        title: 'RPM',
-        yAxisName: 'rpm',
+        title: 'RPM (rpm)',
         series: derivedSeries.seriesByMetric.rpm,
         smooth: true,
         valueFormat: 'integer',
+        cornerMarkers,
       }),
       drs: buildMetricOption({
-        title: 'DRS',
-        yAxisName: 'ON/OFF',
+        title: 'DRS (ON/OFF)',
         series: derivedSeries.seriesByMetric.drs,
         step: 'end',
         yMin: 0,
-        yMax: 100,
-        valueFormat: 'integer',
+        yMax: 1,
+        valueFormat: 'onOff',
+        yAxisSplitNumber: 1,
+        cornerMarkers,
       }),
       gear: buildMetricOption({
         title: 'Gear',
-        yAxisName: 'gear',
         series: derivedSeries.seriesByMetric.gear,
         step: 'end',
         valueFormat: 'integer',
         yAxisSplitNumber: 3,
+        cornerMarkers,
       }),
       delta: buildMetricOption({
-        title: 'Delta (time lost/gained)',
-        yAxisName: 's',
+        title: 'Delta (s)',
         series: derivedSeries.seriesByMetric.delta,
         smooth: true,
         valueFormat: 'deltaFloat',
         yAxisSplitNumber: 1,
+        cornerMarkers,
       }),
     };
     return options;
-  }, [derivedSeries.seriesByMetric]);
+  }, [cornerMarkers, derivedSeries.seriesByMetric]);
 
   const shouldShowDrs = useMemo(() => {
     if (selectedLaps.length > 0) {
@@ -639,8 +912,13 @@ export default function DebugTelemetryPage() {
   );
 
   const trackMapOption = useMemo(
-    () => buildTrackMapOption(derivedSeries.trackSeries, trackMapCursor),
-    [derivedSeries.trackSeries, trackMapCursor],
+    () =>
+      buildTrackMapOption(
+        rotatedTrackSeries,
+        rotatedTrackMapCursor,
+        rotatedTrackCornerLabels,
+      ),
+    [rotatedTrackCornerLabels, rotatedTrackMapCursor, rotatedTrackSeries],
   );
 
   useEffect(() => {
@@ -670,15 +948,21 @@ export default function DebugTelemetryPage() {
 
     const charts = visibleChartOrder
       .map((id) => metricChartInstances[id])
-      .filter((c): c is EChartsType => Boolean(c));
+      .filter(
+        (c): c is EChartsType => Boolean(c) && !(c as EChartsType).isDisposed(),
+      );
 
     for (const chart of charts) {
-      chart.on('updateAxisPointer', onAxisPointer);
+      if (!chart.isDisposed()) {
+        chart.on('updateAxisPointer', onAxisPointer);
+      }
     }
 
     return () => {
       for (const chart of charts) {
-        chart.off('updateAxisPointer', onAxisPointer);
+        if (!chart.isDisposed()) {
+          chart.off('updateAxisPointer', onAxisPointer);
+        }
       }
     };
   }, [
@@ -793,7 +1077,7 @@ export default function DebugTelemetryPage() {
 
       <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
         <Select
-          value={selectedYear?.toString()}
+          value={selectedYear !== null ? selectedYear.toString() : ''}
           onValueChange={(value) => {
             setSelectedYear(parseInt(value, 10));
             setSelectedRound(null);
@@ -815,7 +1099,7 @@ export default function DebugTelemetryPage() {
         </Select>
 
         <Select
-          value={selectedRound?.toString()}
+          value={selectedRound !== null ? selectedRound.toString() : ''}
           onValueChange={(value) => {
             setSelectedRound(parseInt(value, 10));
             setSelectedSessionName(null);
@@ -859,7 +1143,7 @@ export default function DebugTelemetryPage() {
         </Select>
 
         <div className='text-muted-foreground flex items-center rounded border px-3 text-sm'>
-          Selected laps:{' '}
+          Selected laps #:{' '}
           <span className='ml-2 font-semibold'>{selectedLaps.length}</span>
         </div>
       </div>
@@ -876,15 +1160,14 @@ export default function DebugTelemetryPage() {
         <div className='grid gap-2 sm:grid-cols-2 xl:grid-cols-3'>
           {selectedLaps.map((lap) => {
             const color = lapColorByKey[lap.key];
-            const deltaSeries = derivedSeries.seriesByMetric.delta.find(
-              (series) => series.name === lapLabel(lap),
-            );
-            const deltaEnd = deltaSeries?.data?.slice(-1)?.[0]?.[1];
+            const lapTimeDeltaSec =
+              lap.lapTime != null && baselineLapTimeMs != null
+                ? (lap.lapTime - baselineLapTimeMs) / 1000
+                : null;
             const showDelta =
               lap.key !== derivedSeries.baselineKey &&
               Boolean(derivedSeries.baselineKey) &&
-              (deltaSeries?.data?.length ?? 0) > 0 &&
-              deltaEnd != null;
+              lapTimeDeltaSec != null;
 
             return (
               <div key={lap.key} className='rounded border p-2 text-sm'>
@@ -919,7 +1202,8 @@ export default function DebugTelemetryPage() {
                   </p>
                   {showDelta ? (
                     <p className='text-muted-foreground shrink-0 text-xs tabular-nums'>
-                      +{deltaEnd.toFixed(3)} s
+                      {lapTimeDeltaSec >= 0 ? '+' : ''}
+                      {lapTimeDeltaSec.toFixed(3)} s
                     </p>
                   ) : null}
                 </div>

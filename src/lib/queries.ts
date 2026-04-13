@@ -193,6 +193,27 @@ export const GET_DEBUG_LAP_TELEMETRY_NO_DRS = gql`
   }
 `;
 
+export const GET_DEBUG_CIRCUIT_DETAILS = gql`
+  query GetDebugCircuitDetails(
+    $year: Int!
+    $round: Int!
+    $session: session_name_choices_enum!
+  ) @cached {
+    circuits(
+      where: {
+        year: { _eq: $year }
+        sessions: {
+          name: { _eq: $session }
+          event: { round_number: { _eq: $round }, year: { _eq: $year } }
+        }
+      }
+      limit: 1
+    ) {
+      circuit_details
+    }
+  }
+`;
+
 export const GET_CONSTRUCTOR = gql`
   query GetConstructor($_id: String!) @cached {
     constructors(where: { ergast_id: { _eq: $_id } }) {
