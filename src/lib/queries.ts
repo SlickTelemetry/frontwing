@@ -51,6 +51,9 @@ export const GET_DEBUG_SESSION_DRIVERS = gql`
       driver_sessions(order_by: { driver: { full_name: asc } }) {
         driver_id
         session_id
+        constructorByConstructorId {
+          color
+        }
         driver {
           abbreviation
           full_name
@@ -78,6 +81,21 @@ export const GET_DEBUG_DRIVER_LAPS = gql`
         sector1
         sector2
         sector3
+        pitin_time
+        pitout_time
+        session_time
+      }
+    }
+  }
+`;
+
+export const GET_DEBUG_SESSION_FASTEST_LAP = gql`
+  query GetDebugSessionFastestLap($sessionId: String!) @cached {
+    laps_aggregate(where: { driver_session: { session_id: { _eq: $sessionId } } }) {
+      aggregate {
+        min {
+          lap_time
+        }
       }
     }
   }

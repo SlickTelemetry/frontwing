@@ -24,6 +24,7 @@ import {
   GET_DEBUG_LAP_TELEMETRY,
   GET_DEBUG_LAP_TELEMETRY_NO_DRS,
   GET_DEBUG_SESSION_DRIVERS,
+  GET_DEBUG_SESSION_FASTEST_LAP,
 } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 import { useECharts } from '@/hooks/use-EChart';
@@ -35,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 import {
   binaryInterpolate,
@@ -77,6 +79,107 @@ echarts.use([
   TitleComponent,
 ]);
 
+function normalizeHexColor(input?: string | null): string | null {
+  if (!input) return null;
+  const raw = input.trim();
+  if (!raw) return null;
+  const hex = raw.startsWith('#') ? raw.slice(1) : raw;
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+  return `#${hex.toLowerCase()}`;
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const value = normalizeHexColor(hex) ?? '#999999';
+  const r = Number.parseInt(value.slice(1, 3), 16);
+  const g = Number.parseInt(value.slice(3, 5), 16);
+  const b = Number.parseInt(value.slice(5, 7), 16);
+  return [r, g, b];
+}
+
+function colorDistance(a: string, b: string): number {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  return Math.sqrt((ar - br) ** 2 + (ag - bg) ** 2 + (ab - bb) ** 2);
+}
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let rPrime = 0;
+  let gPrime = 0;
+  let bPrime = 0;
+  if (h < 60) {
+    rPrime = c;
+    gPrime = x;
+  } else if (h < 120) {
+    rPrime = x;
+    gPrime = c;
+  } else if (h < 180) {
+    gPrime = c;
+    bPrime = x;
+  } else if (h < 240) {
+    gPrime = x;
+    bPrime = c;
+  } else if (h < 300) {
+    rPrime = x;
+    bPrime = c;
+  } else {
+    rPrime = c;
+    bPrime = x;
+  }
+  const toByte = (v: number) =>
+    Math.round((v + m) * 255)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${toByte(rPrime)}${toByte(gPrime)}${toByte(bPrime)}`;
+}
+
+function generateDistinctLapColor(
+  seed: string,
+  blockedColors: string[],
+): string {
+  const normalizedBlocked = blockedColors
+    .map((color) => normalizeHexColor(color))
+    .filter((color): color is string => Boolean(color));
+  const seedHash = hashString(seed);
+  let bestCandidate = '#cccccc';
+  let bestMinDistance = -1;
+
+  for (let i = 0; i < 36; i += 1) {
+    const hue = (seedHash * 13 + i * 137.508) % 360;
+    const saturation = 0.7 + ((seedHash + i * 17) % 20) / 100;
+    const lightness = 0.42 + ((seedHash + i * 29) % 14) / 100;
+    const candidate = hslToHex(hue, saturation, lightness);
+    const minDistance =
+      normalizedBlocked.length > 0
+        ? Math.min(
+            ...normalizedBlocked.map((blocked) =>
+              colorDistance(candidate, blocked),
+            ),
+          )
+        : 999;
+
+    if (minDistance > bestMinDistance) {
+      bestMinDistance = minDistance;
+      bestCandidate = candidate;
+    }
+    if (minDistance >= 115) {
+      return candidate;
+    }
+  }
+
+  return bestCandidate;
+}
+
 function TelemetryChart({
   chartId,
   option,
@@ -117,6 +220,8 @@ export default function DebugTelemetryPage() {
   const [metricChartInstances, setMetricChartInstances] = useState<
     Record<string, EChartsType>
   >({});
+  const [selectedDriverLapChartInstance, setSelectedDriverLapChartInstance] =
+    useState<EChartsType | null>(null);
   const [trackMapCursor, setTrackMapCursor] = useState<[number, number] | null>(
     null,
   );
@@ -132,6 +237,7 @@ export default function DebugTelemetryPage() {
     useState<Session_Name_Choices_Enum | null>(null);
   const [driverFilter, setDriverFilter] = useState('');
   const [lapFilter, setLapFilter] = useState('');
+  const [showOutlierLaps, setShowOutlierLaps] = useState(false);
 
   const [selectedLaps, setSelectedLaps] = useState<SelectedLap[]>([]);
   const [telemetryByLapKey, setTelemetryByLapKey] = useState<
@@ -155,6 +261,19 @@ export default function DebugTelemetryPage() {
     METRIC_CONFIGS.map((metric) => metric.id),
   );
   const [draggingChartId, setDraggingChartId] = useState<MetricId | null>(null);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const updateLargeScreen = (event?: MediaQueryListEvent) => {
+      setIsLargeScreen(event ? event.matches : mediaQuery.matches);
+    };
+    updateLargeScreen();
+    mediaQuery.addEventListener('change', updateLargeScreen);
+    return () => mediaQuery.removeEventListener('change', updateLargeScreen);
+  }, []);
+
+  const trackMapHeight = isLargeScreen ? 200 : 400;
 
   const { data: hierarchyData, loading: hierarchyLoading } = useQuery<{
     events: {
@@ -209,6 +328,17 @@ export default function DebugTelemetryPage() {
     },
   );
 
+  const { data: sessionFastestData } = useQuery<{
+    laps_aggregate: {
+      aggregate?: { min?: { lap_time?: number | null } | null } | null;
+    };
+  }>(GET_DEBUG_SESSION_FASTEST_LAP, {
+    variables: {
+      sessionId: selectedDriver?.sessionId ?? '',
+    },
+    skip: !selectedDriver?.sessionId,
+  });
+
   const { data: circuitData } = useQuery<{
     circuits: { circuit_details?: unknown | null }[];
   }>(GET_DEBUG_CIRCUIT_DETAILS, {
@@ -252,6 +382,138 @@ export default function DebugTelemetryPage() {
       return lapNumber.includes(query) || lapTime.includes(query);
     });
   }, [lapFilter, laps]);
+
+  const selectedDriverSessionFastestLap = useMemo(
+    () => sessionFastestData?.laps_aggregate?.aggregate?.min?.lap_time ?? null,
+    [sessionFastestData],
+  );
+
+  const visibleFilteredLaps = useMemo(() => {
+    if (showOutlierLaps) return filteredLaps;
+    const outlierThreshold =
+      selectedDriverSessionFastestLap != null
+        ? selectedDriverSessionFastestLap * 1.1
+        : null;
+    return filteredLaps.filter((lap) => {
+      const hasPit = Boolean(lap.pitin_time) || Boolean(lap.pitout_time);
+      if (hasPit) return false;
+      if (
+        outlierThreshold != null &&
+        lap.lap_time != null &&
+        lap.lap_time > outlierThreshold
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [filteredLaps, selectedDriverSessionFastestLap, showOutlierLaps]);
+
+  const selectedDriverColor = useMemo(() => {
+    if (!selectedDriver) return '#60a5fa';
+    const sessionDriver = drivers.find(
+      (item) =>
+        item.driver_id === selectedDriver.driverId &&
+        item.session_id === selectedDriver.sessionId,
+    );
+    const raw = sessionDriver?.constructorByConstructorId?.color;
+    return raw ? `#${raw}` : '#60a5fa';
+  }, [drivers, selectedDriver]);
+
+  const selectedDriverLapChartOption = useMemo<EChartsOption>(() => {
+    const points = visibleFilteredLaps
+      .filter(
+        (lap) =>
+          lap.lap_number != null &&
+          lap.lap_time != null &&
+          Number.isFinite(lap.lap_number) &&
+          Number.isFinite(lap.lap_time),
+      )
+      .map((lap) => {
+        const x = Number(lap.lap_number);
+        return [x, Number(lap.lap_time), Number(lap.lap_number)] as [
+          number,
+          number,
+          number,
+        ];
+      });
+
+    const selectedLapNumberSet = new Set(
+      selectedLaps
+        .filter(
+          (lap) =>
+            selectedDriver != null &&
+            lap.driverId === selectedDriver.driverId &&
+            lap.sessionId === selectedDriver.sessionId,
+        )
+        .map((lap) => lap.lapNumber),
+    );
+    const selectedPoints = points.filter((point) =>
+      selectedLapNumberSet.has(point[2]),
+    );
+
+    return {
+      animation: false,
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'line' },
+        confine: true,
+        formatter: (raw: unknown) => {
+          const params = (Array.isArray(raw) ? raw[0] : raw) as
+            | { value?: [number, number, number] }
+            | undefined;
+          const value = params?.value;
+          if (!value) return '';
+          const [, lapTime, lapNumber] = value;
+          return `Lap ${lapNumber}<br/>${formatLapTime(lapTime)}`;
+        },
+      },
+      grid: { left: 48, right: 20, top: 18, bottom: 36 },
+      xAxis: {
+        type: 'value',
+        name: 'LAP NUMBER',
+        nameLocation: 'middle',
+        nameGap: 28,
+        min: 1,
+        max: 'dataMax',
+        axisLabel: {
+          formatter: (value: number) => Math.round(value).toString(),
+        },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'LAP TIME',
+        nameLocation: 'middle',
+        nameGap: 40,
+        min: 'dataMin',
+        axisLabel: {
+          formatter: (value: number) => formatLapTime(value),
+        },
+      },
+      series: [
+        {
+          type: 'line',
+          smooth: true,
+          showSymbol: true,
+          symbolSize: 6,
+          lineStyle: { width: 2, color: selectedDriverColor },
+          itemStyle: { color: selectedDriverColor },
+          data: points,
+        },
+        {
+          type: 'scatter',
+          name: 'Selected laps',
+          symbolSize: 11,
+          itemStyle: {
+            color: selectedDriverColor,
+            borderColor: '#ffffff',
+            borderWidth: 2,
+          },
+          data: selectedPoints,
+          z: 10,
+        },
+      ],
+    };
+  }, [selectedDriver, selectedDriverColor, selectedLaps, visibleFilteredLaps]);
 
   const selectedLapKeySet = useMemo(
     () => new Set(selectedLaps.map((lap) => lap.key)),
@@ -354,10 +616,32 @@ export default function DebugTelemetryPage() {
 
   const lapColorByKey = useMemo(() => {
     const colorMap: Record<string, string> = {};
-    for (let index = 0; index < selectedLaps.length; index += 1) {
-      colorMap[selectedLaps[index].key] =
-        CHART_PALETTE[index % CHART_PALETTE.length];
+    const teamLapCount = new Map<string, number>();
+    const usedColorsByTeam = new Map<string, string[]>();
+
+    for (const lap of selectedLaps) {
+      const constructorColor =
+        normalizeHexColor(lap.constructorColor) ??
+        CHART_PALETTE[hashString(lap.driverId) % CHART_PALETTE.length];
+      const teamKey = constructorColor;
+      const teamCount = teamLapCount.get(teamKey) ?? 0;
+      const usedTeamColors = usedColorsByTeam.get(teamKey) ?? [];
+
+      if (teamCount === 0) {
+        colorMap[lap.key] = constructorColor;
+        usedColorsByTeam.set(teamKey, [...usedTeamColors, constructorColor]);
+      } else {
+        const altColor = generateDistinctLapColor(lap.key, [
+          constructorColor,
+          ...usedTeamColors,
+        ]);
+        colorMap[lap.key] = altColor;
+        usedColorsByTeam.set(teamKey, [...usedTeamColors, altColor]);
+      }
+
+      teamLapCount.set(teamKey, teamCount + 1);
     }
+
     return colorMap;
   }, [selectedLaps]);
 
@@ -977,57 +1261,95 @@ export default function DebugTelemetryPage() {
     selectedSessionName != null &&
     selectedDriver != null;
 
-  const addOrRemoveLap = (lap: DebugLap) => {
-    if (!currentContextReady || lap.lap_number == null) return;
-    const lapNumber = lap.lap_number;
-    const driver = drivers.find(
-      (d) =>
-        d.driver_id === selectedDriver?.driverId &&
-        d.session_id === selectedDriver?.sessionId,
-    );
-    if (!driver || !selectedDriver || !currentEvent || !selectedSessionName)
-      return;
+  const addOrRemoveLap = useCallback(
+    (lap: DebugLap) => {
+      if (!currentContextReady || lap.lap_number == null) return;
+      const lapNumber = lap.lap_number;
+      const driver = drivers.find(
+        (d) =>
+          d.driver_id === selectedDriver?.driverId &&
+          d.session_id === selectedDriver?.sessionId,
+      );
+      if (!driver || !selectedDriver || !currentEvent || !selectedSessionName)
+        return;
 
-    const key = makeLapKey({
-      year: selectedYear,
-      round: selectedRound,
-      sessionName: selectedSessionName,
-      driverId: selectedDriver.driverId,
-      sessionId: selectedDriver.sessionId,
-      lapNumber,
-    });
+      const key = makeLapKey({
+        year: selectedYear,
+        round: selectedRound,
+        sessionName: selectedSessionName,
+        driverId: selectedDriver.driverId,
+        sessionId: selectedDriver.sessionId,
+        lapNumber,
+      });
 
-    setSelectedLaps((prev) => {
-      if (prev.some((item) => item.key === key)) {
-        return prev.filter((item) => item.key !== key);
+      setSelectedLaps((prev) => {
+        if (prev.some((item) => item.key === key)) {
+          return prev.filter((item) => item.key !== key);
+        }
+        return [
+          ...prev,
+          {
+            key,
+            year: selectedYear,
+            round: selectedRound,
+            eventName: currentEvent.name,
+            sessionName: selectedSessionName,
+            driverId: selectedDriver.driverId,
+            sessionId: selectedDriver.sessionId,
+            constructorColor: driver.constructorByConstructorId?.color
+              ? `#${driver.constructorByConstructorId.color}`
+              : null,
+            driverAbbr: driver.driver?.abbreviation ?? 'UNK',
+            driverNumber: driver.driver?.number ?? null,
+            lapNumber,
+            lapTime: lap.lap_time ?? null,
+          },
+        ];
+      });
+    },
+    [
+      currentContextReady,
+      currentEvent,
+      drivers,
+      selectedDriver,
+      selectedRound,
+      selectedSessionName,
+      selectedYear,
+    ],
+  );
+
+  useEffect(() => {
+    const chart = selectedDriverLapChartInstance;
+    if (!chart || chart.isDisposed()) return;
+
+    const onClick = (evt: unknown) => {
+      const event = evt as { data?: unknown; value?: unknown };
+      const rawValue = Array.isArray(event.data)
+        ? event.data
+        : Array.isArray(event.value)
+          ? event.value
+          : null;
+      if (!rawValue || rawValue.length === 0) return;
+
+      const lapNumberCandidate =
+        rawValue.length >= 3 ? Number(rawValue[2]) : Number(rawValue[0]);
+      if (!Number.isFinite(lapNumberCandidate)) return;
+
+      const lap = visibleFilteredLaps.find(
+        (item) => item.lap_number === lapNumberCandidate,
+      );
+      if (!lap) return;
+
+      addOrRemoveLap(lap);
+    };
+
+    chart.on('click', onClick);
+    return () => {
+      if (!chart.isDisposed()) {
+        chart.off('click', onClick);
       }
-      return [
-        ...prev,
-        {
-          key,
-          year: selectedYear,
-          round: selectedRound,
-          eventName: currentEvent.name,
-          sessionName: selectedSessionName,
-          driverId: selectedDriver.driverId,
-          sessionId: selectedDriver.sessionId,
-          driverAbbr: driver.driver?.abbreviation ?? 'UNK',
-          driverNumber: driver.driver?.number ?? null,
-          lapNumber,
-          lapTime: lap.lap_time ?? null,
-        },
-      ];
-    });
-  };
-
-  const selectedCountsByDriverSession = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const lap of selectedLaps) {
-      const key = `${lap.driverId}:${lap.sessionId}`;
-      counts[key] = (counts[key] ?? 0) + 1;
-    }
-    return counts;
-  }, [selectedLaps]);
+    };
+  }, [addOrRemoveLap, selectedDriverLapChartInstance, visibleFilteredLaps]);
 
   const onChartInstance = useCallback(
     (id: string, instance: EChartsType | null) => {
@@ -1148,79 +1470,8 @@ export default function DebugTelemetryPage() {
         </div>
       </div>
 
-      <section className='space-y-2 rounded border p-3'>
-        <div className='flex items-center justify-between'>
-          <h2 className='text-sm font-semibold uppercase'>Tracked Laps</h2>
-          {derivedSeries.baselineLabel && (
-            <p className='text-muted-foreground text-xs'>
-              Baseline: {derivedSeries.baselineLabel}
-            </p>
-          )}
-        </div>
-        <div className='grid gap-2 sm:grid-cols-2 xl:grid-cols-3'>
-          {selectedLaps.map((lap) => {
-            const color = lapColorByKey[lap.key];
-            const lapTimeDeltaSec =
-              lap.lapTime != null && baselineLapTimeMs != null
-                ? (lap.lapTime - baselineLapTimeMs) / 1000
-                : null;
-            const showDelta =
-              lap.key !== derivedSeries.baselineKey &&
-              Boolean(derivedSeries.baselineKey) &&
-              lapTimeDeltaSec != null;
-
-            return (
-              <div key={lap.key} className='rounded border p-2 text-sm'>
-                <div className='flex items-start justify-between gap-2'>
-                  <div>
-                    <p className='text-xs font-medium'>
-                      {lap.year} {lap.eventName}
-                    </p>
-                    <p className='font-semibold' style={{ color }}>
-                      {lap.driverAbbr} - Lap {lap.lapNumber}
-                    </p>
-                    <p className='text-muted-foreground text-xs'>
-                      {lap.sessionName}
-                    </p>
-                  </div>
-                  <button
-                    type='button'
-                    aria-label={`Remove ${lapLabel(lap)}`}
-                    className='text-muted-foreground hover:text-foreground'
-                    onClick={() =>
-                      setSelectedLaps((prev) =>
-                        prev.filter((item) => item.key !== lap.key),
-                      )
-                    }
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-                <div className='mt-1 flex items-baseline justify-between gap-2'>
-                  <p className='text-lg font-semibold'>
-                    {formatLapTime(lap.lapTime)}
-                  </p>
-                  {showDelta ? (
-                    <p className='text-muted-foreground shrink-0 text-xs tabular-nums'>
-                      {lapTimeDeltaSec >= 0 ? '+' : ''}
-                      {lapTimeDeltaSec.toFixed(3)} s
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
-          {selectedLaps.length === 0 && (
-            <p className='text-muted-foreground col-span-full text-sm'>
-              No laps tracked yet. Pick a session/driver and click laps to add
-              them.
-            </p>
-          )}
-        </div>
-      </section>
-
-      <div className='grid gap-4 lg:grid-cols-2'>
-        <section className='space-y-2 rounded border p-3'>
+      <div className='grid items-start gap-4 lg:grid-cols-3'>
+        <section className='min-w-0 space-y-2 rounded border p-3 lg:col-span-1'>
           <div className='flex items-center justify-between'>
             <h2 className='text-sm font-semibold uppercase'>Drivers</h2>
             <span className='text-muted-foreground text-xs'>
@@ -1244,49 +1495,58 @@ export default function DebugTelemetryPage() {
               Failed to load drivers: {driversError.message}
             </p>
           )}
-          <div className='max-h-[320px] space-y-1 overflow-auto rounded border p-1'>
-            {filteredDrivers.map((driverSession) => {
-              const isCurrentDriver =
-                selectedDriver?.driverId === driverSession.driver_id &&
-                selectedDriver?.sessionId === driverSession.session_id;
-              const selectedCount =
-                selectedCountsByDriverSession[
-                  `${driverSession.driver_id ?? ''}:${driverSession.session_id ?? ''}`
-                ] ?? 0;
-              return (
-                <button
-                  key={`${driverSession.driver_id ?? 'unknown'}:${driverSession.session_id ?? 'unknown'}`}
-                  type='button'
-                  className={cn(
-                    'hover:bg-accent flex w-full items-center justify-between rounded px-2 py-1 text-left text-sm',
-                    isCurrentDriver && 'bg-accent',
-                  )}
-                  onClick={() => {
-                    const driverId = driverSession.driver_id;
-                    const sessionId = driverSession.session_id;
-                    if (!driverId || !sessionId) return;
-                    setSelectedDriver({ driverId, sessionId });
-                  }}
-                >
-                  <span className='flex items-center gap-2'>
-                    <span className='font-semibold'>
-                      {driverSession.driver?.abbreviation ?? 'UNK'}
+          <div className='max-h-[320px] overflow-auto rounded border p-1.5'>
+            <div className='grid grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-4'>
+              {filteredDrivers.map((driverSession) => {
+                const isCurrentDriver =
+                  selectedDriver?.driverId === driverSession.driver_id &&
+                  selectedDriver?.sessionId === driverSession.session_id;
+                const constructorColorRaw =
+                  driverSession.constructorByConstructorId?.color ?? null;
+                const constructorColor =
+                  constructorColorRaw && constructorColorRaw.length > 0
+                    ? `#${constructorColorRaw}`
+                    : null;
+                const driverName = driverSession.driver?.full_name?.trim();
+                const driverAbbr = driverSession.driver?.abbreviation ?? 'UNK';
+                return (
+                  <button
+                    key={`${driverSession.driver_id ?? 'unknown'}:${driverSession.session_id ?? 'unknown'}`}
+                    type='button'
+                    title={driverName?.length ? driverName : driverAbbr}
+                    aria-label={
+                      driverName?.length
+                        ? `Select ${driverName}`
+                        : `Select ${driverAbbr}`
+                    }
+                    className={cn(
+                      'w-full rounded border px-2 py-1.5 text-center transition-colors',
+                      isCurrentDriver
+                        ? 'bg-accent/20 ring-accent/50 ring-1'
+                        : 'hover:bg-accent/10',
+                    )}
+                    style={
+                      constructorColor
+                        ? {
+                            borderColor: constructorColor,
+                            color: constructorColor,
+                          }
+                        : undefined
+                    }
+                    onClick={() => {
+                      const driverId = driverSession.driver_id;
+                      const sessionId = driverSession.session_id;
+                      if (!driverId || !sessionId) return;
+                      setSelectedDriver({ driverId, sessionId });
+                    }}
+                  >
+                    <span className='text-lg leading-none font-medium tracking-tight'>
+                      {driverAbbr}
                     </span>
-                    <span className='text-muted-foreground text-xs'>
-                      #{driverSession.driver?.number ?? '-'}
-                    </span>
-                    <span className='truncate'>
-                      {driverSession.driver?.full_name}
-                    </span>
-                  </span>
-                  {selectedCount > 0 && (
-                    <span className='rounded border px-1.5 py-0.5 text-[10px] font-semibold'>
-                      {selectedCount} added
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
             {filteredDrivers.length === 0 &&
               !driversLoading &&
               !driversError && (
@@ -1297,23 +1557,34 @@ export default function DebugTelemetryPage() {
           </div>
         </section>
 
-        <section className='space-y-2 rounded border p-3'>
+        <section className='min-w-0 space-y-2 rounded border p-3 lg:col-span-2'>
           <div className='flex items-center justify-between'>
             <h2 className='text-sm font-semibold uppercase'>Laps</h2>
             <span className='text-muted-foreground text-xs'>
-              {filteredLaps.length}
+              {visibleFilteredLaps.length}
             </span>
           </div>
-          <label className='border-input flex items-center gap-2 rounded border px-2 py-1 text-sm'>
-            <Search size={14} className='text-muted-foreground' />
-            <input
-              value={lapFilter}
-              onChange={(event) => setLapFilter(event.target.value)}
-              placeholder='Filter laps'
-              className='placeholder:text-muted-foreground w-full bg-transparent outline-none'
-              disabled={!selectedDriver}
-            />
-          </label>
+          <div className='flex flex-wrap items-center gap-3'>
+            <label className='border-input flex w-full items-center gap-2 rounded border px-2 py-1 text-sm sm:w-auto'>
+              <Search size={14} className='text-muted-foreground' />
+              <input
+                value={lapFilter}
+                onChange={(event) => setLapFilter(event.target.value)}
+                placeholder='Filter laps'
+                className='placeholder:text-muted-foreground w-full bg-transparent outline-none'
+                disabled={!selectedDriver}
+              />
+            </label>
+            <label className='flex items-center gap-2 text-sm'>
+              <Switch
+                checked={showOutlierLaps}
+                onCheckedChange={setShowOutlierLaps}
+                disabled={!selectedDriver}
+                id='show-outliers'
+              />
+              <span>Show outliers</span>
+            </label>
+          </div>
           {!selectedDriver && (
             <p className='text-muted-foreground text-sm'>
               Select a driver to see laps.
@@ -1327,56 +1598,157 @@ export default function DebugTelemetryPage() {
               Failed to load laps: {lapsError.message}
             </p>
           )}
-          <div className='max-h-[320px] space-y-1 overflow-auto rounded border p-1'>
-            {filteredLaps.map((lap) => {
-              const key =
-                currentContextReady && lap.lap_number != null
-                  ? makeLapKey({
-                      year: selectedYear,
-                      round: selectedRound,
-                      sessionName: selectedSessionName,
-                      driverId: selectedDriver.driverId,
-                      sessionId: selectedDriver.sessionId,
-                      lapNumber: lap.lap_number,
-                    })
-                  : null;
-              const isSelected = key ? selectedLapKeySet.has(key) : false;
-              return (
-                <button
-                  key={`${lap.lap_number ?? 'unknown'}:${lap.lap_time ?? 'na'}`}
-                  type='button'
-                  className={cn(
-                    'hover:bg-accent flex w-full items-center justify-between rounded px-2 py-1 text-left text-sm',
-                    isSelected && 'bg-accent',
+          {selectedDriver && !lapsLoading && !lapsError && (
+            <>
+              <TelemetryChart
+                chartId='selected-driver-laps'
+                option={selectedDriverLapChartOption}
+                height={280}
+                onInstance={(_, instance) =>
+                  setSelectedDriverLapChartInstance(instance)
+                }
+              />
+              <div className='overflow-x-auto rounded border p-2'>
+                <div className='flex min-w-max items-center gap-2'>
+                  {visibleFilteredLaps.map((lap) => {
+                    const key =
+                      currentContextReady && lap.lap_number != null
+                        ? makeLapKey({
+                            year: selectedYear,
+                            round: selectedRound,
+                            sessionName: selectedSessionName,
+                            driverId: selectedDriver.driverId,
+                            sessionId: selectedDriver.sessionId,
+                            lapNumber: lap.lap_number,
+                          })
+                        : null;
+                    const isSelected = key ? selectedLapKeySet.has(key) : false;
+                    return (
+                      <button
+                        key={`${lap.lap_number ?? 'unknown'}:${lap.lap_time ?? 'na'}`}
+                        type='button'
+                        className={cn(
+                          'hover:bg-accent rounded border px-2 py-1 text-left text-xs',
+                          isSelected && 'bg-accent',
+                        )}
+                        onClick={() => addOrRemoveLap(lap)}
+                        disabled={!selectedDriver}
+                      >
+                        <p className='font-semibold'>Lap {lap.lap_number}</p>
+                        <p className='text-muted-foreground tabular-nums'>
+                          {formatLapTime(lap.lap_time)}
+                        </p>
+                      </button>
+                    );
+                  })}
+                  {visibleFilteredLaps.length === 0 && (
+                    <p className='text-muted-foreground p-2 text-sm'>
+                      No laps available with current filters.
+                    </p>
                   )}
-                  onClick={() => addOrRemoveLap(lap)}
-                  disabled={!selectedDriver}
-                >
-                  <span className='font-semibold'>Lap {lap.lap_number}</span>
-                  <span className='flex items-center gap-2'>
-                    <span className='text-muted-foreground text-xs'>
-                      {formatLapTime(lap.lap_time)}
-                    </span>
-                    {isSelected && (
-                      <span className='rounded border px-1.5 py-0.5 text-[10px] font-semibold'>
-                        Added
-                      </span>
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-            {filteredLaps.length === 0 &&
-              selectedDriver &&
-              !lapsLoading &&
-              !lapsError && (
-                <p className='text-muted-foreground p-2 text-sm'>
-                  No matching laps.
-                </p>
-              )}
-          </div>
+                </div>
+              </div>
+            </>
+          )}
         </section>
       </div>
+      <section className='grid items-start gap-3 lg:grid-cols-3'>
+        <div className='space-y-2 rounded border p-3 lg:col-span-2'>
+          <div className='flex items-center justify-between gap-2'>
+            <h2 className='text-sm font-semibold uppercase'>Tracked Laps</h2>
+            <div className='flex items-center gap-3'>
+              {selectedLaps.length > 0 && (
+                <button
+                  type='button'
+                  className='text-muted-foreground hover:text-foreground text-xs underline underline-offset-2'
+                  onClick={() => setSelectedLaps([])}
+                >
+                  Clear all
+                </button>
+              )}
+              {derivedSeries.baselineLabel && (
+                <p className='text-muted-foreground text-xs'>
+                  Baseline: {derivedSeries.baselineLabel}
+                </p>
+              )}
+            </div>
+          </div>
+          <div
+            className='overflow-y-auto pr-1'
+            style={{ maxHeight: trackMapHeight }}
+          >
+            <div className='grid gap-1.5 sm:grid-cols-2'>
+              {selectedLaps.map((lap) => {
+                const color = lapColorByKey[lap.key];
+                const lapTimeDeltaSec =
+                  lap.lapTime != null && baselineLapTimeMs != null
+                    ? (lap.lapTime - baselineLapTimeMs) / 1000
+                    : null;
+                const showDelta =
+                  lap.key !== derivedSeries.baselineKey &&
+                  Boolean(derivedSeries.baselineKey) &&
+                  lapTimeDeltaSec != null;
+
+                return (
+                  <div key={lap.key} className='rounded border p-1.5 text-xs'>
+                    <div className='flex items-start justify-between gap-2'>
+                      <div>
+                        <p className='text-[11px] font-medium'>
+                          {lap.year} {lap.eventName}
+                        </p>
+                        <p className='font-semibold' style={{ color }}>
+                          {lap.driverAbbr} - Lap {lap.lapNumber}
+                        </p>
+                        <p className='text-muted-foreground text-[11px]'>
+                          {lap.sessionName}
+                        </p>
+                      </div>
+                      <button
+                        type='button'
+                        aria-label={`Remove ${lapLabel(lap)}`}
+                        className='text-muted-foreground hover:text-foreground'
+                        onClick={() =>
+                          setSelectedLaps((prev) =>
+                            prev.filter((item) => item.key !== lap.key),
+                          )
+                        }
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                    <div className='mt-1 flex items-baseline justify-between gap-2'>
+                      <p className='text-base leading-tight font-semibold'>
+                        {formatLapTime(lap.lapTime)}
+                      </p>
+                      {showDelta ? (
+                        <p className='text-muted-foreground shrink-0 text-[11px] tabular-nums'>
+                          {lapTimeDeltaSec >= 0 ? '+' : ''}
+                          {lapTimeDeltaSec.toFixed(3)} s
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+              {selectedLaps.length === 0 && (
+                <p className='text-muted-foreground col-span-full text-sm'>
+                  No laps tracked yet. Pick a session/driver and click laps to
+                  add them.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className='space-y-2 rounded border p-3 lg:col-span-1'>
+          <h2 className='text-sm font-semibold uppercase'>Track Map</h2>
+          <TelemetryChart
+            chartId='track-map'
+            option={trackMapOption}
+            height={trackMapHeight}
+          />
+        </div>
+      </section>
 
       <section className='space-y-2'>
         <h2 className='text-sm font-semibold uppercase'>Telemetry Compare</h2>
@@ -1429,16 +1801,6 @@ export default function DebugTelemetryPage() {
               </div>
             );
           })}
-        </div>
-      </section>
-
-      <section className='space-y-2'>
-        <div className='mx-auto h-[400px] w-full max-w-[400px]'>
-          <TelemetryChart
-            chartId='track-map'
-            option={trackMapOption}
-            height={400}
-          />
         </div>
       </section>
     </div>
