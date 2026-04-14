@@ -13268,6 +13268,10 @@ export type GetDebugSessionDriversQuery = {
       __typename?: 'driver_sessions';
       driver_id?: string | null;
       session_id?: string | null;
+      constructorByConstructorId?: {
+        __typename?: 'constructors';
+        color?: string | null;
+      } | null;
       driver?: {
         __typename?: 'drivers';
         abbreviation?: string | null;
@@ -13300,8 +13304,26 @@ export type GetDebugDriverLapsQuery = {
       sector1?: number | null;
       sector2?: number | null;
       sector3?: number | null;
+      pitin_time?: number | null;
+      pitout_time?: number | null;
+      session_time?: number | null;
     }>;
   }>;
+};
+
+export type GetDebugSessionFastestLapQueryVariables = Exact<{
+  sessionId: Scalars['String']['input'];
+}>;
+
+export type GetDebugSessionFastestLapQuery = {
+  __typename?: 'query_root';
+  laps_aggregate: {
+    __typename?: 'laps_aggregate';
+    aggregate?: {
+      __typename?: 'laps_aggregate_fields';
+      min?: { __typename?: 'laps_min_fields'; lap_time?: number | null } | null;
+    } | null;
+  };
 };
 
 export type GetRacePlotDataQueryVariables = Exact<{
@@ -18638,6 +18660,22 @@ export const GetDebugSessionDriversDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'constructorByConstructorId',
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'color' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'driver' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -18833,6 +18871,18 @@ export const GetDebugDriverLapsDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'sector3' },
                       },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'pitin_time' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'pitout_time' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'session_time' },
+                      },
                     ],
                   },
                 },
@@ -18846,6 +18896,111 @@ export const GetDebugDriverLapsDocument = {
 } as unknown as DocumentNode<
   GetDebugDriverLapsQuery,
   GetDebugDriverLapsQueryVariables
+>;
+export const GetDebugSessionFastestLapDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDebugSessionFastestLap' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'sessionId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      directives: [
+        { kind: 'Directive', name: { kind: 'Name', value: 'cached' } },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'laps_aggregate' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'driver_session' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'session_id' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'sessionId' },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'aggregate' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'min' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lap_time' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDebugSessionFastestLapQuery,
+  GetDebugSessionFastestLapQueryVariables
 >;
 export const GetRacePlotDataDocument = {
   kind: 'Document',

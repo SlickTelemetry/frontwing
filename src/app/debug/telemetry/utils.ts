@@ -6,6 +6,9 @@ import { Session_Name_Choices_Enum } from '@/types/graphql';
 export type DebugDriverSession = {
   driver_id?: string | null;
   session_id?: string | null;
+  constructorByConstructorId?: {
+    color?: string | null;
+  } | null;
   driver?: {
     abbreviation?: string | null;
     full_name?: string | null;
@@ -16,6 +19,9 @@ export type DebugDriverSession = {
 export type DebugLap = {
   lap_number?: number | null;
   lap_time?: number | null;
+  pitin_time?: number | null;
+  pitout_time?: number | null;
+  session_time?: number | null;
 };
 
 export type DebugTelemetryPoint = {
@@ -40,6 +46,7 @@ export type SelectedLap = {
   sessionName: Session_Name_Choices_Enum;
   driverId: string;
   sessionId: string;
+  constructorColor?: string | null;
   driverAbbr: string;
   driverNumber: number | null;
   lapNumber: number;
@@ -136,15 +143,15 @@ export const DRS_LAST_YEAR = 2025;
 const DRS_ON_VALUES = new Set([10, 12, 14]);
 
 export const CHART_PALETTE = [
-  '#ef4444',
   '#ffffff',
+  '#ef4444',
   '#eab308',
   '#22c55e',
-  '#06b6d4',
+  '#06b6c4',
   '#3b82f6',
-  '#8b5cf6',
+  '#8b5ca0',
   '#ec4899',
-  '#a855f7',
+  '#a855ff',
 ];
 
 export function formatLapTime(lapTimeMs?: number | null) {
@@ -334,7 +341,10 @@ function formatMetricYValue(value: unknown, format: MetricValueFormat): string {
   const n = Number(value);
   if (Number.isNaN(n)) return '—';
   if (format === 'onOff') return n >= 1 ? 'ON' : 'OFF';
-  if (format === 'deltaFloat') return n.toFixed(3);
+  if (format === 'deltaFloat') {
+    const normalized = Math.abs(n) < 0.0005 ? 0 : n;
+    return normalized.toFixed(3);
+  }
   return Math.round(n).toString();
 }
 
@@ -548,16 +558,6 @@ export function buildTrackMapOption(
 
   const option: EChartsOption = {
     animation: false,
-    title: {
-      text: 'Track Map',
-      left: 8,
-      top: 4,
-      textStyle: { fontSize: 13, fontWeight: 500 },
-    },
-    tooltip: {
-      ...ECHARTS_DARK_TOOLTIP,
-      trigger: 'item',
-    },
     grid: { left: 10, right: 10, top: 30, bottom: 10 },
     xAxis: { type: 'value', show: false, scale: true },
     yAxis: { type: 'value', show: false, scale: true },
