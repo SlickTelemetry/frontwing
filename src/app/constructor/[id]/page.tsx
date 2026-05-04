@@ -1,7 +1,6 @@
 'use client';
 import { useQuery } from '@apollo/client/react';
 import { use, useMemo } from 'react';
-import React from 'react';
 
 import { GET_CONSTRUCTOR } from '@/lib/queries';
 import { bgGradient } from '@/lib/utils';
